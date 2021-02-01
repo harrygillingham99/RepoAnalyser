@@ -1,4 +1,4 @@
-import { Client, IConfig } from "./Client";
+import { Client, IConfig } from "@services/api/Client";
 
 export const authorisedApiClient = (token: string | undefined) =>  new Client(new IConfig(token ?? "not-logged-in"))
 

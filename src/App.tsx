@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from '@/logo.svg';
 import '@/App.css';
-import { apiClient } from './services/api';
+import { apiClient } from '@services/api';
 
 const App = () => {
 
