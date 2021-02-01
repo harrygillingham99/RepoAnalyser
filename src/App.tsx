@@ -1,8 +1,19 @@
 import React from 'react';
 import logo from '@/logo.svg';
 import '@/App.css';
+import { apiClient } from './services/api';
 
 const App = () => {
+
+  const [state, setState] = React.useState<object>()
+
+  React.useEffect(() => {
+    (async () => {
+      const x = await apiClient.example_Test(200);
+      console.log(x)
+      setState(x);
+    })();
+  })
   return (
     <div className="App">
       <header className="App-header">
@@ -18,6 +29,7 @@ const App = () => {
         >
           Learn React
         </a>
+        <p>{JSON.stringify(state)}</p>
       </header>
     </div>
   );
