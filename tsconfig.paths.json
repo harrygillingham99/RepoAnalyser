@@ -5,6 +5,7 @@
       "@/*": ["/*"],
       "@assets/*" : ["assets/*"],
       "@styles/*" : ["styles/*"],
+      "@components/*":["components/*"],
       "@utils/*": ["utils/*"],
       "@state/*": ["state/*"],
       "@services/*": ["services/*"],
