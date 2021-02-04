@@ -2,7 +2,6 @@ import { Client, IConfig } from "@services/api/Client";
 import { buildUserInfo } from "@utils/userInfo";
 
 const buildClient = (token: string | (() => string) | undefined) => {
-  const metadata = buildUserInfo();
   switch (typeof token) {
     case "function":
       return new Client(new IConfig(token()));
