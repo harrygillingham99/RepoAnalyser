@@ -68,19 +68,21 @@ export class Client extends AuthorizedApiBase {
   }
 
   /**
+   * @param code (optional)
+   * @param state (optional)
    * @param metadata (optional) ClientMetadata
+   * @return Success getting auth token
    */
-  repository_Test(
-    statusToReturn: number,
+  authentication_GetOAuthToken(
+    code: string | null | undefined,
+    state: string | null | undefined,
     metadata: any | undefined
-  ): Promise<TestResponse> {
-    let url_ = this.baseUrl + "/Repo/{statusToReturn}";
-    if (statusToReturn === undefined || statusToReturn === null)
-      throw new Error("The parameter 'statusToReturn' must be defined.");
-    url_ = url_.replace(
-      "{statusToReturn}",
-      encodeURIComponent("" + statusToReturn)
-    );
+  ): Promise<string> {
+    let url_ = this.baseUrl + "/auth/token?";
+    if (code !== undefined && code !== null)
+      url_ += "code=" + encodeURIComponent("" + code) + "&";
+    if (state !== undefined && state !== null)
+      url_ += "state=" + encodeURIComponent("" + state) + "&";
     url_ = url_.replace(/[?&]$/, "");
 
     let options_ = <RequestInit>{
@@ -97,11 +99,13 @@ export class Client extends AuthorizedApiBase {
         return this.http.fetch(url_, transformedOptions_);
       })
       .then((_response: Response) => {
-        return this.processRepository_Test(_response);
+        return this.processAuthentication_GetOAuthToken(_response);
       });
   }
 
-  protected processRepository_Test(response: Response): Promise<TestResponse> {
+  protected processAuthentication_GetOAuthToken(
+    response: Response
+  ): Promise<string> {
     const status = response.status;
     let _headers: any = {};
     if (response.headers && response.headers.forEach) {
@@ -114,24 +118,8 @@ export class Client extends AuthorizedApiBase {
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result200 = TestResponse.fromJS(resultData200);
+        result200 = resultData200 !== undefined ? resultData200 : <any>null;
         return result200;
-      });
-    } else if (status === 500) {
-      return response.text().then((_responseText) => {
-        let result500: any = null;
-        let resultData500 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result500 = ProblemDetails.fromJS(resultData500);
-        return throwException(
-          "Error",
-          status,
-          _responseText,
-          _headers,
-          result500
-        );
       });
     } else if (status === 400) {
       return response.text().then((_responseText) => {
@@ -142,7 +130,7 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result400 = ValidationResponse.fromJS(resultData400);
         return throwException(
-          "Bad Request",
+          "Bad request getting auth token",
           status,
           _responseText,
           _headers,
@@ -158,11 +146,27 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result404 = NotFoundResponse.fromJS(resultData404);
         return throwException(
-          "Not Found",
+          "Error getting auth token, code provided not found",
           status,
           _responseText,
           _headers,
           result404
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "Error getting auth token",
+          status,
+          _responseText,
+          _headers,
+          result500
         );
       });
     } else if (status !== 200 && status !== 204) {
@@ -175,112 +179,115 @@ export class Client extends AuthorizedApiBase {
         );
       });
     }
-    return Promise.resolve<TestResponse>(<any>null);
+    return Promise.resolve<string>(<any>null);
   }
-}
 
-export class TestResponse implements ITestResponse {
-  testProp?: string | undefined;
+  /**
+   * @param metadata (optional) ClientMetadata
+   * @return Success getting github redirect url
+   */
+  authentication_GetLoginRedirectUrl(
+    metadata: any | undefined
+  ): Promise<string> {
+    let url_ = this.baseUrl + "/auth/login-redirect";
+    url_ = url_.replace(/[?&]$/, "");
 
-  constructor(data?: ITestResponse) {
-    if (data) {
-      for (var property in data) {
-        if (data.hasOwnProperty(property))
-          (<any>this)[property] = (<any>data)[property];
-      }
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processAuthentication_GetLoginRedirectUrl(_response);
+      });
+  }
+
+  protected processAuthentication_GetLoginRedirectUrl(
+    response: Response
+  ): Promise<string> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-  }
-
-  init(_data?: any) {
-    if (_data) {
-      this.testProp = _data["testProp"];
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = resultData200 !== undefined ? resultData200 : <any>null;
+        return result200;
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "Bad request getting redirect url",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "Error getting redirect url",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "Error getting redirect url",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
     }
+    return Promise.resolve<string>(<any>null);
   }
-
-  static fromJS(data: any): TestResponse {
-    data = typeof data === "object" ? data : {};
-    let result = new TestResponse();
-    result.init(data);
-    return result;
-  }
-
-  toJSON(data?: any) {
-    data = typeof data === "object" ? data : {};
-    data["testProp"] = this.testProp;
-    return data;
-  }
-}
-
-export interface ITestResponse {
-  testProp?: string | undefined;
-}
-
-export class ProblemDetails implements IProblemDetails {
-  type?: string | undefined;
-  title?: string | undefined;
-  status?: number | undefined;
-  detail?: string | undefined;
-  instance?: string | undefined;
-  extensions?: { [key: string]: any } | undefined;
-
-  constructor(data?: IProblemDetails) {
-    if (data) {
-      for (var property in data) {
-        if (data.hasOwnProperty(property))
-          (<any>this)[property] = (<any>data)[property];
-      }
-    }
-  }
-
-  init(_data?: any) {
-    if (_data) {
-      this.type = _data["type"];
-      this.title = _data["title"];
-      this.status = _data["status"];
-      this.detail = _data["detail"];
-      this.instance = _data["instance"];
-      if (_data["extensions"]) {
-        this.extensions = {} as any;
-        for (let key in _data["extensions"]) {
-          if (_data["extensions"].hasOwnProperty(key))
-            this.extensions![key] = _data["extensions"][key];
-        }
-      }
-    }
-  }
-
-  static fromJS(data: any): ProblemDetails {
-    data = typeof data === "object" ? data : {};
-    let result = new ProblemDetails();
-    result.init(data);
-    return result;
-  }
-
-  toJSON(data?: any) {
-    data = typeof data === "object" ? data : {};
-    data["type"] = this.type;
-    data["title"] = this.title;
-    data["status"] = this.status;
-    data["detail"] = this.detail;
-    data["instance"] = this.instance;
-    if (this.extensions) {
-      data["extensions"] = {};
-      for (let key in this.extensions) {
-        if (this.extensions.hasOwnProperty(key))
-          data["extensions"][key] = this.extensions[key];
-      }
-    }
-    return data;
-  }
-}
-
-export interface IProblemDetails {
-  type?: string | undefined;
-  title?: string | undefined;
-  status?: number | undefined;
-  detail?: string | undefined;
-  instance?: string | undefined;
-  extensions?: { [key: string]: any } | undefined;
 }
 
 export abstract class BaseResponse implements IBaseResponse {
@@ -415,6 +422,74 @@ export class NotFoundResponse
 
 export interface INotFoundResponse extends IBaseResponse {
   badProperties?: { [key: string]: string } | undefined;
+}
+
+export class ProblemDetails implements IProblemDetails {
+  type?: string | undefined;
+  title?: string | undefined;
+  status?: number | undefined;
+  detail?: string | undefined;
+  instance?: string | undefined;
+  extensions?: { [key: string]: any } | undefined;
+
+  constructor(data?: IProblemDetails) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.type = _data["type"];
+      this.title = _data["title"];
+      this.status = _data["status"];
+      this.detail = _data["detail"];
+      this.instance = _data["instance"];
+      if (_data["extensions"]) {
+        this.extensions = {} as any;
+        for (let key in _data["extensions"]) {
+          if (_data["extensions"].hasOwnProperty(key))
+            this.extensions![key] = _data["extensions"][key];
+        }
+      }
+    }
+  }
+
+  static fromJS(data: any): ProblemDetails {
+    data = typeof data === "object" ? data : {};
+    let result = new ProblemDetails();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["type"] = this.type;
+    data["title"] = this.title;
+    data["status"] = this.status;
+    data["detail"] = this.detail;
+    data["instance"] = this.instance;
+    if (this.extensions) {
+      data["extensions"] = {};
+      for (let key in this.extensions) {
+        if (this.extensions.hasOwnProperty(key))
+          data["extensions"][key] = this.extensions[key];
+      }
+    }
+    return data;
+  }
+}
+
+export interface IProblemDetails {
+  type?: string | undefined;
+  title?: string | undefined;
+  status?: number | undefined;
+  detail?: string | undefined;
+  instance?: string | undefined;
+  extensions?: { [key: string]: any } | undefined;
 }
 
 export class ClientMetadata implements IClientMetadata {

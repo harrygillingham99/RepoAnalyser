@@ -1,3 +1,7 @@
+import { apiClient } from "@services/api/Index";
+import { AppContainer } from "@state/AppState";
+import { Routes } from "@typeDefinitions/Routes";
+import { buildUserInfo } from "@utils/ClientInfo";
 import React from "react";
 import {
   Button,
@@ -7,18 +11,33 @@ import {
   Navbar,
   NavDropdown,
 } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import useEffectOnce from "react-use/lib/useEffectOnce";
 
 export const NavigationBar = () => {
+  const { state, setState } = AppContainer.useContainer();
+  useEffectOnce(() => {
+    (async () => {
+      var redirectUrl = await apiClient.authentication_GetLoginRedirectUrl(
+        buildUserInfo()
+      );
+      setState({ loginRedirectUrl: redirectUrl });
+    })();
+  });
+
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
-      <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
+      <Navbar.Brand href="#home">Repo Analyser</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
-          <Nav.Link href="#home">Home</Nav.Link>
-          <Nav.Link href="#link">Link</Nav.Link>
+          <Link to={Routes.Home}>
+            <Nav.Link>Home</Nav.Link>
+          </Link>
           <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-            <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+            <NavDropdown.Item href={state.loginRedirectUrl}>
+              Githoob
+            </NavDropdown.Item>
             <NavDropdown.Item href="#action/3.2">
               Another action
             </NavDropdown.Item>

@@ -9,7 +9,7 @@
       "@utils/*": ["utils/*"],
       "@state/*": ["state/*"],
       "@services/*": ["services/*"],
-      "@types/*": ["types/*"]
+      "@typeDefinitions/*": ["typeDefinitions/*"]
     }
   }
 }
