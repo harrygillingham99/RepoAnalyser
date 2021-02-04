@@ -1,5 +1,4 @@
 import { Client, IConfig } from "@services/api/Client";
-import { buildUserInfo } from "@utils/userInfo";
 
 const buildClient = (token: string | (() => string) | undefined) => {
   switch (typeof token) {

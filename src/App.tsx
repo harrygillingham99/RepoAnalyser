@@ -1,7 +1,7 @@
 import React from "react";
 import "@/App.css";
-import { apiClient } from "@services/api";
-import { buildUserInfo } from "@utils/userInfo";
+import { apiClient } from "@services/api/Index";
+import { buildUserInfo } from "@utils/ClientInfo";
 
 const App = () => {
   const [state, setState] = React.useState<object>();

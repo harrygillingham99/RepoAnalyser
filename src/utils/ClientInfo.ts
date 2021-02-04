@@ -27,39 +27,6 @@ function dataCookiesEnabled() {
 export const buildUserInfo = () =>
   new ClientMetadata({
     page: pageon(),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     referrer: referrer(),
     browserName: browserName(),
     browserEngine: browserEngine(),
