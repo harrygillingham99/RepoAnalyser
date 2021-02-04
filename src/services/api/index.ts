@@ -5,11 +5,11 @@ const buildClient = (token: string | (() => string) | undefined) => {
   const metadata = buildUserInfo();
   switch (typeof token) {
     case "function":
-      return new Client(new IConfig(token(), metadata));
+      return new Client(new IConfig(token()));
     case "string":
-      return new Client(new IConfig(token, metadata));
+      return new Client(new IConfig(token));
     default:
-      return new Client(new IConfig("not-logged-in", metadata));
+      return new Client(new IConfig("not-logged-in"));
   }
 };
 

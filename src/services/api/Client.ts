@@ -14,16 +14,14 @@ export class IConfig {
       inject firebase authorization tokens into the request header for the back end to then verify and get my own baseUrl stored in a config file.
       A comment at the top of this file will actually break client generation and for whatever reason this will end up at the bottom of Client.ts not the top.
     */
-  constructor(token: string, metadata: ClientMetadata) {
+  constructor(token: string) {
     this.JwtToken = token;
-    this.Metadata = metadata;
   }
   /*
       Returns a valid value for the Authorization header.
       Used to dynamically inject the current auth header.
      */
   JwtToken: string;
-  Metadata: ClientMetadata;
 }
 
 export class AuthorizedApiBase {
@@ -42,402 +40,476 @@ export class AuthorizedApiBase {
   };
 
   protected getBaseUrl = (defaultUrl: string, baseUrl?: string) => {
-    const ApiUrl = "https://localhost:44306";
+    const ApiUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://192.168.0.69:4471"
+        : "https://localhost:44306";
     return ApiUrl !== undefined ? ApiUrl : defaultUrl;
   };
 }
 
 export class Client extends AuthorizedApiBase {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+  private http: {
+    fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
+  };
+  private baseUrl: string;
+  protected jsonParseReviver:
+    | ((key: string, value: any) => any)
+    | undefined = undefined;
 
-    constructor(configuration: IConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        super(configuration);
-        this.http = http ? http : <any>window;
-        this.baseUrl = this.getBaseUrl("https://localhost:44306", baseUrl);
+  constructor(
+    configuration: IConfig,
+    baseUrl?: string,
+    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }
+  ) {
+    super(configuration);
+    this.http = http ? http : <any>window;
+    this.baseUrl = this.getBaseUrl("https://localhost:44306", baseUrl);
+  }
+
+  /**
+   * @param metadata (optional) ClientMetadata
+   */
+  repository_Test(
+    statusToReturn: number,
+    metadata: any | undefined
+  ): Promise<TestResponse> {
+    let url_ = this.baseUrl + "/Repo/{statusToReturn}";
+    if (statusToReturn === undefined || statusToReturn === null)
+      throw new Error("The parameter 'statusToReturn' must be defined.");
+    url_ = url_.replace(
+      "{statusToReturn}",
+      encodeURIComponent("" + statusToReturn)
+    );
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processRepository_Test(_response);
+      });
+  }
+
+  protected processRepository_Test(response: Response): Promise<TestResponse> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-
-    /**
-     * @param metadata (optional) ClientMetadata
-     */
-    repository_Test(statusToReturn: number, metadata: any | undefined): Promise<TestResponse> {
-        let url_ = this.baseUrl + "/Repo/{statusToReturn}";
-        if (statusToReturn === undefined || statusToReturn === null)
-            throw new Error("The parameter 'statusToReturn' must be defined.");
-        url_ = url_.replace("{statusToReturn}", encodeURIComponent("" + statusToReturn));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processRepository_Test(_response);
-        });
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = TestResponse.fromJS(resultData200);
+        return result200;
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "Error",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "Bad Request",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "Not Found",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
     }
-
-    protected processRepository_Test(response: Response): Promise<TestResponse> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = TestResponse.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("Error", status, _responseText, _headers, result500);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
-            });
-        } else if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<TestResponse>(<any>null);
-    }
+    return Promise.resolve<TestResponse>(<any>null);
+  }
 }
 
 export class TestResponse implements ITestResponse {
-    testProp?: string | undefined;
+  testProp?: string | undefined;
 
-    constructor(data?: ITestResponse) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: ITestResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.testProp = _data["testProp"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.testProp = _data["testProp"];
     }
+  }
 
-    static fromJS(data: any): TestResponse {
-        data = typeof data === 'object' ? data : {};
-        let result = new TestResponse();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): TestResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new TestResponse();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["testProp"] = this.testProp;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["testProp"] = this.testProp;
+    return data;
+  }
 }
 
 export interface ITestResponse {
-    testProp?: string | undefined;
+  testProp?: string | undefined;
 }
 
 export class ProblemDetails implements IProblemDetails {
-    type?: string | undefined;
-    title?: string | undefined;
-    status?: number | undefined;
-    detail?: string | undefined;
-    instance?: string | undefined;
-    extensions?: { [key: string]: any; } | undefined;
+  type?: string | undefined;
+  title?: string | undefined;
+  status?: number | undefined;
+  detail?: string | undefined;
+  instance?: string | undefined;
+  extensions?: { [key: string]: any } | undefined;
 
-    constructor(data?: IProblemDetails) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
+  constructor(data?: IProblemDetails) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.type = _data["type"];
+      this.title = _data["title"];
+      this.status = _data["status"];
+      this.detail = _data["detail"];
+      this.instance = _data["instance"];
+      if (_data["extensions"]) {
+        this.extensions = {} as any;
+        for (let key in _data["extensions"]) {
+          if (_data["extensions"].hasOwnProperty(key))
+            this.extensions![key] = _data["extensions"][key];
         }
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.type = _data["type"];
-            this.title = _data["title"];
-            this.status = _data["status"];
-            this.detail = _data["detail"];
-            this.instance = _data["instance"];
-            if (_data["extensions"]) {
-                this.extensions = {} as any;
-                for (let key in _data["extensions"]) {
-                    if (_data["extensions"].hasOwnProperty(key))
-                        this.extensions![key] = _data["extensions"][key];
-                }
-            }
-        }
-    }
+  static fromJS(data: any): ProblemDetails {
+    data = typeof data === "object" ? data : {};
+    let result = new ProblemDetails();
+    result.init(data);
+    return result;
+  }
 
-    static fromJS(data: any): ProblemDetails {
-        data = typeof data === 'object' ? data : {};
-        let result = new ProblemDetails();
-        result.init(data);
-        return result;
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["type"] = this.type;
+    data["title"] = this.title;
+    data["status"] = this.status;
+    data["detail"] = this.detail;
+    data["instance"] = this.instance;
+    if (this.extensions) {
+      data["extensions"] = {};
+      for (let key in this.extensions) {
+        if (this.extensions.hasOwnProperty(key))
+          data["extensions"][key] = this.extensions[key];
+      }
     }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["type"] = this.type;
-        data["title"] = this.title;
-        data["status"] = this.status;
-        data["detail"] = this.detail;
-        data["instance"] = this.instance;
-        if (this.extensions) {
-            data["extensions"] = {};
-            for (let key in this.extensions) {
-                if (this.extensions.hasOwnProperty(key))
-                    data["extensions"][key] = this.extensions[key];
-            }
-        }
-        return data; 
-    }
+    return data;
+  }
 }
 
 export interface IProblemDetails {
-    type?: string | undefined;
-    title?: string | undefined;
-    status?: number | undefined;
-    detail?: string | undefined;
-    instance?: string | undefined;
-    extensions?: { [key: string]: any; } | undefined;
+  type?: string | undefined;
+  title?: string | undefined;
+  status?: number | undefined;
+  detail?: string | undefined;
+  instance?: string | undefined;
+  extensions?: { [key: string]: any } | undefined;
 }
 
 export abstract class BaseResponse implements IBaseResponse {
-    message?: string | undefined;
-    title?: string | undefined;
+  message?: string | undefined;
+  title?: string | undefined;
 
-    constructor(data?: IBaseResponse) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IBaseResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.message = _data["message"];
-            this.title = _data["title"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.message = _data["message"];
+      this.title = _data["title"];
     }
+  }
 
-    static fromJS(data: any): BaseResponse {
-        data = typeof data === 'object' ? data : {};
-        throw new Error("The abstract class 'BaseResponse' cannot be instantiated.");
-    }
+  static fromJS(data: any): BaseResponse {
+    data = typeof data === "object" ? data : {};
+    throw new Error(
+      "The abstract class 'BaseResponse' cannot be instantiated."
+    );
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["message"] = this.message;
-        data["title"] = this.title;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["message"] = this.message;
+    data["title"] = this.title;
+    return data;
+  }
 }
 
 export interface IBaseResponse {
-    message?: string | undefined;
-    title?: string | undefined;
+  message?: string | undefined;
+  title?: string | undefined;
 }
 
-export class ValidationResponse extends BaseResponse implements IValidationResponse {
-    validationErrors?: { [key: string]: string; } | undefined;
+export class ValidationResponse
+  extends BaseResponse
+  implements IValidationResponse {
+  validationErrors?: { [key: string]: string } | undefined;
 
-    constructor(data?: IValidationResponse) {
-        super(data);
-    }
+  constructor(data?: IValidationResponse) {
+    super(data);
+  }
 
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            if (_data["validationErrors"]) {
-                this.validationErrors = {} as any;
-                for (let key in _data["validationErrors"]) {
-                    if (_data["validationErrors"].hasOwnProperty(key))
-                        this.validationErrors![key] = _data["validationErrors"][key];
-                }
-            }
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      if (_data["validationErrors"]) {
+        this.validationErrors = {} as any;
+        for (let key in _data["validationErrors"]) {
+          if (_data["validationErrors"].hasOwnProperty(key))
+            this.validationErrors![key] = _data["validationErrors"][key];
         }
+      }
     }
+  }
 
-    static fromJS(data: any): ValidationResponse {
-        data = typeof data === 'object' ? data : {};
-        let result = new ValidationResponse();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): ValidationResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new ValidationResponse();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (this.validationErrors) {
-            data["validationErrors"] = {};
-            for (let key in this.validationErrors) {
-                if (this.validationErrors.hasOwnProperty(key))
-                    data["validationErrors"][key] = this.validationErrors[key];
-            }
-        }
-        super.toJSON(data);
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (this.validationErrors) {
+      data["validationErrors"] = {};
+      for (let key in this.validationErrors) {
+        if (this.validationErrors.hasOwnProperty(key))
+          data["validationErrors"][key] = this.validationErrors[key];
+      }
     }
+    super.toJSON(data);
+    return data;
+  }
 }
 
 export interface IValidationResponse extends IBaseResponse {
-    validationErrors?: { [key: string]: string; } | undefined;
+  validationErrors?: { [key: string]: string } | undefined;
 }
 
-export class NotFoundResponse extends BaseResponse implements INotFoundResponse {
-    badProperties?: { [key: string]: string; } | undefined;
+export class NotFoundResponse
+  extends BaseResponse
+  implements INotFoundResponse {
+  badProperties?: { [key: string]: string } | undefined;
 
-    constructor(data?: INotFoundResponse) {
-        super(data);
-    }
+  constructor(data?: INotFoundResponse) {
+    super(data);
+  }
 
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            if (_data["badProperties"]) {
-                this.badProperties = {} as any;
-                for (let key in _data["badProperties"]) {
-                    if (_data["badProperties"].hasOwnProperty(key))
-                        this.badProperties![key] = _data["badProperties"][key];
-                }
-            }
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      if (_data["badProperties"]) {
+        this.badProperties = {} as any;
+        for (let key in _data["badProperties"]) {
+          if (_data["badProperties"].hasOwnProperty(key))
+            this.badProperties![key] = _data["badProperties"][key];
         }
+      }
     }
+  }
 
-    static fromJS(data: any): NotFoundResponse {
-        data = typeof data === 'object' ? data : {};
-        let result = new NotFoundResponse();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): NotFoundResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new NotFoundResponse();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (this.badProperties) {
-            data["badProperties"] = {};
-            for (let key in this.badProperties) {
-                if (this.badProperties.hasOwnProperty(key))
-                    data["badProperties"][key] = this.badProperties[key];
-            }
-        }
-        super.toJSON(data);
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (this.badProperties) {
+      data["badProperties"] = {};
+      for (let key in this.badProperties) {
+        if (this.badProperties.hasOwnProperty(key))
+          data["badProperties"][key] = this.badProperties[key];
+      }
     }
+    super.toJSON(data);
+    return data;
+  }
 }
 
 export interface INotFoundResponse extends IBaseResponse {
-    badProperties?: { [key: string]: string; } | undefined;
+  badProperties?: { [key: string]: string } | undefined;
 }
 
 export class ClientMetadata implements IClientMetadata {
-    page?: string | undefined;
-    referrer?: string | undefined;
-    browserName?: string | undefined;
-    browserEngine?: string | undefined;
-    browserLanguage?: string | undefined;
-    cookiesEnabled?: boolean;
+  page?: string | undefined;
+  referrer?: string | undefined;
+  browserName?: string | undefined;
+  browserEngine?: string | undefined;
+  browserLanguage?: string | undefined;
+  cookiesEnabled?: boolean;
 
-    constructor(data?: IClientMetadata) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IClientMetadata) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.page = _data["page"];
-            this.referrer = _data["referrer"];
-            this.browserName = _data["browserName"];
-            this.browserEngine = _data["browserEngine"];
-            this.browserLanguage = _data["browserLanguage"];
-            this.cookiesEnabled = _data["cookiesEnabled"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.page = _data["page"];
+      this.referrer = _data["referrer"];
+      this.browserName = _data["browserName"];
+      this.browserEngine = _data["browserEngine"];
+      this.browserLanguage = _data["browserLanguage"];
+      this.cookiesEnabled = _data["cookiesEnabled"];
     }
+  }
 
-    static fromJS(data: any): ClientMetadata {
-        data = typeof data === 'object' ? data : {};
-        let result = new ClientMetadata();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): ClientMetadata {
+    data = typeof data === "object" ? data : {};
+    let result = new ClientMetadata();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["page"] = this.page;
-        data["referrer"] = this.referrer;
-        data["browserName"] = this.browserName;
-        data["browserEngine"] = this.browserEngine;
-        data["browserLanguage"] = this.browserLanguage;
-        data["cookiesEnabled"] = this.cookiesEnabled;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["page"] = this.page;
+    data["referrer"] = this.referrer;
+    data["browserName"] = this.browserName;
+    data["browserEngine"] = this.browserEngine;
+    data["browserLanguage"] = this.browserLanguage;
+    data["cookiesEnabled"] = this.cookiesEnabled;
+    return data;
+  }
 }
 
 export interface IClientMetadata {
-    page?: string | undefined;
-    referrer?: string | undefined;
-    browserName?: string | undefined;
-    browserEngine?: string | undefined;
-    browserLanguage?: string | undefined;
-    cookiesEnabled?: boolean;
+  page?: string | undefined;
+  referrer?: string | undefined;
+  browserName?: string | undefined;
+  browserEngine?: string | undefined;
+  browserLanguage?: string | undefined;
+  cookiesEnabled?: boolean;
 }
 
 export class ApiException extends Error {
-    message: string;
-    status: number;
-    response: string;
-    headers: { [key: string]: any; };
-    result: any;
+  message: string;
+  status: number;
+  response: string;
+  headers: { [key: string]: any };
+  result: any;
 
-    constructor(message: string, status: number, response: string, headers: { [key: string]: any; }, result: any) {
-        super();
+  constructor(
+    message: string,
+    status: number,
+    response: string,
+    headers: { [key: string]: any },
+    result: any
+  ) {
+    super();
 
-        this.message = message;
-        this.status = status;
-        this.response = response;
-        this.headers = headers;
-        this.result = result;
-    }
+    this.message = message;
+    this.status = status;
+    this.response = response;
+    this.headers = headers;
+    this.result = result;
+  }
 
-    protected isApiException = true;
+  protected isApiException = true;
 
-    static isApiException(obj: any): obj is ApiException {
-        return obj.isApiException === true;
-    }
+  static isApiException(obj: any): obj is ApiException {
+    return obj.isApiException === true;
+  }
 }
 
-function throwException(message: string, status: number, response: string, headers: { [key: string]: any; }, result?: any): any {
-    if (result !== null && result !== undefined)
-        throw result;
-    else
-        throw new ApiException(message, status, response, headers, null);
+function throwException(
+  message: string,
+  status: number,
+  response: string,
+  headers: { [key: string]: any },
+  result?: any
+): any {
+  if (result !== null && result !== undefined) throw result;
+  else throw new ApiException(message, status, response, headers, null);
 }
