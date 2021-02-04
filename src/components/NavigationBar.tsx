@@ -26,7 +26,7 @@ export const NavigationBar = () => {
   });
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg">
+    <Navbar bg="dark" variant="dark" expand="lg" style={{ zIndex: 9999 }}>
       <Navbar.Brand href="#home">Repo Analyser</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
