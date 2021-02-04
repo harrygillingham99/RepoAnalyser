@@ -7,7 +7,6 @@
 //----------------------
 // ReSharper disable InconsistentNaming
 
-import { ClientMetadata } from "./Client";
 export class IConfig {
   /* 
       ApiClient.ts
