@@ -19,11 +19,14 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
-    "nswag": "^13.10.1"
+    "husky": "^4.3.8",
+    "nswag": "^13.10.1",
+    "prettier": "2.2.1",
+    "pretty-quick": "^3.1.0"
   },
   "scripts": {
     "start": "craco start --verbose",
-    "build": "craco build",
+    "build": "cross-env NODE_ENV=production && craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
     "generate-client": "nswag run ./backend.nswag /runtime:WinX64"
@@ -33,6 +36,11 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged --verbose"
+    }
   },
   "browserslist": {
     "production": [
