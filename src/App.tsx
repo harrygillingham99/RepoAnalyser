@@ -1,23 +1,22 @@
-import React from 'react';
-import logo from '@/logo.svg';
-import '@/App.css';
-import { apiClient } from '@services/api';
+import React from "react";
+import "@/App.css";
+import { apiClient } from "@services/api";
+import { buildUserInfo } from "@utils/userInfo";
 
 const App = () => {
-
-  const [state, setState] = React.useState<object>()
+  const [state, setState] = React.useState<object>();
 
   React.useEffect(() => {
     (async () => {
-      const x = await apiClient.example_Test(200);
-      console.log(x)
+      const x = await apiClient.repository_Test(200, buildUserInfo());
+      console.log(x);
       setState(x);
     })();
-  })
+  });
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <img src={require("@/logo.svg")} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
@@ -33,6 +32,6 @@ const App = () => {
       </header>
     </div>
   );
-}
+};
 
 export default App;

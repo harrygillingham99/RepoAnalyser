@@ -19,28 +19,26 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
-    "husky": "^4.3.8",
+    "husky": "^5.0.8",
+    "lint-staged": "^10.5.3",
     "nswag": "^13.10.1",
-    "prettier": "2.2.1",
-    "pretty-quick": "^3.1.0"
+    "pinst": "^2.1.4",
+    "prettier": "2.2.1"
   },
   "scripts": {
     "start": "craco start --verbose",
     "build": "cross-env NODE_ENV=production && craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
-    "generate-client": "nswag run ./backend.nswag /runtime:WinX64"
+    "generate-client": "nswag run ./backend.nswag /runtime:WinX64",
+    "postinstall": "husky install",
+    "pre-commit": "lint-staged"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged --verbose"
-    }
   },
   "browserslist": {
     "production": [
@@ -53,5 +51,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "lint-staged": {
+    "*.{js,css,md,ts,tsx}": "prettier --write"
   }
 }
