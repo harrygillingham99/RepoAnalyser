@@ -1,7 +1,8 @@
 import React from "react";
-import "@/App.css";
+import "@styles/App.css";
 import { apiClient } from "@services/api/Index";
 import { buildUserInfo } from "@utils/ClientInfo";
+import logo from "@assets/logo.svg";
 
 const App = () => {
   const [state, setState] = React.useState<object>();
@@ -16,7 +17,7 @@ const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={require("@/logo.svg")} className="App-logo" alt="logo" />
+        <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
