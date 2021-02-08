@@ -42,7 +42,7 @@
     "eject": "react-scripts eject",
     "generate-client": "nswag run ./backend.nswag /runtime:WinX64",
     "postinstall": "husky install",
-    "pre-commit": "lint-staged --verbose && npm run build"
+    "pre-commit": "lint-staged --verbose"
   },
   "eslintConfig": {
     "extends": [
