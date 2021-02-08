@@ -9,31 +9,43 @@ interface ISideBarItem {
   title: string;
   orderBy: number;
   Icon: ComponentType<Props>;
+  onPress: () => void;
 }
 
 const HomeSidebarItems: ISideBarItem[] = [
-  { title: "Home", orderBy: 1, Icon: LightbulbFill },
+  { title: "Home", orderBy: 1, Icon: LightbulbFill, onPress: () => undefined },
 ];
 
 export const SideBar = () => {
+  const getLinksForRoute = (route: Routes | undefined) => {
+    switch (route) {
+      case Routes.Home:
+        return HomeSidebarItems.sort((a, b) => a.orderBy - b.orderBy).map(
+          ({ title, Icon }) => (
+            <li className="nav-item">
+              <Link to={Routes.Home} className="nav-link">
+                <Icon className="nav-link-icon" />
+                {title}
+              </Link>
+            </li>
+          )
+        );
+      default:
+        return (
+          <li className="nav-item">
+            <span>No Links Available</span>
+          </li>
+        );
+    }
+  };
   return (
-    <Switch>
-      <Route path={Routes.Home}>
-        <div className="sidebar-sticky">
-          <Nav as="ul" className="flex-column">
-            {HomeSidebarItems.sort((a, b) => a.orderBy - b.orderBy).map(
-              ({ title, Icon }) => (
-                <li className="nav-item">
-                  <Link to={Routes.Home} className="nav-link">
-                    <Icon className="nav-link-icon" />
-                    {title}
-                  </Link>
-                </li>
-              )
-            )}
-          </Nav>
-        </div>
-      </Route>
-    </Switch>
+    <div className="sidebar-sticky">
+      <Nav as="ul" className="flex-column">
+        <Switch>
+          <Route path={Routes.Home}>{getLinksForRoute(Routes.Home)}</Route>
+          <Route>{getLinksForRoute(undefined)}</Route>
+        </Switch>
+      </Nav>
+    </div>
   );
 };

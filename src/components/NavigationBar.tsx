@@ -1,7 +1,5 @@
-import { apiClient } from "@services/api/Index";
-import { AppContainer } from "@state/AppState";
+import { RedirectContainer } from "@state/RedirectContainer";
 import { Routes } from "@typeDefinitions/Routes";
-import { buildUserInfo } from "@utils/ClientInfo";
 import React from "react";
 import {
   Button,
@@ -12,18 +10,9 @@ import {
   NavDropdown,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import useEffectOnce from "react-use/lib/useEffectOnce";
 
 export const NavigationBar = () => {
-  const { state, setState } = AppContainer.useContainer();
-  useEffectOnce(() => {
-    (async () => {
-      var redirectUrl = await apiClient.authentication_GetLoginRedirectUrl(
-        buildUserInfo()
-      );
-      setState({ loginRedirectUrl: redirectUrl });
-    })();
-  });
+  const { redirectToRoute } = RedirectContainer.useContainer();
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg" style={{ zIndex: 9999 }}>
@@ -35,7 +24,7 @@ export const NavigationBar = () => {
             <Nav.Link>Home</Nav.Link>
           </Link>
           <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-            <NavDropdown.Item href={state.loginRedirectUrl}>
+            <NavDropdown.Item href={"state.loginRedirectUrl"}>
               Githoob
             </NavDropdown.Item>
             <NavDropdown.Item href="#action/3.2">
@@ -50,7 +39,12 @@ export const NavigationBar = () => {
         </Nav>
         <Form inline>
           <FormControl type="text" placeholder="Search" className="mr-sm-2" />
-          <Button variant="outline-success">Search</Button>
+          <Button
+            variant="outline-success"
+            onClick={() => redirectToRoute(Routes.Test)}
+          >
+            Search
+          </Button>
         </Form>
       </Navbar.Collapse>
     </Navbar>
