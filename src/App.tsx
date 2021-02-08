@@ -6,7 +6,7 @@ import { Dashboard } from "@components/BaseComponents/Dashboard";
 import { SideBar } from "@components/BaseComponents/SideBar";
 import { BrowserRouter, Redirect, Route } from "react-router-dom";
 import { Routes } from "@typeDefinitions/Routes";
-import { Authenticate } from "@components/BaseComponents/Authenticate";
+import { AuthenticationHandler } from "@components/BaseComponents/AuthenticationHandler";
 import { AppContainer } from "@state/AppStateContainer";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppAlert } from "@components/BaseComponents/AppAlert";
@@ -35,11 +35,9 @@ const App = () => {
               <Route exact path="/">
                 <Redirect to={Routes.Home} />
               </Route>
-              <Route
-                exact
-                path={Routes.CallbackUrl}
-                children={<Authenticate />}
-              />
+              <Route exact path={Routes.CallbackUrl}>
+                <AuthenticationHandler />
+              </Route>
             </Container>
             <RedirectHandler />
           </RedirectContainer.Provider>

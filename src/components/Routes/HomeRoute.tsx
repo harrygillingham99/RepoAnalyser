@@ -1,10 +1,10 @@
 import { AppContainer } from "@state/AppStateContainer";
 
 export const HomeRoute = () => {
-  const { state } = AppContainer.useContainer();
+  const { appState } = AppContainer.useContainer();
   return (
     <div>
-      <p>logged in: {state.token ?? "nope"}</p>
+      <p>{JSON.stringify(appState)}</p>
     </div>
   );
 };

@@ -24,12 +24,15 @@ function dataCookiesEnabled() {
   return navigator.cookieEnabled;
 }
 
-export const buildUserInfo = () =>
-  new ClientMetadata({
-    page: pageon(),
-    referrer: referrer(),
-    browserName: browserName(),
-    browserEngine: browserEngine(),
-    browserLanguage: browserLanguage(),
-    cookiesEnabled: dataCookiesEnabled(),
-  });
+export const buildUserInfo = () => {
+  return JSON.stringify(
+    new ClientMetadata({
+      page: pageon(),
+      referrer: referrer(),
+      browserName: browserName(),
+      browserEngine: browserEngine(),
+      browserLanguage: browserLanguage(),
+      cookiesEnabled: dataCookiesEnabled(),
+    })
+  );
+};

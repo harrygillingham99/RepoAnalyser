@@ -1,13 +1,19 @@
+import { User } from "@services/api/Client";
 import { useSetState } from "react-use";
 import { createContainer } from "unstated-next";
 
 interface IAppState {
   token: string;
   loginRedirectUrl: string;
+  user?: User;
 }
 const useAppState = () => {
-  const [state, setState] = useSetState<IAppState>();
-  return { state, setState };
+  const [appState, setAppState] = useSetState<IAppState>({
+    token: "",
+    user: undefined,
+    loginRedirectUrl: "",
+  });
+  return { appState, setAppState };
 };
 
 export const AppContainer = createContainer(useAppState);
