@@ -1,5 +1,5 @@
 import { apiClient } from "@services/api/Index";
-import { AppContainer } from "@state/AppState";
+import { AppContainer } from "@state/AppStateContainer";
 import { Routes } from "@typeDefinitions/Routes";
 import { buildUserInfo } from "@utils/ClientInfo";
 import { Redirect } from "react-router-dom";

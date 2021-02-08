@@ -1,20 +1,9 @@
 import { Routes } from "@typeDefinitions/Routes";
-import React, { ComponentType } from "react";
+import React from "react";
 import { Nav } from "react-bootstrap";
 import { Link, Route, Switch } from "react-router-dom";
 import "@styles/Nav.css";
-import { LightbulbFill, Props } from "react-bootstrap-icons";
-
-interface ISideBarItem {
-  title: string;
-  orderBy: number;
-  Icon: ComponentType<Props>;
-  onPress: () => void;
-}
-
-const HomeSidebarItems: ISideBarItem[] = [
-  { title: "Home", orderBy: 1, Icon: LightbulbFill, onPress: () => undefined },
-];
+import { HomeSidebarItems } from "@typeDefinitions/SidebarItems";
 
 export const SideBar = () => {
   const getLinksForRoute = (route: Routes | undefined) => {

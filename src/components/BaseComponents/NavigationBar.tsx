@@ -1,3 +1,4 @@
+import { AlertContainer } from "@state/AlertContainer";
 import { RedirectContainer } from "@state/RedirectContainer";
 import { Routes } from "@typeDefinitions/Routes";
 import React from "react";
@@ -12,7 +13,7 @@ import {
 import { Link } from "react-router-dom";
 
 export const NavigationBar = () => {
-  const { redirectToRoute } = RedirectContainer.useContainer();
+  const { showInfoAlert } = AlertContainer.useContainer();
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg" style={{ zIndex: 9999 }}>
@@ -41,7 +42,7 @@ export const NavigationBar = () => {
           <FormControl type="text" placeholder="Search" className="mr-sm-2" />
           <Button
             variant="outline-success"
-            onClick={() => redirectToRoute(Routes.Test)}
+            onClick={() => showInfoAlert("Info", "Wow info")}
           >
             Search
           </Button>

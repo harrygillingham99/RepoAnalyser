@@ -1,4 +1,4 @@
-import { AlertContainer } from "@state/GlobalAlert";
+import { AlertContainer } from "@state/AlertContainer";
 import React from "react";
 import { Alert } from "react-bootstrap";
 
@@ -10,7 +10,7 @@ export const AppAlert = () => {
       variant={alert.type}
       onClose={() => hideAlert()}
       dismissible
-      className="m-3"
+      className="mt-3 mb-3"
     >
       <Alert.Heading>{alert.title}</Alert.Heading>
       {alert.message}

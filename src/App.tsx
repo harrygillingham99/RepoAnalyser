@@ -1,17 +1,17 @@
 import React from "react";
 import "@styles/App.css";
 import { Col, Container, Row } from "react-bootstrap";
-import { NavigationBar } from "@components/NavigationBar";
-import { Dashboard } from "@components/Dashboard";
-import { SideBar } from "@components/SideBar";
+import { NavigationBar } from "@components/BaseComponents/NavigationBar";
+import { Dashboard } from "@components/BaseComponents/Dashboard";
+import { SideBar } from "@components/BaseComponents/SideBar";
 import { BrowserRouter, Redirect, Route } from "react-router-dom";
 import { Routes } from "@typeDefinitions/Routes";
-import { Authenticate } from "@components/Authenticate";
-import { AppContainer } from "@state/AppState";
-import { AlertContainer } from "@state/GlobalAlert";
-import { AppAlert } from "@components/AppAlert";
+import { Authenticate } from "@components/BaseComponents/Authenticate";
+import { AppContainer } from "@state/AppStateContainer";
+import { AlertContainer } from "@state/AlertContainer";
+import { AppAlert } from "@components/BaseComponents/AppAlert";
 import { RedirectContainer } from "@state/RedirectContainer";
-import { RedirectHandler } from "@components/RedirectHandler";
+import { RedirectHandler } from "@components/BaseComponents/RedirectHandler";
 
 const App = () => {
   return (
@@ -26,8 +26,10 @@ const App = () => {
                   <SideBar />
                 </Col>
                 <Col className="col-md-9 ml-sm-auto col-lg-10 px-2">
-                  <AppAlert />
-                  <Dashboard />
+                  <div className="m-3">
+                    <AppAlert />
+                    <Dashboard />
+                  </div>
                 </Col>
               </Row>
               <Route exact path="/">
