@@ -7,16 +7,25 @@ import { Link } from "react-router-dom";
 import { apiClient } from "@services/api/Index";
 import { useEffectOnce } from "react-use";
 import { buildUserInfo } from "@utils/ClientInfo";
+import { AlertContainer } from "@state/AlertContainer";
 
 export const NavigationBar = () => {
   const { appState, setAppState } = AppContainer.useContainer();
+  const { showErrorAlert } = AlertContainer.useContainer();
 
   useEffectOnce(() => {
     (async () => {
-      const result = await apiClient.authentication_GetLoginRedirectUrl(
-        buildUserInfo()
-      );
-      setAppState({ loginRedirectUrl: result });
+      try {
+        const result = await apiClient.authentication_GetLoginRedirectUrl(
+          buildUserInfo()
+        );
+        setAppState({ loginRedirectUrl: result });
+      } catch (error) {
+        showErrorAlert(
+          "Authentication Error",
+          "Error getting the GitHub callback URL."
+        );
+      }
     })();
   });
 

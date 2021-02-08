@@ -5,13 +5,13 @@ import { createContainer } from "unstated-next";
 interface IAppState {
   token: string;
   loginRedirectUrl: string;
-  user?: User;
+  user: User;
 }
 const useAppState = () => {
   const [appState, setAppState] = useSetState<IAppState>({
-    token: "",
-    user: undefined,
-    loginRedirectUrl: "",
+    token: undefined!,
+    user: undefined!,
+    loginRedirectUrl: undefined!,
   });
   return { appState, setAppState };
 };
