@@ -1,7 +1,7 @@
 import { ComponentType } from "react";
 import { LightbulbFill, Props } from "react-bootstrap-icons";
 
-interface ISideBarItem {
+export interface ISideBarItem {
   title: string;
   orderBy: number;
   Icon: ComponentType<Props>;
