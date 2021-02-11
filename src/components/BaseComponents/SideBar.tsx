@@ -1,16 +1,21 @@
 import { Routes } from "@typeDefinitions/Routes";
 import React from "react";
 import { Nav } from "react-bootstrap";
-import { Link, Route, Switch } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "@styles/Nav.css";
-import { HomeSidebarItems, ISideBarItem } from "@typeDefinitions/SidebarItems";
+import {
+  HomeSidebarItems,
+  ISideBarItem,
+  TestSidebarItems,
+} from "@typeDefinitions/SidebarItems";
 
 export const SideBar = () => {
+  const { pathname } = useLocation();
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
       .sort((a, b) => a.orderBy - b.orderBy)
       .map(({ title, Icon }) => (
-        <li className="nav-item">
+        <li className="nav-item" key={`${title}-${pathname}-nav-item`}>
           <Link to={Routes.Home} className="nav-link">
             <Icon className="nav-link-icon" />
             {title}
@@ -22,6 +27,8 @@ export const SideBar = () => {
     switch (route) {
       case Routes.Home:
         return generateLinksForItems(HomeSidebarItems);
+      case Routes.Test:
+        return generateLinksForItems(TestSidebarItems);
       default:
         return (
           <li className="nav-item">
@@ -33,10 +40,7 @@ export const SideBar = () => {
   return (
     <div className="sidebar-sticky">
       <Nav as="ul" className="flex-column">
-        <Switch>
-          <Route path={Routes.Home}>{getLinksForRoute(Routes.Home)}</Route>
-          <Route>{getLinksForRoute(undefined)}</Route>
-        </Switch>
+        {getLinksForRoute(pathname as Routes)}
       </Nav>
     </div>
   );

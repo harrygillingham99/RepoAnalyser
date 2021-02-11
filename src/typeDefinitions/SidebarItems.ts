@@ -11,3 +11,7 @@ export interface ISideBarItem {
 export const HomeSidebarItems: ISideBarItem[] = [
   { title: "Home", orderBy: 1, Icon: LightbulbFill, onPress: () => undefined },
 ];
+
+export const TestSidebarItems: ISideBarItem[] = [
+  { title: "Test", orderBy: 1, Icon: LightbulbFill, onPress: () => undefined },
+];

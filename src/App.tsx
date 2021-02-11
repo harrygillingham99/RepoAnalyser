@@ -4,7 +4,7 @@ import { Col, Container, Row } from "react-bootstrap";
 import { NavigationBar } from "@components/BaseComponents/NavigationBar";
 import { Dashboard } from "@components/BaseComponents/Dashboard";
 import { SideBar } from "@components/BaseComponents/SideBar";
-import { BrowserRouter, Redirect, Route } from "react-router-dom";
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import { Routes } from "@typeDefinitions/Routes";
 import { AuthenticationHandler } from "@components/BaseComponents/AuthenticationHandler";
 import { AppContainer } from "@state/AppStateContainer";
@@ -20,25 +20,29 @@ const App = () => {
         <AlertContainer.Provider>
           <RedirectContainer.Provider>
             <NavigationBar />
-            <Container fluid>
-              <Row>
-                <Col className="col-md-2 d-none d-md-block bg-light sidebar">
-                  <SideBar />
-                </Col>
-                <Col className="col-md-9 ml-sm-auto col-lg-10 px-2">
-                  <div className="m-3">
-                    <AppAlert />
-                    <Dashboard />
-                  </div>
-                </Col>
-              </Row>
-              <Route exact path="/">
-                <Redirect to={Routes.Home} />
-              </Route>
+            <Switch>
               <Route exact path={Routes.CallbackUrl}>
                 <AuthenticationHandler />
               </Route>
-            </Container>
+              <Route exact path="/">
+                <Redirect to={Routes.Home} />
+              </Route>
+              <Route>
+                <Container fluid>
+                  <Row>
+                    <Col className="col-md-2 d-none d-md-block bg-light sidebar">
+                      <SideBar />
+                    </Col>
+                    <Col className="col-md-9 ml-sm-auto col-lg-10 px-2">
+                      <div className="m-3">
+                        <AppAlert />
+                        <Dashboard />
+                      </div>
+                    </Col>
+                  </Row>
+                </Container>
+              </Route>
+            </Switch>
             <RedirectHandler />
           </RedirectContainer.Provider>
         </AlertContainer.Provider>

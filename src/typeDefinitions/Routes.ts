@@ -1,7 +1,7 @@
 enum Routes {
   Home = "/home",
   CallbackUrl = "/auth",
-  Test = "/REEEEEEEEEEEEEEEEEEEE",
+  Test = "/test",
 }
 
 export { Routes };
