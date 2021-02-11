@@ -1,6 +1,8 @@
 {
   "name": "front-end",
   "version": "0.1.0",
+  "author": "Harry Gillingham",
+  "description": "A GitHub Repository Analyser",
   "main": "electron/main.js",
   "homepage": "./",
   "private": true,
@@ -51,14 +53,16 @@
   "scripts": {
     "start": "craco start --verbose",
     "build": "cross-env NODE_ENV=production && craco build",
+    "build-dev": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
     "generate-client": "nswag run ./backend.nswag /runtime:WinX64",
     "postinstall": "husky install",
     "pre-commit": "lint-staged --verbose",
-    "start-electron": "concurrently \"npm start\" \"set ELECTRON_START_URL=http://localhost:3000 && electron . \"",
-    "build-electron": "mkdir build\\src && Xcopy /E /I /Y electron build\\electron",
-    "package-electron": "npm run build && npm run build-electron && electron-builder build -c.extraMetadata.main=build/electron/main.ts --publish never"
+    "start-electron": "concurrently \"set BROWSER=none && npm start\" \"set ELECTRON_START_URL=http://localhost:3000 && electron . \"",
+    "package-electron": "npm run build && npm run build-electron && electron-builder build -c.extraMetadata.main=build/electron/main.js --publish never",
+    "package-electron-dev": "npm run build-dev && npm run build-electron && electron-builder build -c.extraMetadata.main=build/electron/main.js --publish never",
+    "build-electron": "mkdir build\\src && Xcopy /E /I /Y electron build\\electron"
   },
   "eslintConfig": {
     "extends": [
