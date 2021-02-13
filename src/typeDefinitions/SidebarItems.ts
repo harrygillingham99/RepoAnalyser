@@ -1,11 +1,13 @@
 import { ComponentType } from "react";
 import { PersonXFill, Lightning, Props } from "react-bootstrap-icons";
+import { Routes } from "./Routes";
 
 export interface ISideBarItem {
   title: string;
   orderBy: number;
   Icon: ComponentType<Props>;
-  onPress: () => void;
+  onPress?: () => void;
+  href?: string;
 }
 
 interface IAccountSidebarItemProps {
@@ -13,7 +15,13 @@ interface IAccountSidebarItemProps {
 }
 
 export const HomeSidebarItems = (): ISideBarItem[] => [
-  { title: "Home", orderBy: 1, Icon: Lightning, onPress: () => undefined },
+  {
+    title: "Home",
+    orderBy: 1,
+    Icon: Lightning,
+    onPress: () => undefined,
+    href: "https://who.cares.com",
+  },
 ];
 
 export const AccountSidebarItems = (

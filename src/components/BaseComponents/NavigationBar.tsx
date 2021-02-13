@@ -10,16 +10,16 @@ import { buildUserInfo } from "@utils/ClientInfo";
 import { AlertContainer } from "@state/AlertContainer";
 
 export const NavigationBar = () => {
-  const { appState, setAppState } = AppContainer.useContainer();
+  const { appState, setLoginRedirect } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
 
   useEffectOnce(() => {
     (async () => {
       try {
-        const result = await apiClient.authentication_GetLoginRedirectUrl(
+        const urlResult = await apiClient.authentication_GetLoginRedirectUrl(
           buildUserInfo()
         );
-        setAppState({ loginRedirectUrl: result });
+        setLoginRedirect(urlResult);
       } catch (error) {
         showErrorAlert(
           "Authentication Error",

@@ -11,7 +11,7 @@ import { useEffectOnce } from "react-use";
 export const AuthenticationHandler = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get("code");
-  const { setAppState } = AppContainer.useContainer();
+  const { setUserAndToken } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
 
   const resolveAuthenticationToken = (code: string | null, state: string) => {
@@ -23,8 +23,8 @@ export const AuthenticationHandler = () => {
           state,
           buildUserInfo()
         );
-        if (result && result.accessToken) {
-          setAppState({ token: result.accessToken, user: result.user });
+        if (result && result.user && result.accessToken) {
+          setUserAndToken(result.user, result.accessToken);
           setCookie(AuthCookieKey, result.accessToken);
         } else {
           throw new Error("User was null");

@@ -9,25 +9,33 @@ import {
   AccountSidebarItems,
 } from "@typeDefinitions/SidebarItems";
 import { AppContainer } from "@state/AppStateContainer";
+import { RedirectContainer } from "@state/RedirectContainer";
+import { ConditonalWrapper } from "./ConditionalWrapper";
 
 export const SideBar = () => {
   const { pathname } = useLocation();
+  const { redirectToRoute } = RedirectContainer.useContainer();
   const { signOut } = AppContainer.useContainer();
 
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
       .sort((a, b) => a.orderBy - b.orderBy)
-      .map(({ title, Icon, onPress }) => (
-        <li
-          className="nav-item list-group-item-action clickable"
-          key={`${title}-${pathname}-nav-item`}
-          onClick={onPress}
+      .map(({ title, Icon, onPress, href }) => (
+        <ConditonalWrapper
+          condition={href !== undefined}
+          wrapper={(children) => <a href={href}>{children}</a>}
         >
-          <span className="nav-link">
-            <Icon className="nav-link-icon" />
-            {title}
-          </span>
-        </li>
+          <li
+            className="nav-item list-group-item-action clickable"
+            key={`${title}-${pathname}-nav-item`}
+            onClick={onPress}
+          >
+            <span className="nav-link">
+              <Icon className="nav-link-icon" />
+              {title}
+            </span>
+          </li>
+        </ConditonalWrapper>
       ));
   };
   const getLinksForRoute = (route: Routes | undefined) => {
@@ -35,7 +43,9 @@ export const SideBar = () => {
       case Routes.Home:
         return generateLinksForItems(HomeSidebarItems());
       case Routes.Account:
-        return generateLinksForItems(AccountSidebarItems({ signOut: signOut }));
+        return generateLinksForItems(
+          AccountSidebarItems({ signOut: () => signOut(redirectToRoute) })
+        );
       default:
         return (
           <li className="nav-item">

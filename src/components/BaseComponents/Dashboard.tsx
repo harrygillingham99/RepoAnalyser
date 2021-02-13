@@ -12,7 +12,8 @@ import { HomeRoute } from "../Routes/HomeRoute";
 import { FourOhFour } from "./FourOhFour";
 
 export const Dashboard = () => {
-  const { setAppState } = AppContainer.useContainer();
+  const { setUserAndToken } = AppContainer.useContainer();
+  const { pathname } = useLocation();
 
   useEffectOnce(() => {
     const savedAuthCookie = getCookie(AuthCookieKey);
@@ -21,12 +22,11 @@ export const Dashboard = () => {
         const user = await authorisedApiClient(
           savedAuthCookie
         ).authentication_GetUserInformationForToken(buildUserInfo());
-        setAppState({ user: user, token: savedAuthCookie });
+        setUserAndToken(user, savedAuthCookie);
       })();
     }
   });
 
-  const { pathname } = useLocation();
   switch (pathname as Routes) {
     case Routes.Home:
       return <HomeRoute />;

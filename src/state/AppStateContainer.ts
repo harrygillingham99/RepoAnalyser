@@ -1,5 +1,6 @@
 import { AuthCookieKey } from "@constants/CookieConstants";
 import { User } from "@services/api/Client";
+import { Routes } from "@typeDefinitions/Routes";
 import { expireCookie } from "@utils/CookieProvider";
 import { useSetState } from "react-use";
 import { createContainer } from "unstated-next";
@@ -16,11 +17,21 @@ const useAppState = () => {
     loginRedirectUrl: undefined!,
   });
 
-  const signOut = () => {
+  const signOut = (redirectToRoute: (route: Routes) => void) => {
     setAppState({ user: undefined });
     expireCookie(AuthCookieKey);
+    redirectToRoute(Routes.Home);
   };
-  return { appState, setAppState, signOut };
+
+  const setUser = (user: User) => setAppState({ user: user });
+
+  const setUserAndToken = (user: User, token: string) =>
+    setAppState({ user: user, token: token });
+
+  const setLoginRedirect = (url: string) =>
+    setAppState({ loginRedirectUrl: url });
+
+  return { appState, setUser, setUserAndToken, setLoginRedirect, signOut };
 };
 
 export const AppContainer = createContainer(useAppState);
