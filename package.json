@@ -58,7 +58,7 @@
     "eject": "react-scripts eject",
     "generate-client": "nswag run ./backend.nswag /runtime:WinX64",
     "postinstall": "husky install",
-    "pre-commit": "lint-staged --verbose",
+    "pre-commit": "lint-staged --verbose --allow-empty",
     "start-electron": "concurrently \"set BROWSER=none && npm start\" \"set ELECTRON_START_URL=http://localhost:3000 && electron . \"",
     "package-electron": "npm run build && npm run build-electron && electron-builder build -c.extraMetadata.main=build/electron/main.js --publish never",
     "package-electron-dev": "npm run build-dev && npm run build-electron && electron-builder build -c.extraMetadata.main=build/electron/main.js --publish never",
