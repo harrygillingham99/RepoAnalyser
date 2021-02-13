@@ -33,11 +33,9 @@ const App = () => {
                     <Col className="col-md-2 d-none d-md-block bg-light sidebar">
                       <SideBar />
                     </Col>
-                    <Col className="col-md-9 ml-sm-auto col-lg-10 px-2">
-                      <div className="m-3">
-                        <AppAlert />
-                        <Dashboard />
-                      </div>
+                    <Col className="col-md-9 ml-sm-auto col-lg-10 p-0">
+                      <AppAlert />
+                      <Dashboard />
                     </Col>
                   </Row>
                 </Container>

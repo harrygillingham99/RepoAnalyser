@@ -40,7 +40,13 @@ export const NavigationBar = () => {
           <Link className="nav-link" to={Routes.Home}>
             Home
           </Link>
+          {appState.user && (
+            <Link className="nav-link" to={Routes.Account}>
+              Account
+            </Link>
+          )}
         </Nav>
+
         <div>
           {appState.user === undefined && (
             <a href={appState.loginRedirectUrl}>
@@ -49,7 +55,6 @@ export const NavigationBar = () => {
               </Button>
             </a>
           )}
-          {appState.user && <Button variant="info">Account</Button>}
         </div>
       </Navbar.Collapse>
     </Navbar>

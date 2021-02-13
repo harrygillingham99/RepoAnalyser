@@ -3,6 +3,8 @@ import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
 import { Routes } from "@typeDefinitions/Routes";
 import { buildUserInfo } from "@utils/ClientInfo";
+import { setCookie } from "@utils/CookieProvider";
+import { AuthCookieKey } from "@constants/CookieConstants";
 import { Redirect } from "react-router-dom";
 import { useEffectOnce } from "react-use";
 
@@ -21,7 +23,12 @@ export const AuthenticationHandler = () => {
           state,
           buildUserInfo()
         );
-        setAppState({ token: result.accessToken, user: result.user });
+        if (result && result.accessToken) {
+          setAppState({ token: result.accessToken, user: result.user });
+          setCookie(AuthCookieKey, result.accessToken);
+        } else {
+          throw new Error("User was null");
+        }
       } catch (error) {
         showErrorAlert("Authentication Error", "Unable to resolve user.");
       }

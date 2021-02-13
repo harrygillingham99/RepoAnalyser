@@ -1,5 +1,5 @@
 import { ComponentType } from "react";
-import { LightbulbFill, Props } from "react-bootstrap-icons";
+import { PersonXFill, Lightning, Props } from "react-bootstrap-icons";
 
 export interface ISideBarItem {
   title: string;
@@ -8,10 +8,23 @@ export interface ISideBarItem {
   onPress: () => void;
 }
 
-export const HomeSidebarItems: ISideBarItem[] = [
-  { title: "Home", orderBy: 1, Icon: LightbulbFill, onPress: () => undefined },
+interface IAccountSidebarItemProps {
+  signOut: () => void;
+}
+
+export const HomeSidebarItems = (): ISideBarItem[] => [
+  { title: "Home", orderBy: 1, Icon: Lightning, onPress: () => undefined },
 ];
 
-export const TestSidebarItems: ISideBarItem[] = [
-  { title: "Test", orderBy: 1, Icon: LightbulbFill, onPress: () => undefined },
-];
+export const AccountSidebarItems = (
+  props: IAccountSidebarItemProps
+): ISideBarItem[] => {
+  return [
+    {
+      title: "Sign Out",
+      orderBy: 1,
+      Icon: PersonXFill,
+      onPress: () => props.signOut(),
+    },
+  ];
+};

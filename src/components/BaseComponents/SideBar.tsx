@@ -1,34 +1,41 @@
 import { Routes } from "@typeDefinitions/Routes";
 import React from "react";
 import { Nav } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import "@styles/Nav.css";
 import {
   HomeSidebarItems,
   ISideBarItem,
-  TestSidebarItems,
+  AccountSidebarItems,
 } from "@typeDefinitions/SidebarItems";
+import { AppContainer } from "@state/AppStateContainer";
 
 export const SideBar = () => {
   const { pathname } = useLocation();
+  const { signOut } = AppContainer.useContainer();
+
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
       .sort((a, b) => a.orderBy - b.orderBy)
-      .map(({ title, Icon }) => (
-        <li className="nav-item" key={`${title}-${pathname}-nav-item`}>
-          <Link to={Routes.Home} className="nav-link">
+      .map(({ title, Icon, onPress }) => (
+        <li
+          className="nav-item list-group-item-action clickable"
+          key={`${title}-${pathname}-nav-item`}
+          onClick={onPress}
+        >
+          <span className="nav-link">
             <Icon className="nav-link-icon" />
             {title}
-          </Link>
+          </span>
         </li>
       ));
   };
   const getLinksForRoute = (route: Routes | undefined) => {
     switch (route) {
       case Routes.Home:
-        return generateLinksForItems(HomeSidebarItems);
-      case Routes.Test:
-        return generateLinksForItems(TestSidebarItems);
+        return generateLinksForItems(HomeSidebarItems());
+      case Routes.Account:
+        return generateLinksForItems(AccountSidebarItems({ signOut: signOut }));
       default:
         return (
           <li className="nav-item">
@@ -39,7 +46,7 @@ export const SideBar = () => {
   };
   return (
     <div className="sidebar-sticky">
-      <Nav as="ul" className="flex-column">
+      <Nav as="ul" className="flex-column list-group list-group-flush">
         {getLinksForRoute(pathname as Routes)}
       </Nav>
     </div>

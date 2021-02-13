@@ -9,7 +9,8 @@
       "@utils/*": ["utils/*"],
       "@state/*": ["state/*"],
       "@services/*": ["services/*"],
-      "@typeDefinitions/*": ["typeDefinitions/*"]
+      "@typeDefinitions/*": ["typeDefinitions/*"],
+      "@constants/*":["constants/*"]
     }
   }
 }

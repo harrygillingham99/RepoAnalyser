@@ -1,4 +1,6 @@
+import { AuthCookieKey } from "@constants/CookieConstants";
 import { User } from "@services/api/Client";
+import { expireCookie } from "@utils/CookieProvider";
 import { useSetState } from "react-use";
 import { createContainer } from "unstated-next";
 
@@ -13,7 +15,12 @@ const useAppState = () => {
     user: undefined!,
     loginRedirectUrl: undefined!,
   });
-  return { appState, setAppState };
+
+  const signOut = () => {
+    setAppState({ user: undefined });
+    expireCookie(AuthCookieKey);
+  };
+  return { appState, setAppState, signOut };
 };
 
 export const AppContainer = createContainer(useAppState);
