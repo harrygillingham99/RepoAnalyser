@@ -1,6 +1,5 @@
 import { ComponentType } from "react";
 import { PersonXFill, Lightning, Props } from "react-bootstrap-icons";
-import { Routes } from "./Routes";
 
 export interface ISideBarItem {
   title: string;
