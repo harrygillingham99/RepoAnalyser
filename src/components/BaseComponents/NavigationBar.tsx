@@ -1,9 +1,9 @@
 import { AppContainer } from "@state/AppStateContainer";
 import { Github } from "react-bootstrap-icons";
 import { Routes } from "@typeDefinitions/Routes";
-import React from "react";
+import React, { useState } from "react";
 import { Button, Nav, Navbar } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { apiClient, authorisedApiClient } from "@services/api/Index";
 import { useEffectOnce } from "react-use";
 import { buildUserInfo } from "@utils/ClientInfo";
@@ -12,14 +12,25 @@ import { AuthCookieKey } from "@constants/CookieConstants";
 import { getCookie } from "@utils/CookieProvider";
 
 export const NavigationBar = () => {
+  const { pathname } = useLocation();
+
   const {
     appState,
     setLoginRedirect,
     setUserAndToken,
   } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
+  const [loading, setLoading] = useState(false);
+
+  const shouldShowLoginButton =
+    appState.user === undefined &&
+    !loading &&
+    appState.loginRedirectUrl !== undefined;
+
+  const shouldShowAccountLink = appState.user && !loading;
 
   useEffectOnce(() => {
+    setLoading(true);
     const savedAuthCookie = getCookie(AuthCookieKey);
     //if the cookie is there we can use it to just fetch the user info straight away
     if (savedAuthCookie) {
@@ -34,6 +45,8 @@ export const NavigationBar = () => {
             "Authentication Error",
             "Error logging in with existing cookie."
           );
+        } finally {
+          setLoading(false);
         }
       })();
       //if not we need to send the user through the OAuth flow again to authenticate
@@ -49,6 +62,8 @@ export const NavigationBar = () => {
             "Authentication Error",
             "Error getting the GitHub callback URL."
           );
+        } finally {
+          setLoading(false);
         }
       })();
     }
@@ -62,18 +77,26 @@ export const NavigationBar = () => {
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
-          <Link className="nav-link" to={Routes.Home}>
+          <Link
+            className={`nav-link ${pathname === Routes.Home ? "active" : ""}`}
+            to={Routes.Home}
+          >
             Home
           </Link>
-          {appState.user && (
-            <Link className="nav-link" to={Routes.Account}>
+          {shouldShowAccountLink && (
+            <Link
+              className={`nav-link ${
+                pathname === Routes.Account ? "active" : ""
+              }`}
+              to={Routes.Account}
+            >
               Account
             </Link>
           )}
         </Nav>
 
         <div>
-          {appState.user === undefined && (
+          {shouldShowLoginButton && (
             <a href={appState.loginRedirectUrl}>
               <Button variant="info">
                 <Github /> Login With GitHub
