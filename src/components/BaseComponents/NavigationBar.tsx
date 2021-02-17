@@ -21,6 +21,7 @@ export const NavigationBar = () => {
 
   useEffectOnce(() => {
     const savedAuthCookie = getCookie(AuthCookieKey);
+    //if the cookie is there we can use it to just fetch the user info straight away
     if (savedAuthCookie) {
       (async () => {
         try {
@@ -35,6 +36,7 @@ export const NavigationBar = () => {
           );
         }
       })();
+      //if not we need to send the user through the OAuth flow again to authenticate
     } else {
       (async () => {
         try {
