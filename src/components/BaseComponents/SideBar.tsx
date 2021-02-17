@@ -2,7 +2,7 @@ import { Routes } from "@typeDefinitions/Routes";
 import React from "react";
 import { Nav } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
-import "@styles/Nav.css";
+import "@styles/Nav.scss";
 import {
   HomeSidebarItems,
   ISideBarItem,
