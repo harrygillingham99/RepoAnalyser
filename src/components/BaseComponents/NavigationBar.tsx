@@ -4,29 +4,52 @@ import { Routes } from "@typeDefinitions/Routes";
 import React from "react";
 import { Button, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { apiClient } from "@services/api/Index";
+import { apiClient, authorisedApiClient } from "@services/api/Index";
 import { useEffectOnce } from "react-use";
 import { buildUserInfo } from "@utils/ClientInfo";
 import { AlertContainer } from "@state/AlertContainer";
+import { AuthCookieKey } from "@constants/CookieConstants";
+import { getCookie } from "@utils/CookieProvider";
 
 export const NavigationBar = () => {
-  const { appState, setLoginRedirect } = AppContainer.useContainer();
+  const {
+    appState,
+    setLoginRedirect,
+    setUserAndToken,
+  } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
 
   useEffectOnce(() => {
-    (async () => {
-      try {
-        const urlResult = await apiClient.authentication_GetLoginRedirectUrl(
-          buildUserInfo()
-        );
-        setLoginRedirect(urlResult);
-      } catch (error) {
-        showErrorAlert(
-          "Authentication Error",
-          "Error getting the GitHub callback URL."
-        );
-      }
-    })();
+    const savedAuthCookie = getCookie(AuthCookieKey);
+    if (savedAuthCookie) {
+      (async () => {
+        try {
+          const user = await authorisedApiClient(
+            savedAuthCookie
+          ).authentication_GetUserInformationForToken(buildUserInfo());
+          setUserAndToken(user, savedAuthCookie);
+        } catch (error) {
+          showErrorAlert(
+            "Authentication Error",
+            "Error logging in with existing cookie."
+          );
+        }
+      })();
+    } else {
+      (async () => {
+        try {
+          const urlResult = await apiClient.authentication_GetLoginRedirectUrl(
+            buildUserInfo()
+          );
+          setLoginRedirect(urlResult);
+        } catch (error) {
+          showErrorAlert(
+            "Authentication Error",
+            "Error getting the GitHub callback URL."
+          );
+        }
+      })();
+    }
   });
 
   return (
