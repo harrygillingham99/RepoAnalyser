@@ -10,7 +10,7 @@ export const AppAlert = () => {
       variant={alert.type}
       onClose={() => hideAlert()}
       dismissible
-      className="mt-3 mb-3"
+      className="mb-0"
     >
       <Alert.Heading>{alert.title}</Alert.Heading>
       {alert.message}
