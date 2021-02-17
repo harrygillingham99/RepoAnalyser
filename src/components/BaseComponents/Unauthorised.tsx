@@ -2,11 +2,11 @@ import { Routes } from "@typeDefinitions/Routes";
 import React from "react";
 import { ErrorScreen } from "./ErrorScreen";
 
-export const FourOhFour = () => {
+export const Unauthorised = () => {
   return (
     <ErrorScreen
-      message="The page you were looking for was not found."
-      title="Not Found"
+      message="You need to log in to view this page."
+      title="Unauthorised"
       redirectSubtitle="Back to Home"
       redirectTo={Routes.Home}
     />

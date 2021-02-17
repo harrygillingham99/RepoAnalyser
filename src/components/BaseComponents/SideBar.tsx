@@ -11,11 +11,15 @@ import {
 import { AppContainer } from "@state/AppStateContainer";
 import { RedirectContainer } from "@state/RedirectContainer";
 import { ConditonalWrapper } from "./ConditionalWrapper";
+import { AuthorizedRoutes } from "@constants/RouteConstants";
 
 export const SideBar = () => {
   const { pathname } = useLocation();
   const { redirectToRoute } = RedirectContainer.useContainer();
-  const { signOut } = AppContainer.useContainer();
+  const { signOut, appState } = AppContainer.useContainer();
+
+  const isUnauthorised =
+    !appState.user && AuthorizedRoutes.indexOf(pathname as Routes) >= 0;
 
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
@@ -49,15 +53,16 @@ export const SideBar = () => {
       default:
         return (
           <li className="nav-item">
-            <span>No Links Available</span>
+            <span className="nav-link">No Links Available</span>
           </li>
         );
     }
   };
+
   return (
     <div className="sidebar-sticky">
       <Nav as="ul" className="flex-column list-group list-group-flush">
-        {getLinksForRoute(pathname as Routes)}
+        {getLinksForRoute(isUnauthorised ? undefined : (pathname as Routes))}
       </Nav>
     </div>
   );
