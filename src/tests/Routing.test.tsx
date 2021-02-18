@@ -4,6 +4,8 @@ import { createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
 import { Dashboard } from "@components/BaseComponents/Dashboard";
 import { AppContainer } from "@state/AppStateContainer";
+import { TestId } from "./TestConstants";
+import App from "../App";
 
 test("bad routes result in 404 page", () => {
   const history = createMemoryHistory();
@@ -18,4 +20,9 @@ test("bad routes result in 404 page", () => {
 
   const elems = screen.getAllByText(/Not Found/i);
   expect(elems[0]).toBeInTheDocument();
+});
+
+test("redirect handler not rendered by default", () => {
+  render(<App />);
+  expect(screen.queryByTestId(TestId.RedirectHandler)).not.toBeInTheDocument();
 });
