@@ -10,7 +10,8 @@
       "@state/*": ["state/*"],
       "@services/*": ["services/*"],
       "@typeDefinitions/*": ["typeDefinitions/*"],
-      "@constants/*":["constants/*"]
+      "@constants/*":["constants/*"],
+      "@tests/*":["tests/*"]
     }
   }
 }

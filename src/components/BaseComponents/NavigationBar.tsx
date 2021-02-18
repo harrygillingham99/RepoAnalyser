@@ -10,6 +10,7 @@ import { buildUserInfo } from "@utils/ClientInfo";
 import { AlertContainer } from "@state/AlertContainer";
 import { AuthCookieKey } from "@constants/CookieConstants";
 import { getCookie } from "@utils/CookieProvider";
+import { TestId } from "@tests/TestConstants";
 
 export const NavigationBar = () => {
   const { pathname } = useLocation();
@@ -70,7 +71,13 @@ export const NavigationBar = () => {
   });
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" style={{ zIndex: 9999 }}>
+    <Navbar
+      bg="dark"
+      variant="dark"
+      expand="lg"
+      style={{ zIndex: 9999 }}
+      data-testid={TestId.Nav}
+    >
       <Link to={Routes.Home}>
         <Navbar.Brand>Repo Analyser</Navbar.Brand>
       </Link>

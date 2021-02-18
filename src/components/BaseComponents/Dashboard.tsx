@@ -1,6 +1,7 @@
 import { AccountRoute } from "@components/Routes/AccountRoute";
 import { AuthorizedRoutes } from "@constants/RouteConstants";
 import { AppContainer } from "@state/AppStateContainer";
+import { TestId } from "@tests/TestConstants";
 import { Routes } from "@typeDefinitions/Routes";
 import React from "react";
 import { useLocation } from "react-router-dom";
@@ -12,16 +13,24 @@ export const Dashboard = () => {
   const { pathname } = useLocation();
   const { appState } = AppContainer.useContainer();
 
-  if (!appState.user && AuthorizedRoutes.indexOf(pathname as Routes) >= 0) {
-    return <Unauthorised />;
-  }
+  const getDashboardForRoute = (route: Routes): JSX.Element => {
+    if (!appState.user && AuthorizedRoutes.indexOf(route as Routes) >= 0) {
+      return <Unauthorised />;
+    }
 
-  switch (pathname as Routes) {
-    case Routes.Home:
-      return <HomeRoute />;
-    case Routes.Account:
-      return <AccountRoute />;
-    default:
-      return <FourOhFour />;
-  }
+    switch (route as Routes) {
+      case Routes.Home:
+        return <HomeRoute />;
+      case Routes.Account:
+        return <AccountRoute />;
+      default:
+        return <FourOhFour />;
+    }
+  };
+
+  return (
+    <div data-testid={TestId.Dashboard}>
+      {getDashboardForRoute(pathname as Routes)}
+    </div>
+  );
 };

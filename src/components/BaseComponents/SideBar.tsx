@@ -12,6 +12,7 @@ import { AppContainer } from "@state/AppStateContainer";
 import { RedirectContainer } from "@state/RedirectContainer";
 import { ConditonalWrapper } from "./ConditionalWrapper";
 import { AuthorizedRoutes } from "@constants/RouteConstants";
+import { TestId } from "@tests/TestConstants";
 
 export const SideBar = () => {
   const { pathname } = useLocation();
@@ -28,10 +29,10 @@ export const SideBar = () => {
         <ConditonalWrapper
           condition={href !== undefined}
           wrapper={(children) => <a href={href}>{children}</a>}
+          key={`${title}-${pathname}-nav-item`}
         >
           <li
             className="nav-item list-group-item-action clickable"
-            key={`${title}-${pathname}-nav-item`}
             onClick={onPress}
           >
             <span className="nav-link">
@@ -60,7 +61,7 @@ export const SideBar = () => {
   };
 
   return (
-    <div className="sidebar-sticky">
+    <div className="sidebar-sticky" data-testid={TestId.SideBar}>
       <Nav as="ul" className="flex-column list-group list-group-flush">
         {getLinksForRoute(isUnauthorised ? undefined : (pathname as Routes))}
       </Nav>
