@@ -26,7 +26,7 @@ export const HomeSidebarItems = (): ISideBarItem[] => [
   },
   {
     title: "Repositories",
-    orderBy: 1,
+    orderBy: 2,
     Icon: Lightning,
     onPress: undefined,
     linkTo: HomeSubRoutes.Repositories,
@@ -42,7 +42,7 @@ export const HomeSidebarItems = (): ISideBarItem[] => [
   },
   {
     title: "Pull Requests",
-    orderBy: 1,
+    orderBy: 3,
     Icon: Lightning,
     onPress: undefined,
     linkTo: HomeSubRoutes.PullRequests,
@@ -50,7 +50,7 @@ export const HomeSidebarItems = (): ISideBarItem[] => [
   },
   {
     title: "Contributions",
-    orderBy: 1,
+    orderBy: 4,
     Icon: Lightning,
     onPress: undefined,
     linkTo: HomeSubRoutes.Contributions,
