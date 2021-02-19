@@ -13,7 +13,7 @@ export const HomeRoute = () => {
 
   const canViewRoute = (path: string) =>
     (appState.user === undefined && AuthorizedRoutes.indexOf(path) < 0) ||
-    (appState.user !== undefined && AuthorizedRoutes.indexOf(path) >= 0);
+    appState.user !== undefined;
 
   if (!canViewRoute(pathname)) return <Redirect to={Routes.Unauthorised} />;
 

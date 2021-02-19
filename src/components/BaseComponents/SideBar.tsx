@@ -23,7 +23,7 @@ export const SideBar = () => {
 
   const canViewRoute = (path: string) =>
     (appState.user === undefined && AuthorizedRoutes.indexOf(path) < 0) ||
-    (appState.user !== undefined && AuthorizedRoutes.indexOf(path) >= 0);
+    appState.user !== undefined;
 
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
