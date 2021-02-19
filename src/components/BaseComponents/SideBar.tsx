@@ -19,25 +19,32 @@ export const SideBar = () => {
   const { pathname } = useLocation();
   const { redirectToRoute } = RedirectContainer.useContainer();
   const { signOut, appState } = AppContainer.useContainer();
+  const basePathName = splitPath(pathname);
 
-  const isUnauthorised =
-    !appState.user && AuthorizedRoutes.indexOf(pathname as Routes) >= 0;
+  const canViewRoute = (path: string) =>
+    (appState.user === undefined && AuthorizedRoutes.indexOf(path) < 0) ||
+    (appState.user !== undefined && AuthorizedRoutes.indexOf(path) >= 0);
 
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
       .sort((a, b) => a.orderBy - b.orderBy)
       .map(({ title, Icon, onPress, linkTo, forRoute }) => {
-        const isActiveLink = pathname === `${forRoute}${linkTo ?? ""}`;
+        const isActiveLink =
+          linkTo !== undefined && pathname === `${forRoute}${linkTo}`;
+        const canViewThisRoute =
+          linkTo !== undefined && canViewRoute(`${forRoute}${linkTo}`);
         return (
           <ConditonalWrapper
-            condition={linkTo !== undefined}
+            condition={canViewThisRoute}
             wrapper={(children) => (
               <Link to={`${forRoute}${linkTo}`}>{children}</Link>
             )}
             key={`${title}-${pathname}-nav-item`}
           >
             <li
-              className="nav-item list-group-item-action clickable"
+              className={`nav-item ${
+                canViewThisRoute ? "clickable" : "disabled"
+              }`}
               onClick={onPress}
             >
               <span className={`nav-link ${isActiveLink ? "active" : ""}`}>
@@ -71,7 +78,9 @@ export const SideBar = () => {
     <div className="sidebar-sticky" data-testid={TestId.SideBar}>
       <Nav as="ul" className="flex-column list-group list-group-flush">
         {getLinksForRoute(
-          isUnauthorised ? undefined : (splitPath(pathname) as Routes)
+          canViewRoute(basePathName) ?? false
+            ? (basePathName as Routes)
+            : undefined
         )}
       </Nav>
     </div>

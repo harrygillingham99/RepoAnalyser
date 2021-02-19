@@ -1,4 +1,5 @@
 import { ClientMetadata } from "@services/api/Client";
+import { memorizeResult } from "./Memorize";
 
 function pageon() {
   return window.location.pathname;
@@ -24,7 +25,7 @@ function dataCookiesEnabled() {
   return navigator.cookieEnabled;
 }
 
-export const buildUserInfo = () => {
+export const buildUserInfo = memorizeResult(() => {
   return JSON.stringify(
     new ClientMetadata({
       page: pageon(),
@@ -35,4 +36,4 @@ export const buildUserInfo = () => {
       cookiesEnabled: dataCookiesEnabled(),
     })
   );
-};
+});

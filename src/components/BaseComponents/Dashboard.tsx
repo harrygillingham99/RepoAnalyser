@@ -1,4 +1,4 @@
-import { AccountRoute } from "@components/Routes/AccountRoute";
+import { AccountRoute } from "@components/Routes/Account/AccountRoute";
 import { AuthorizedRoutes } from "@constants/RouteConstants";
 import { AppContainer } from "@state/AppStateContainer";
 import { TestId } from "@tests/TestConstants";
@@ -6,7 +6,7 @@ import { Routes } from "@typeDefinitions/Routes";
 import { splitPath } from "@utils/Urls";
 import React from "react";
 import { Redirect, useLocation } from "react-router-dom";
-import { HomeRoute } from "../Routes/HomeRoute";
+import { HomeRoute } from "../Routes/Home/HomeRoute";
 
 export const Dashboard = () => {
   const { pathname } = useLocation();
