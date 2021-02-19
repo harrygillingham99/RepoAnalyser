@@ -9,12 +9,14 @@ interface IAppState {
   token: string;
   loginRedirectUrl: string;
   user: User;
+  loading: boolean;
 }
 const useAppState = () => {
   const [appState, setAppState] = useSetState<IAppState>({
     token: undefined!,
     user: undefined!,
     loginRedirectUrl: undefined!,
+    loading: true,
   });
 
   const signOut = (redirectToRoute: (route: Routes) => void) => {
@@ -34,12 +36,15 @@ const useAppState = () => {
   const setUserAndToken = (user: User, token: string) =>
     setAppState({ user: user, token: token });
 
+  const toggleLoading = (toggle: boolean) => setAppState({ loading: toggle });
+
   return {
     appState,
     setUser,
     setUserTokenAndUrl,
     setUserAndToken,
     setLoginRedirect,
+    toggleLoading,
     signOut,
   };
 };

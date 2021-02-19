@@ -1,7 +1,7 @@
 import { AppContainer } from "@state/AppStateContainer";
 import { Github } from "react-bootstrap-icons";
 import { Routes } from "@typeDefinitions/Routes";
-import React, { useState } from "react";
+import React from "react";
 import { Button, Form, FormControl, Nav, Navbar } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { apiClient, authorisedApiClient } from "@services/api/Index";
@@ -20,17 +20,18 @@ export const NavigationBar = () => {
     appState,
     setLoginRedirect,
     setUserTokenAndUrl,
+    toggleLoading,
   } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
-  const [loading, setLoading] = useState(false);
   const { setSearchText } = SearchContainer.useContainer();
 
-  const shouldShowAccountLink = appState.user !== undefined && !loading;
+  const shouldShowAccountLink =
+    appState.user !== undefined && !appState.loading;
 
-  const canLogin = !loading && appState.loginRedirectUrl;
+  const canLogin = !appState.loading && appState.loginRedirectUrl;
 
   useEffectOnce(() => {
-    setLoading(true);
+    toggleLoading(true);
     const savedAuthCookie = getCookie(AuthCookieKey);
     //if the cookie is there we can use it to just fetch the user info straight away
     if (savedAuthCookie) {
@@ -48,7 +49,7 @@ export const NavigationBar = () => {
             "Error logging in with existing cookie."
           );
         } finally {
-          setLoading(false);
+          toggleLoading(false);
         }
       })();
       //if not we need to send the user through the OAuth flow again to authenticate
@@ -65,7 +66,7 @@ export const NavigationBar = () => {
             "Error getting the GitHub callback URL."
           );
         } finally {
-          setLoading(false);
+          toggleLoading(false);
         }
       })();
     }
