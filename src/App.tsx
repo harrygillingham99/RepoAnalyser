@@ -12,6 +12,8 @@ import { AlertContainer } from "@state/AlertContainer";
 import { AppAlert } from "@components/BaseComponents/AppAlert";
 import { RedirectContainer } from "@state/RedirectContainer";
 import { RedirectHandler } from "@components/BaseComponents/RedirectHandler";
+import { FourOhFour } from "@components/BaseComponents/FourOhFour";
+import { Unauthorised } from "@components/BaseComponents/Unauthorised";
 
 const App = () => {
   return (
@@ -25,6 +27,12 @@ const App = () => {
             </Route>
             <Route exact path="/">
               <Redirect to={Routes.Home} />
+            </Route>
+            <Route exact path={Routes.NotFound}>
+              <FourOhFour />
+            </Route>
+            <Route exact path={Routes.Unauthorised}>
+              <Unauthorised />
             </Route>
             <Route>
               <Container fluid>

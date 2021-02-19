@@ -3,7 +3,7 @@ import { useState } from "react";
 import { createContainer } from "unstated-next";
 
 interface IRedirect {
-  to: Routes | undefined;
+  to?: string;
 }
 const useRedirect = () => {
   const [redirect, setRedirect] = useState<IRedirect>({ to: undefined });

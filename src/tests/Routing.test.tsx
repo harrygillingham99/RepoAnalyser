@@ -2,8 +2,6 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import { BrowserRouter, Router } from "react-router-dom";
-import { Dashboard } from "@components/BaseComponents/Dashboard";
-import { AppContainer } from "@state/AppStateContainer";
 import { TestId } from "./TestConstants";
 import App from "../App";
 import { Routes } from "@typeDefinitions/Routes";
@@ -13,9 +11,7 @@ test("bad routes result in 404 page", () => {
   history.push("/thisisanunhandledroute");
   render(
     <Router history={history}>
-      <AppContainer.Provider>
-        <Dashboard />
-      </AppContainer.Provider>
+      <App />
     </Router>
   );
 
@@ -23,18 +19,16 @@ test("bad routes result in 404 page", () => {
   expect(elems[0]).toBeInTheDocument();
 });
 
-test("authentication route renders handler", () => {
+test("unauthenticated page when not logged in", () => {
   const history = createMemoryHistory();
-  history.push(Routes.CallbackUrl);
+  history.push(Routes.Account);
   render(
     <Router history={history}>
-      <AppContainer.Provider>
-        <Dashboard />
-      </AppContainer.Provider>
+      <App />
     </Router>
   );
 
-  const elems = screen.getAllByText(/Not Found/i);
+  const elems = screen.getAllByText(/Unauthorised/i);
   expect(elems[0]).toBeInTheDocument();
 });
 

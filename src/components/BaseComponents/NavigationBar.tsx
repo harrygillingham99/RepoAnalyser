@@ -11,6 +11,7 @@ import { AlertContainer } from "@state/AlertContainer";
 import { AuthCookieKey } from "@constants/CookieConstants";
 import { getCookie } from "@utils/CookieProvider";
 import { TestId } from "@tests/TestConstants";
+import { splitPath } from "@utils/Urls";
 
 export const NavigationBar = () => {
   const { pathname } = useLocation();
@@ -85,7 +86,9 @@ export const NavigationBar = () => {
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
           <Link
-            className={`nav-link ${pathname === Routes.Home ? "active" : ""}`}
+            className={`nav-link ${
+              splitPath(pathname) === Routes.Home ? "active" : ""
+            }`}
             to={Routes.Home}
           >
             Home

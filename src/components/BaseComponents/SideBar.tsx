@@ -1,7 +1,7 @@
 import { Routes } from "@typeDefinitions/Routes";
 import React from "react";
 import { Nav } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "@styles/Nav.scss";
 import {
   HomeSidebarItems,
@@ -13,6 +13,7 @@ import { RedirectContainer } from "@state/RedirectContainer";
 import { ConditonalWrapper } from "./ConditionalWrapper";
 import { AuthorizedRoutes } from "@constants/RouteConstants";
 import { TestId } from "@tests/TestConstants";
+import { splitPath } from "@utils/Urls";
 
 export const SideBar = () => {
   const { pathname } = useLocation();
@@ -25,10 +26,12 @@ export const SideBar = () => {
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
       .sort((a, b) => a.orderBy - b.orderBy)
-      .map(({ title, Icon, onPress, href }) => (
+      .map(({ title, Icon, onPress, href, forRoute }) => (
         <ConditonalWrapper
           condition={href !== undefined}
-          wrapper={(children) => <a href={href}>{children}</a>}
+          wrapper={(children) => (
+            <Link to={`${forRoute}${href}`}>{children}</Link>
+          )}
           key={`${title}-${pathname}-nav-item`}
         >
           <li
@@ -43,6 +46,7 @@ export const SideBar = () => {
         </ConditonalWrapper>
       ));
   };
+
   const getLinksForRoute = (route: Routes | undefined) => {
     switch (route) {
       case Routes.Home:
@@ -63,7 +67,9 @@ export const SideBar = () => {
   return (
     <div className="sidebar-sticky" data-testid={TestId.SideBar}>
       <Nav as="ul" className="flex-column list-group list-group-flush">
-        {getLinksForRoute(isUnauthorised ? undefined : (pathname as Routes))}
+        {getLinksForRoute(
+          isUnauthorised ? undefined : (splitPath(pathname) as Routes)
+        )}
       </Nav>
     </div>
   );
