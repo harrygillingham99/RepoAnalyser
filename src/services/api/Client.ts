@@ -42,7 +42,7 @@ export class AuthorizedApiBase {
   protected getBaseUrl = (defaultUrl: string, baseUrl?: string) => {
     const ApiUrl =
       process.env.NODE_ENV === "production"
-        ? "https://192.168.0.69:4471"
+        ? "https://server.local:4471"
         : "https://localhost:44306";
     return ApiUrl !== undefined ? ApiUrl : defaultUrl;
   };
