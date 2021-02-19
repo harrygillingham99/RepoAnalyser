@@ -43,8 +43,10 @@ export const SideBar = () => {
           >
             <li
               className={`nav-item ${
-                canViewThisRoute ? "clickable" : "disabled"
-              }`}
+                canViewThisRoute || linkTo === undefined
+                  ? "clickable"
+                  : "disabled"
+              } ${linkTo === undefined ? "list-group-item-action" : ""}`}
               onClick={onPress}
             >
               <span className={`nav-link ${isActiveLink ? "active" : ""}`}>

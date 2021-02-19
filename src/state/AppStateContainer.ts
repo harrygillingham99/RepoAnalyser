@@ -18,22 +18,26 @@ const useAppState = () => {
   });
 
   const signOut = (redirectToRoute: (route: Routes) => void) => {
-    setAppState({ user: undefined });
+    setAppState({ user: undefined, token: undefined });
     expireCookie(AuthCookieKey);
     redirectToRoute(Routes.Home);
   };
 
   const setUser = (user: User) => setAppState({ user: user });
 
-  const setUserAndToken = (user: User, token: string) =>
-    setAppState({ user: user, token: token });
+  const setUserTokenAndUrl = (user: User, token: string, url: string) =>
+    setAppState({ user: user, token: token, loginRedirectUrl: url });
 
   const setLoginRedirect = (url: string) =>
     setAppState({ loginRedirectUrl: url });
 
+  const setUserAndToken = (user: User, token: string) =>
+    setAppState({ user: user, token: token });
+
   return {
     appState,
     setUser,
+    setUserTokenAndUrl,
     setUserAndToken,
     setLoginRedirect,
     signOut,

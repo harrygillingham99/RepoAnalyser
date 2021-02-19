@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import { Button, Form, FormControl, Nav, Navbar } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { apiClient, authorisedApiClient } from "@services/api/Index";
-import { useEffectOnce } from "react-use";
 import { buildUserInfo } from "@utils/ClientInfo";
 import { AlertContainer } from "@state/AlertContainer";
 import { AuthCookieKey } from "@constants/CookieConstants";
@@ -13,19 +12,20 @@ import { getCookie } from "@utils/CookieProvider";
 import { TestId } from "@tests/TestConstants";
 import { splitPath } from "@utils/Urls";
 import { SearchContainer } from "@state/SearchContainer";
+import useEffectOnce from "react-use/lib/useEffectOnce";
 
 export const NavigationBar = () => {
   const { pathname } = useLocation();
   const {
     appState,
     setLoginRedirect,
-    setUserAndToken,
+    setUserTokenAndUrl,
   } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
   const [loading, setLoading] = useState(false);
   const { setSearchText } = SearchContainer.useContainer();
 
-  const shouldShowAccountLink = appState.user && !loading;
+  const shouldShowAccountLink = appState.user !== undefined && !loading;
 
   const canLogin = !loading && appState.loginRedirectUrl;
 
@@ -36,10 +36,12 @@ export const NavigationBar = () => {
     if (savedAuthCookie) {
       (async () => {
         try {
-          const user = await authorisedApiClient(
+          const { user, loginRedirectUrl } = await authorisedApiClient(
             savedAuthCookie
           ).authentication_GetUserInformationForToken(buildUserInfo());
-          setUserAndToken(user, savedAuthCookie);
+          if (user === undefined || loginRedirectUrl === undefined)
+            throw new Error();
+          setUserTokenAndUrl(user, savedAuthCookie, loginRedirectUrl);
         } catch (error) {
           showErrorAlert(
             "Authentication Error",
