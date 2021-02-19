@@ -10,7 +10,7 @@ enum HomeSubRoutes {
   LandingPage = "/landing",
   Repositories = "/repositories",
   PullRequests = "/pull-requests",
-  Contributions = "/contributuions",
+  Contributions = "/contributions",
   Commits = "/commits",
 }
 

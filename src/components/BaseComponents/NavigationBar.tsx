@@ -2,7 +2,7 @@ import { AppContainer } from "@state/AppStateContainer";
 import { Github } from "react-bootstrap-icons";
 import { Routes } from "@typeDefinitions/Routes";
 import React, { useState } from "react";
-import { Button, Nav, Navbar } from "react-bootstrap";
+import { Button, Form, FormControl, Nav, Navbar } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { apiClient, authorisedApiClient } from "@services/api/Index";
 import { useEffectOnce } from "react-use";
@@ -12,10 +12,10 @@ import { AuthCookieKey } from "@constants/CookieConstants";
 import { getCookie } from "@utils/CookieProvider";
 import { TestId } from "@tests/TestConstants";
 import { splitPath } from "@utils/Urls";
+import { SearchContainer } from "@state/SearchContainer";
 
 export const NavigationBar = () => {
   const { pathname } = useLocation();
-
   const {
     appState,
     setLoginRedirect,
@@ -23,13 +23,11 @@ export const NavigationBar = () => {
   } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
   const [loading, setLoading] = useState(false);
-
-  const shouldShowLoginButton =
-    appState.user === undefined &&
-    !loading &&
-    appState.loginRedirectUrl !== undefined;
+  const { setSearchText } = SearchContainer.useContainer();
 
   const shouldShowAccountLink = appState.user && !loading;
+
+  const canLogin = !loading && appState.loginRedirectUrl;
 
   useEffectOnce(() => {
     setLoading(true);
@@ -96,7 +94,7 @@ export const NavigationBar = () => {
           {shouldShowAccountLink && (
             <Link
               className={`nav-link ${
-                pathname === Routes.Account ? "active" : ""
+                splitPath(pathname) === Routes.Account ? "active" : ""
               }`}
               to={Routes.Account}
             >
@@ -106,12 +104,25 @@ export const NavigationBar = () => {
         </Nav>
 
         <div>
-          {shouldShowLoginButton && (
-            <a href={appState.loginRedirectUrl}>
-              <Button variant="info">
+          {!appState.user ? (
+            <a
+              className={!canLogin ? "disabled" : ""}
+              href={appState.loginRedirectUrl}
+            >
+              <Button variant="info" disabled={!canLogin}>
                 <Github /> Login With GitHub
               </Button>
             </a>
+          ) : (
+            <Form inline>
+              <FormControl
+                type="text"
+                placeholder="Search"
+                className="mr-sm-2"
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <Button variant="outline-info">Search</Button>
+            </Form>
           )}
         </div>
       </Navbar.Collapse>

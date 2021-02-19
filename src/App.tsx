@@ -14,41 +14,44 @@ import { RedirectContainer } from "@state/RedirectContainer";
 import { RedirectHandler } from "@components/BaseComponents/RedirectHandler";
 import { FourOhFour } from "@components/BaseComponents/FourOhFour";
 import { Unauthorised } from "@components/BaseComponents/Unauthorised";
+import { SearchContainer } from "@state/SearchContainer";
 
 const App = () => {
   return (
     <AppContainer.Provider>
       <AlertContainer.Provider>
         <RedirectContainer.Provider>
-          <NavigationBar />
-          <Switch>
-            <Route exact path={Routes.CallbackUrl}>
-              <AuthenticationHandler />
-            </Route>
-            <Route exact path="/">
-              <Redirect to={Routes.Home} />
-            </Route>
-            <Route exact path={Routes.NotFound}>
-              <FourOhFour />
-            </Route>
-            <Route exact path={Routes.Unauthorised}>
-              <Unauthorised />
-            </Route>
-            <Route>
-              <Container fluid>
-                <Row>
-                  <Col className="col-md-2 d-none d-md-block bg-light sidebar">
-                    <SideBar />
-                  </Col>
-                  <Col className="col-md-9 ml-sm-auto col-lg-10 p-0">
-                    <AppAlert />
-                    <Dashboard />
-                  </Col>
-                </Row>
-              </Container>
-            </Route>
-          </Switch>
-          <RedirectHandler />
+          <SearchContainer.Provider>
+            <NavigationBar />
+            <Switch>
+              <Route exact path={Routes.CallbackUrl}>
+                <AuthenticationHandler />
+              </Route>
+              <Route exact path="/">
+                <Redirect to={Routes.Home} />
+              </Route>
+              <Route exact path={Routes.NotFound}>
+                <FourOhFour />
+              </Route>
+              <Route exact path={Routes.Unauthorised}>
+                <Unauthorised />
+              </Route>
+              <Route>
+                <Container fluid>
+                  <Row>
+                    <Col className="col-md-2 d-none d-md-block bg-light sidebar">
+                      <SideBar />
+                    </Col>
+                    <Col className="col-md-9 ml-sm-auto col-lg-10 p-0">
+                      <AppAlert />
+                      <Dashboard />
+                    </Col>
+                  </Row>
+                </Container>
+              </Route>
+            </Switch>
+            <RedirectHandler />
+          </SearchContainer.Provider>
         </RedirectContainer.Provider>
       </AlertContainer.Provider>
     </AppContainer.Provider>

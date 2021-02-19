@@ -31,7 +31,13 @@ const useAppState = () => {
   const setLoginRedirect = (url: string) =>
     setAppState({ loginRedirectUrl: url });
 
-  return { appState, setUser, setUserAndToken, setLoginRedirect, signOut };
+  return {
+    appState,
+    setUser,
+    setUserAndToken,
+    setLoginRedirect,
+    signOut,
+  };
 };
 
 export const AppContainer = createContainer(useAppState);

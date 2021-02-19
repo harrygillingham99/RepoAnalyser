@@ -7,7 +7,7 @@ export interface ISideBarItem {
   orderBy: number;
   Icon: ComponentType<Props>;
   onPress?: () => void;
-  href?: string;
+  linkTo?: string;
   forRoute: Routes;
 }
 
@@ -20,40 +20,40 @@ export const HomeSidebarItems = (): ISideBarItem[] => [
     title: "Home",
     orderBy: 1,
     Icon: Lightning,
-    onPress: () => undefined,
-    href: HomeSubRoutes.LandingPage,
+    onPress: undefined,
+    linkTo: HomeSubRoutes.LandingPage,
     forRoute: Routes.Home,
   },
   {
     title: "Repositories",
     orderBy: 1,
     Icon: Lightning,
-    onPress: () => undefined,
-    href: HomeSubRoutes.Repositories,
+    onPress: undefined,
+    linkTo: HomeSubRoutes.Repositories,
     forRoute: Routes.Home,
   },
   {
     title: "Commits",
     orderBy: 1,
     Icon: Lightning,
-    onPress: () => undefined,
-    href: HomeSubRoutes.Commits,
+    onPress: undefined,
+    linkTo: HomeSubRoutes.Commits,
     forRoute: Routes.Home,
   },
   {
     title: "Pull Requests",
     orderBy: 1,
     Icon: Lightning,
-    onPress: () => undefined,
-    href: HomeSubRoutes.PullRequests,
+    onPress: undefined,
+    linkTo: HomeSubRoutes.PullRequests,
     forRoute: Routes.Home,
   },
   {
     title: "Contributions",
     orderBy: 1,
     Icon: Lightning,
-    onPress: () => undefined,
-    href: HomeSubRoutes.Contributions,
+    onPress: undefined,
+    linkTo: HomeSubRoutes.Contributions,
     forRoute: Routes.Home,
   },
 ];

@@ -26,25 +26,28 @@ export const SideBar = () => {
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
       .sort((a, b) => a.orderBy - b.orderBy)
-      .map(({ title, Icon, onPress, href, forRoute }) => (
-        <ConditonalWrapper
-          condition={href !== undefined}
-          wrapper={(children) => (
-            <Link to={`${forRoute}${href}`}>{children}</Link>
-          )}
-          key={`${title}-${pathname}-nav-item`}
-        >
-          <li
-            className="nav-item list-group-item-action clickable"
-            onClick={onPress}
+      .map(({ title, Icon, onPress, linkTo, forRoute }) => {
+        const isActiveLink = pathname === `${forRoute}${linkTo ?? ""}`;
+        return (
+          <ConditonalWrapper
+            condition={linkTo !== undefined}
+            wrapper={(children) => (
+              <Link to={`${forRoute}${linkTo}`}>{children}</Link>
+            )}
+            key={`${title}-${pathname}-nav-item`}
           >
-            <span className="nav-link">
-              <Icon className="nav-link-icon" />
-              {title}
-            </span>
-          </li>
-        </ConditonalWrapper>
-      ));
+            <li
+              className="nav-item list-group-item-action clickable"
+              onClick={onPress}
+            >
+              <span className={`nav-link ${isActiveLink ? "active" : ""}`}>
+                <Icon className="nav-link-icon" />
+                {title}
+              </span>
+            </li>
+          </ConditonalWrapper>
+        );
+      });
   };
 
   const getLinksForRoute = (route: Routes | undefined) => {
