@@ -8,7 +8,20 @@ import { Routes } from "@typeDefinitions/Routes";
 
 test("bad routes result in 404 page", () => {
   const history = createMemoryHistory();
-  history.push("/thisisanunhandledroute");
+  history.push("/ThisIsAnUnhandledRoute");
+  render(
+    <Router history={history}>
+      <App />
+    </Router>
+  );
+
+  const elems = screen.getAllByText(/Not Found/i);
+  expect(elems[0]).toBeInTheDocument();
+});
+
+test("bad sub route still results in 404 page", () => {
+  const history = createMemoryHistory();
+  history.push(`${Routes.Home}/unhandledSubRoute`);
   render(
     <Router history={history}>
       <App />
