@@ -5,7 +5,7 @@ interface IConditionalWrapperProps {
   wrapper: (children: React.ReactNode) => JSX.Element;
 }
 
-export const ConditonalWrapper: React.FC<IConditionalWrapperProps> = (
+export const WrapChildrenIf: React.FC<IConditionalWrapperProps> = (
   props: PropsWithChildren<IConditionalWrapperProps>
 ): JSX.Element =>
   props.condition ? props.wrapper(props.children) : <>{props.children}</>;

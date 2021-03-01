@@ -10,7 +10,7 @@ import {
 } from "@typeDefinitions/SidebarItems";
 import { AppContainer } from "@state/AppStateContainer";
 import { RedirectContainer } from "@state/RedirectContainer";
-import { ConditonalWrapper } from "./ConditionalWrapper";
+import { WrapChildrenIf } from "./WrapChildrenIf";
 import { AuthorizedRoutes } from "@constants/RouteConstants";
 import { TestId } from "@tests/TestConstants";
 import { splitPath } from "@utils/Urls";
@@ -34,7 +34,7 @@ export const SideBar = () => {
         const canViewThisRoute =
           linkTo !== undefined && canViewRoute(`${forRoute}${linkTo}`);
         return (
-          <ConditonalWrapper
+          <WrapChildrenIf
             condition={canViewThisRoute}
             wrapper={(children) => (
               <Link to={`${forRoute}${linkTo}`}>{children}</Link>
@@ -54,7 +54,7 @@ export const SideBar = () => {
                 {title}
               </span>
             </li>
-          </ConditonalWrapper>
+          </WrapChildrenIf>
         );
       });
   };
