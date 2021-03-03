@@ -4,3 +4,8 @@ export enum TestId {
   Nav = "Nav",
   RedirectHandler = "RedirectHandler",
 }
+
+export const waitForLoadThenAssert = (
+  testFunc: () => void,
+  millisecondsToWait: number = 2000
+): NodeJS.Timeout => setTimeout(testFunc, millisecondsToWait);

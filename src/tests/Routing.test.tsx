@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import { BrowserRouter, Router } from "react-router-dom";
-import { TestId } from "./TestConstants";
+import { TestId, waitForLoadThenAssert } from "./TestConstants";
 import App from "../App";
 import { Routes } from "@typeDefinitions/Routes";
 
@@ -28,8 +28,10 @@ test("bad sub route still results in 404 page", () => {
     </Router>
   );
 
-  const elems = screen.getAllByText(/Not Found/i);
-  expect(elems[0]).toBeInTheDocument();
+  waitForLoadThenAssert(() => {
+    const elems = screen.getAllByText(/Not Found/i);
+    expect(elems[0]).toBeInTheDocument();
+  });
 });
 
 test("unauthenticated page when not logged in", () => {
@@ -41,8 +43,10 @@ test("unauthenticated page when not logged in", () => {
     </Router>
   );
 
-  const elems = screen.getAllByText(/Unauthorised/i);
-  expect(elems[0]).toBeInTheDocument();
+  waitForLoadThenAssert(() => {
+    const elems = screen.getAllByText(/Unauthorised/i);
+    expect(elems[0]).toBeInTheDocument();
+  });
 });
 
 test("redirect handler not rendered by default", () => {
