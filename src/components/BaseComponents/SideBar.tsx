@@ -48,6 +48,7 @@ export const SideBar = () => {
                   : "disabled"
               } ${linkTo === undefined ? "list-group-item-action" : ""}`}
               onClick={onPress}
+              data-testid={TestId.SideBarRowItem}
             >
               <span className={`nav-link ${isActiveLink ? "active" : ""}`}>
                 <Icon className="nav-link-icon" />
@@ -62,7 +63,7 @@ export const SideBar = () => {
   const getLinksForRoute = (route: Routes | undefined) => {
     switch (route) {
       case Routes.Home:
-        return generateLinksForItems(HomeSidebarItems());
+        return generateLinksForItems(HomeSidebarItems);
       case Routes.Account:
         return generateLinksForItems(
           AccountSidebarItems({ signOut: () => signOut(redirectToRoute) })

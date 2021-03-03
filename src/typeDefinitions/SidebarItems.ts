@@ -15,7 +15,7 @@ interface IAccountSidebarItemProps {
   signOut: () => void;
 }
 
-export const HomeSidebarItems = (): ISideBarItem[] => [
+export const HomeSidebarItems: ISideBarItem[] = [
   {
     title: "Home",
     orderBy: 1,

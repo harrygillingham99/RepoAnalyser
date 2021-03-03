@@ -3,9 +3,10 @@ export enum TestId {
   Dashboard = "Dashboard",
   Nav = "Nav",
   RedirectHandler = "RedirectHandler",
+  SideBarRowItem = "SideBarRowItem",
 }
 
 export const waitForLoadThenAssert = (
   testFunc: () => void,
-  millisecondsToWait: number = 2000
+  millisecondsToWait = 500
 ): NodeJS.Timeout => setTimeout(testFunc, millisecondsToWait);
