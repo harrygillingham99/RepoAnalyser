@@ -11,12 +11,13 @@ import { useEffectOnce } from "react-use";
 export const AuthenticationHandler = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get("code");
-  const { setUserAndToken } = AppContainer.useContainer();
+  const { setUserAndToken, toggleLoading } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
 
   const resolveAuthenticationToken = (code: string | null, state: string) => {
     (async () => {
       try {
+        toggleLoading(true);
         if (code === null) throw new Error("No code provided");
         var result = await apiClient.authentication_GetOAuthTokenWithUserInfo(
           code,
@@ -31,6 +32,8 @@ export const AuthenticationHandler = () => {
         }
       } catch (error) {
         showErrorAlert("Authentication Error", "Unable to resolve user.");
+      } finally {
+        toggleLoading(false);
       }
     })();
   };
