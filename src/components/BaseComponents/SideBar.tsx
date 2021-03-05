@@ -31,11 +31,11 @@ export const SideBar = () => {
       .map(({ title, Icon, onPress, linkTo, forRoute }) => {
         const isActiveLink =
           linkTo !== undefined && pathname === `${forRoute}${linkTo}`;
-        const canViewThisRoute =
+        const shouldWrapInAnchor =
           linkTo !== undefined && canViewRoute(`${forRoute}${linkTo}`);
         return (
           <WrapChildrenIf
-            condition={canViewThisRoute}
+            condition={shouldWrapInAnchor}
             wrapper={(children) => (
               <Link to={`${forRoute}${linkTo}`}>{children}</Link>
             )}
@@ -43,7 +43,7 @@ export const SideBar = () => {
           >
             <li
               className={`nav-item ${
-                canViewThisRoute || linkTo === undefined
+                shouldWrapInAnchor || linkTo === undefined
                   ? "clickable"
                   : "disabled"
               } ${linkTo === undefined ? "list-group-item-action" : ""}`}
