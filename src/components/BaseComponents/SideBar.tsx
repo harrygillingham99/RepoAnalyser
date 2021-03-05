@@ -81,9 +81,7 @@ export const SideBar = () => {
     <div className="sidebar-sticky" data-testid={TestId.SideBar}>
       <Nav as="ul" className="flex-column list-group list-group-flush">
         {getLinksForRoute(
-          appState.loading
-            ? undefined
-            : canViewRoute(basePathName)
+          !appState.loading && canViewRoute(basePathName)
             ? (basePathName as Routes)
             : undefined
         )}
