@@ -42,6 +42,7 @@
     ]
   },
   "devDependencies": {
+    "@types/jquery": "^3.5.5",
     "@types/react-beautiful-dnd": "^13.0.0",
     "craco-alias": "^2.1.1",
     "cross-env": "^7.0.2",
