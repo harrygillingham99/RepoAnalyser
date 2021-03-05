@@ -1,4 +1,3 @@
-import { KanbanBoard } from "@components/KanbanBoard";
 import { AuthorizedRoutes } from "@constants/RouteConstants";
 import { AppContainer } from "@state/AppStateContainer";
 import { HomeSubRoutes, Routes } from "@typeDefinitions/Routes";

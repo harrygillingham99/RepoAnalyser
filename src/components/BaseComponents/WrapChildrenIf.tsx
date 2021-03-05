@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from "react";
+import React from "react";
 
 interface IConditionalWrapperProps {
   condition: boolean;
@@ -6,6 +6,6 @@ interface IConditionalWrapperProps {
 }
 
 export const WrapChildrenIf: React.FC<IConditionalWrapperProps> = (
-  props: PropsWithChildren<IConditionalWrapperProps>
+  props
 ): JSX.Element =>
   props.condition ? props.wrapper(props.children) : <>{props.children}</>;
