@@ -21,6 +21,7 @@ export const RepositoriesRoute = () => {
     repoFilterType: RepoFilterOptions.All,
   });
 
+  /* eslint-disable react-hooks/exhaustive-deps*/
   useEffect(() => {
     try {
       toggleLoading(true);
@@ -36,6 +37,7 @@ export const RepositoriesRoute = () => {
       toggleLoading(false);
     }
   }, [state.repoFilterType]);
+  /* eslint-enable react-hooks/exhaustive-deps*/
 
   const getHeaderText = (filterOption: RepoFilterOptions) => {
     switch (filterOption) {
