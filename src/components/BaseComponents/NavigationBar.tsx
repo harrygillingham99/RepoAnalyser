@@ -1,7 +1,6 @@
 import { AppContainer } from "@state/AppStateContainer";
 import { Github } from "react-bootstrap-icons";
 import { Routes } from "@typeDefinitions/Routes";
-import React from "react";
 import { Button, Form, FormControl, Nav, Navbar } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { apiClient, authorisedApiClient } from "@services/api/Index";

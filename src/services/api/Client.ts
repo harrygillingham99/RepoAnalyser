@@ -411,6 +411,239 @@ export class Client extends AuthorizedApiBase {
     }
     return Promise.resolve<UserInfoResult>(<any>null);
   }
+
+  /**
+   * @param metadata (optional) ClientMetadata
+   * @return Success getting repos
+   */
+  repository_Repositories(
+    filterOption: RepoFilterOptions,
+    metadata: any | undefined
+  ): Promise<UserRepositoryResult[]> {
+    let url_ = this.baseUrl + "/repo/{filterOption}";
+    if (filterOption === undefined || filterOption === null)
+      throw new Error("The parameter 'filterOption' must be defined.");
+    url_ = url_.replace(
+      "{filterOption}",
+      encodeURIComponent("" + filterOption)
+    );
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processRepository_Repositories(_response);
+      });
+  }
+
+  protected processRepository_Repositories(
+    response: Response
+  ): Promise<UserRepositoryResult[]> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        if (Array.isArray(resultData200)) {
+          result200 = [] as any;
+          for (let item of resultData200)
+            result200!.push(UserRepositoryResult.fromJS(item));
+        }
+        return result200;
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "No token provided",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "not found",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "Error getting repos",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
+    }
+    return Promise.resolve<UserRepositoryResult[]>(<any>null);
+  }
+
+  /**
+   * @param metadata (optional) ClientMetadata
+   * @return Success getting commits for repo
+   */
+  repository_GetCommitsForRepository(
+    metadata: any | undefined,
+    request: RepositoryCommitsRequest
+  ): Promise<Commit[]> {
+    let url_ = this.baseUrl + "/repo/commits";
+    url_ = url_.replace(/[?&]$/, "");
+
+    const content_ = JSON.stringify(request);
+
+    let options_ = <RequestInit>{
+      body: content_,
+      method: "POST",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processRepository_GetCommitsForRepository(_response);
+      });
+  }
+
+  protected processRepository_GetCommitsForRepository(
+    response: Response
+  ): Promise<Commit[]> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        if (Array.isArray(resultData200)) {
+          result200 = [] as any;
+          for (let item of resultData200) result200!.push(Commit.fromJS(item));
+        }
+        return result200;
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "No token provided",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "Repo not found",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "Error getting commits for repo",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
+    }
+    return Promise.resolve<Commit[]>(<any>null);
+  }
 }
 
 export class TokenUserResponse implements ITokenUserResponse {
@@ -1021,6 +1254,502 @@ export class UserInfoResult implements IUserInfoResult {
 export interface IUserInfoResult {
   user?: User | undefined;
   loginRedirectUrl?: string | undefined;
+}
+
+export class UserRepositoryResult implements IUserRepositoryResult {
+  name?: string | undefined;
+  description?: string | undefined;
+  pullUrl?: string | undefined;
+  private?: boolean;
+  template?: boolean;
+  collaborators?: Collaborator[] | undefined;
+  lastUpdated?: Date;
+
+  constructor(data?: IUserRepositoryResult) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.name = _data["name"];
+      this.description = _data["description"];
+      this.pullUrl = _data["pullUrl"];
+      this.private = _data["private"];
+      this.template = _data["template"];
+      if (Array.isArray(_data["collaborators"])) {
+        this.collaborators = [] as any;
+        for (let item of _data["collaborators"])
+          this.collaborators!.push(Collaborator.fromJS(item));
+      }
+      this.lastUpdated = _data["lastUpdated"]
+        ? new Date(_data["lastUpdated"].toString())
+        : <any>undefined;
+    }
+  }
+
+  static fromJS(data: any): UserRepositoryResult {
+    data = typeof data === "object" ? data : {};
+    let result = new UserRepositoryResult();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["name"] = this.name;
+    data["description"] = this.description;
+    data["pullUrl"] = this.pullUrl;
+    data["private"] = this.private;
+    data["template"] = this.template;
+    if (Array.isArray(this.collaborators)) {
+      data["collaborators"] = [];
+      for (let item of this.collaborators)
+        data["collaborators"].push(item.toJSON());
+    }
+    data["lastUpdated"] = this.lastUpdated
+      ? this.lastUpdated.toISOString()
+      : <any>undefined;
+    return data;
+  }
+}
+
+export interface IUserRepositoryResult {
+  name?: string | undefined;
+  description?: string | undefined;
+  pullUrl?: string | undefined;
+  private?: boolean;
+  template?: boolean;
+  collaborators?: Collaborator[] | undefined;
+  lastUpdated?: Date;
+}
+
+export class Collaborator implements ICollaborator {
+  name?: string | undefined;
+  avatarUrl?: string | undefined;
+
+  constructor(data?: ICollaborator) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.name = _data["name"];
+      this.avatarUrl = _data["avatarUrl"];
+    }
+  }
+
+  static fromJS(data: any): Collaborator {
+    data = typeof data === "object" ? data : {};
+    let result = new Collaborator();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["name"] = this.name;
+    data["avatarUrl"] = this.avatarUrl;
+    return data;
+  }
+}
+
+export interface ICollaborator {
+  name?: string | undefined;
+  avatarUrl?: string | undefined;
+}
+
+export enum RepoFilterOptions {
+  All = 1,
+  Owned = 2,
+  ContributedNotOwned = 3,
+}
+
+export abstract class GitObject implements IGitObject {
+  id?: ObjectId | undefined;
+  sha?: string | undefined;
+
+  constructor(data?: IGitObject) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.id = _data["id"] ? ObjectId.fromJS(_data["id"]) : <any>undefined;
+      this.sha = _data["sha"];
+    }
+  }
+
+  static fromJS(data: any): GitObject {
+    data = typeof data === "object" ? data : {};
+    throw new Error("The abstract class 'GitObject' cannot be instantiated.");
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["id"] = this.id ? this.id.toJSON() : <any>undefined;
+    data["sha"] = this.sha;
+    return data;
+  }
+}
+
+export interface IGitObject {
+  id?: ObjectId | undefined;
+  sha?: string | undefined;
+}
+
+export class Commit extends GitObject implements ICommit {
+  message?: string | undefined;
+  messageShort?: string | undefined;
+  encoding?: string | undefined;
+  author?: Signature | undefined;
+  committer?: Signature | undefined;
+  tree?: TreeEntry[] | undefined;
+  parents?: Commit[] | undefined;
+  notes?: Note[] | undefined;
+
+  constructor(data?: ICommit) {
+    super(data);
+  }
+
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      this.message = _data["message"];
+      this.messageShort = _data["messageShort"];
+      this.encoding = _data["encoding"];
+      this.author = _data["author"]
+        ? Signature.fromJS(_data["author"])
+        : <any>undefined;
+      this.committer = _data["committer"]
+        ? Signature.fromJS(_data["committer"])
+        : <any>undefined;
+      if (Array.isArray(_data["tree"])) {
+        this.tree = [] as any;
+        for (let item of _data["tree"]) this.tree!.push(TreeEntry.fromJS(item));
+      }
+      if (Array.isArray(_data["parents"])) {
+        this.parents = [] as any;
+        for (let item of _data["parents"])
+          this.parents!.push(Commit.fromJS(item));
+      }
+      if (Array.isArray(_data["notes"])) {
+        this.notes = [] as any;
+        for (let item of _data["notes"]) this.notes!.push(Note.fromJS(item));
+      }
+    }
+  }
+
+  static fromJS(data: any): Commit {
+    data = typeof data === "object" ? data : {};
+    let result = new Commit();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["message"] = this.message;
+    data["messageShort"] = this.messageShort;
+    data["encoding"] = this.encoding;
+    data["author"] = this.author ? this.author.toJSON() : <any>undefined;
+    data["committer"] = this.committer
+      ? this.committer.toJSON()
+      : <any>undefined;
+    if (Array.isArray(this.tree)) {
+      data["tree"] = [];
+      for (let item of this.tree) data["tree"].push(item.toJSON());
+    }
+    if (Array.isArray(this.parents)) {
+      data["parents"] = [];
+      for (let item of this.parents) data["parents"].push(item.toJSON());
+    }
+    if (Array.isArray(this.notes)) {
+      data["notes"] = [];
+      for (let item of this.notes) data["notes"].push(item.toJSON());
+    }
+    super.toJSON(data);
+    return data;
+  }
+}
+
+export interface ICommit extends IGitObject {
+  message?: string | undefined;
+  messageShort?: string | undefined;
+  encoding?: string | undefined;
+  author?: Signature | undefined;
+  committer?: Signature | undefined;
+  tree?: TreeEntry[] | undefined;
+  parents?: Commit[] | undefined;
+  notes?: Note[] | undefined;
+}
+
+export class Signature implements ISignature {
+  name?: string | undefined;
+  email?: string | undefined;
+  when?: Date;
+
+  constructor(data?: ISignature) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.name = _data["name"];
+      this.email = _data["email"];
+      this.when = _data["when"]
+        ? new Date(_data["when"].toString())
+        : <any>undefined;
+    }
+  }
+
+  static fromJS(data: any): Signature {
+    data = typeof data === "object" ? data : {};
+    let result = new Signature();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["name"] = this.name;
+    data["email"] = this.email;
+    data["when"] = this.when ? this.when.toISOString() : <any>undefined;
+    return data;
+  }
+}
+
+export interface ISignature {
+  name?: string | undefined;
+  email?: string | undefined;
+  when?: Date;
+}
+
+export class TreeEntry implements ITreeEntry {
+  mode?: Mode;
+  name?: string | undefined;
+  path?: string | undefined;
+  target?: GitObject | undefined;
+  targetType?: TreeEntryTargetType;
+
+  constructor(data?: ITreeEntry) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.mode = _data["mode"];
+      this.name = _data["name"];
+      this.path = _data["path"];
+      this.target = _data["target"]
+        ? GitObject.fromJS(_data["target"])
+        : <any>undefined;
+      this.targetType = _data["targetType"];
+    }
+  }
+
+  static fromJS(data: any): TreeEntry {
+    data = typeof data === "object" ? data : {};
+    let result = new TreeEntry();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["mode"] = this.mode;
+    data["name"] = this.name;
+    data["path"] = this.path;
+    data["target"] = this.target ? this.target.toJSON() : <any>undefined;
+    data["targetType"] = this.targetType;
+    return data;
+  }
+}
+
+export interface ITreeEntry {
+  mode?: Mode;
+  name?: string | undefined;
+  path?: string | undefined;
+  target?: GitObject | undefined;
+  targetType?: TreeEntryTargetType;
+}
+
+export enum Mode {
+  Nonexistent = 0,
+  Directory = 16384,
+  NonExecutableFile = 33188,
+  NonExecutableGroupWritableFile = 33204,
+  ExecutableFile = 33261,
+  SymbolicLink = 40960,
+  GitLink = 57344,
+}
+
+export class ObjectId implements IObjectId {
+  rawId?: string | undefined;
+  sha?: string | undefined;
+
+  constructor(data?: IObjectId) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.rawId = _data["rawId"];
+      this.sha = _data["sha"];
+    }
+  }
+
+  static fromJS(data: any): ObjectId {
+    data = typeof data === "object" ? data : {};
+    let result = new ObjectId();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["rawId"] = this.rawId;
+    data["sha"] = this.sha;
+    return data;
+  }
+}
+
+export interface IObjectId {
+  rawId?: string | undefined;
+  sha?: string | undefined;
+}
+
+export enum TreeEntryTargetType {
+  Blob = 0,
+  Tree = 1,
+  GitLink = 2,
+}
+
+export class Note implements INote {
+  blobId?: ObjectId | undefined;
+  message?: string | undefined;
+  namespace?: string | undefined;
+  targetObjectId?: ObjectId | undefined;
+
+  constructor(data?: INote) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.blobId = _data["blobId"]
+        ? ObjectId.fromJS(_data["blobId"])
+        : <any>undefined;
+      this.message = _data["message"];
+      this.namespace = _data["namespace"];
+      this.targetObjectId = _data["targetObjectId"]
+        ? ObjectId.fromJS(_data["targetObjectId"])
+        : <any>undefined;
+    }
+  }
+
+  static fromJS(data: any): Note {
+    data = typeof data === "object" ? data : {};
+    let result = new Note();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["blobId"] = this.blobId ? this.blobId.toJSON() : <any>undefined;
+    data["message"] = this.message;
+    data["namespace"] = this.namespace;
+    data["targetObjectId"] = this.targetObjectId
+      ? this.targetObjectId.toJSON()
+      : <any>undefined;
+    return data;
+  }
+}
+
+export interface INote {
+  blobId?: ObjectId | undefined;
+  message?: string | undefined;
+  namespace?: string | undefined;
+  targetObjectId?: ObjectId | undefined;
+}
+
+export class RepositoryCommitsRequest implements IRepositoryCommitsRequest {
+  repositoryUrl?: string | undefined;
+  username?: string | undefined;
+  email?: string | undefined;
+
+  constructor(data?: IRepositoryCommitsRequest) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.repositoryUrl = _data["repositoryUrl"];
+      this.username = _data["username"];
+      this.email = _data["email"];
+    }
+  }
+
+  static fromJS(data: any): RepositoryCommitsRequest {
+    data = typeof data === "object" ? data : {};
+    let result = new RepositoryCommitsRequest();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["repositoryUrl"] = this.repositoryUrl;
+    data["username"] = this.username;
+    data["email"] = this.email;
+    return data;
+  }
+}
+
+export interface IRepositoryCommitsRequest {
+  repositoryUrl?: string | undefined;
+  username?: string | undefined;
+  email?: string | undefined;
 }
 
 export class ClientMetadata implements IClientMetadata {

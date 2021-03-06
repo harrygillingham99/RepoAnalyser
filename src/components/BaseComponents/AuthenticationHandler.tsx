@@ -15,10 +15,10 @@ export const AuthenticationHandler = () => {
   const { showErrorAlert } = AlertContainer.useContainer();
 
   const resolveAuthenticationToken = (code: string | null, state: string) => {
-    (async () => {
-      try {
-        toggleLoading(true);
-        if (code === null) throw new Error("No code provided");
+    try {
+      toggleLoading(true);
+      if (code === null) throw new Error("No code provided");
+      (async () => {
         var result = await apiClient.authentication_GetOAuthTokenWithUserInfo(
           code,
           state,
@@ -30,12 +30,12 @@ export const AuthenticationHandler = () => {
         } else {
           throw new Error("User was null");
         }
-      } catch (error) {
-        showErrorAlert("Authentication Error", "Unable to resolve user.");
-      } finally {
-        toggleLoading(false);
-      }
-    })();
+      })();
+    } catch (error) {
+      showErrorAlert("Authentication Error", "Unable to resolve user.");
+    } finally {
+      toggleLoading(false);
+    }
   };
 
   useEffectOnce(() => resolveAuthenticationToken(code, "state"));

@@ -1,9 +1,9 @@
+import { DashboardHeader } from "@components/BaseComponents/DashboardHeader";
 import { AuthorizedRoutes } from "@constants/RouteConstants";
 import { AppContainer } from "@state/AppStateContainer";
 import { HomeSubRoutes, Routes } from "@typeDefinitions/Routes";
-import React from "react";
-import { Jumbotron, Container } from "react-bootstrap";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { RepositoriesRoute } from "./Repositories/RepositoriesRoute";
 
 export const HomeRoute = () => {
   const { pathname } = useLocation();
@@ -24,13 +24,13 @@ export const HomeRoute = () => {
         Contributions
       </Route>
       <Route path={buildRoute(HomeSubRoutes.PullRequests)}>PRs</Route>
-      <Route path={buildRoute(HomeSubRoutes.Repositories)}>Repos!</Route>
+      <Route path={buildRoute(HomeSubRoutes.Repositories)}>
+        <RepositoriesRoute />
+      </Route>
       <Route path={buildRoute(HomeSubRoutes.LandingPage)}>
-        <Jumbotron fluid>
-          <Container>
-            <h1>Welcome {appState?.user?.name ?? "please log in!"}</h1>
-          </Container>
-        </Jumbotron>
+        <DashboardHeader
+          text={`Welcome ${appState?.user?.name ?? "please log in"}`}
+        />
       </Route>
       <Route>
         <Redirect to={Routes.NotFound} />
