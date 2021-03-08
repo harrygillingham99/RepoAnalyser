@@ -58,7 +58,7 @@ export const HomeSidebarItems: ISideBarItem[] = [
   },
 ];
 
-export const AccountSidebarItems = (
+export const SettingsSidebarItems = (
   props: IAccountSidebarItemProps
 ): ISideBarItem[] => {
   return [
@@ -67,7 +67,7 @@ export const AccountSidebarItems = (
       orderBy: 1,
       Icon: PersonXFill,
       onPress: () => props.signOut(),
-      forRoute: Routes.Account,
+      forRoute: Routes.Settings,
     },
   ];
 };

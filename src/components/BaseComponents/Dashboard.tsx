@@ -1,4 +1,4 @@
-import { AccountRoute } from "@components/Routes/Account/AccountRoute";
+import { SettingsRoute } from "@components/Routes/Settings/SettingsRoute";
 import { AuthorizedRoutes } from "@constants/RouteConstants";
 import { AppContainer } from "@state/AppStateContainer";
 import { TestId } from "@tests/TestConstants";
@@ -24,8 +24,8 @@ export const Dashboard = () => {
     switch (route as Routes) {
       case Routes.Home:
         return <HomeRoute />;
-      case Routes.Account:
-        return <AccountRoute />;
+      case Routes.Settings:
+        return <SettingsRoute />;
       default:
         return <Redirect to={Routes.NotFound} />;
     }

@@ -82,11 +82,11 @@ export const RepositoriesRoute = () => {
             </Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
-        {chunk(state.repos, 4).map((row) => (
-          <Row className="m-1">
+        {chunk(state.repos, 4).map((row, index) => (
+          <Row className="m-1" key={`row-${index}`}>
             {row.map((repo) => (
-              <Col className="p-1">
-                <Card key={`${repo.name}`} className="h-100 w-100">
+              <Col className="p-1" key={`${repo.name}`}>
+                <Card className="h-100">
                   <Card.Header className="p-1">{`Last updated - ${repo.lastUpdated?.toDateString()}`}</Card.Header>
                   <Card.Title className="text-center">{repo.name}</Card.Title>
                   <Card.Subtitle className="m-1">

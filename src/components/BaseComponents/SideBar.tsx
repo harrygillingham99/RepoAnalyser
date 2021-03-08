@@ -1,12 +1,11 @@
 import { Routes } from "@typeDefinitions/Routes";
-import React from "react";
 import { Nav } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import "@styles/Nav.scss";
 import {
   HomeSidebarItems,
   ISideBarItem,
-  AccountSidebarItems,
+  SettingsSidebarItems,
 } from "@typeDefinitions/SidebarItems";
 import { AppContainer } from "@state/AppStateContainer";
 import { RedirectContainer } from "@state/RedirectContainer";
@@ -64,9 +63,9 @@ export const SideBar = () => {
     switch (route) {
       case Routes.Home:
         return generateLinksForItems(HomeSidebarItems);
-      case Routes.Account:
+      case Routes.Settings:
         return generateLinksForItems(
-          AccountSidebarItems({ signOut: () => signOut(redirectToRoute) })
+          SettingsSidebarItems({ signOut: () => signOut(redirectToRoute) })
         );
       default:
         return (

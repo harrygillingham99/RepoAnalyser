@@ -1,11 +1,11 @@
 import React from "react";
 import { Jumbotron, Container } from "react-bootstrap";
 
-export const AccountRoute = () => {
+export const SettingsRoute = () => {
   return (
     <Jumbotron fluid>
       <Container>
-        <h1>Account Management</h1>
+        <h1>Settings</h1>
       </Container>
     </Jumbotron>
   );

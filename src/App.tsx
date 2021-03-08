@@ -39,7 +39,7 @@ const App = () => {
               <Route exact path={Routes.Unauthorised}>
                 <Unauthorised />
               </Route>
-              <Route path={[Routes.Home, Routes.Account]}>
+              <Route path={[Routes.Home, Routes.Settings]}>
                 <Container fluid>
                   <Row>
                     <Col className="col-md-2 d-none d-md-block bg-light sidebar">

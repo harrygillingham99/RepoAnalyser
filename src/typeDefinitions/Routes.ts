@@ -1,7 +1,7 @@
 enum Routes {
   Home = "/home",
   CallbackUrl = "/auth",
-  Account = "/account",
+  Settings = "/settings",
   NotFound = "/not-found",
   Unauthorised = "/unauthorised",
 }

@@ -96,11 +96,11 @@ export const NavigationBar = () => {
           {shouldShowAccountLink && (
             <Link
               className={`nav-link ${
-                splitPath(pathname) === Routes.Account ? "active" : ""
+                splitPath(pathname) === Routes.Settings ? "active" : ""
               }`}
-              to={Routes.Account}
+              to={Routes.Settings}
             >
-              Account
+              Settings
             </Link>
           )}
         </Nav>
