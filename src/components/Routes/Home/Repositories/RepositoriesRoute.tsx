@@ -3,11 +3,12 @@ import { RepoFilterOptions, UserRepositoryResult } from "@services/api/Client";
 import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
-import { chunk } from "@utils/Array";
 import { buildUserInfo } from "@utils/ClientInfo";
 import { useEffect } from "react";
-import { Card, Col, Dropdown, Row } from "react-bootstrap";
+import { Card, Dropdown } from "react-bootstrap";
 import useSetState from "react-use/lib/useSetState";
+import { Loader } from "@components/BaseComponents/Loader";
+import { ResponsiveGrid } from "@components/BaseComponents/ResponsiveGrid";
 
 interface RepositoriesRouteState {
   repos: UserRepositoryResult[];
@@ -53,8 +54,8 @@ export const RepositoriesRoute = () => {
   return (
     <>
       <DashboardHeader text={getHeaderText(state.repoFilterType)} />
-      <div className="container-xl">
-        <Dropdown className="pl-2">
+      <div className="container-fluid">
+        <Dropdown className="">
           <Dropdown.Toggle variant="info">Repository Filter</Dropdown.Toggle>
           <Dropdown.Menu>
             <Dropdown.Item
@@ -82,22 +83,26 @@ export const RepositoriesRoute = () => {
             </Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
-        {chunk(state.repos, 4).map((row, index) => (
-          <Row className="m-1" key={`row-${index}`}>
-            {row.map((repo) => (
-              <Col className="p-1" key={`${repo.name}`}>
-                <Card className="h-100">
-                  <Card.Header className="p-1">{`Last updated - ${repo.lastUpdated?.toDateString()}`}</Card.Header>
-                  <Card.Title className="text-center">{repo.name}</Card.Title>
-                  <Card.Subtitle className="m-1">
-                    {repo.description ?? "No Description Set"}
-                  </Card.Subtitle>
-                  <Card.Link href={repo.pullUrl}>GitHub Url</Card.Link>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        ))}
+        {state.repos && state.repos !== [] ? (
+          <ResponsiveGrid
+            items={state.repos}
+            mapFunc={(repo) => (
+              <Card
+                key={`${repo.name}`}
+                style={{ height: "300px", background: "#e9ecef" }}
+              >
+                <Card.Header className="p-1">{`Last updated - ${repo.lastUpdated?.toDateString()}`}</Card.Header>
+                <Card.Title className="text-center">{repo.name}</Card.Title>
+                <Card.Subtitle className="m-1">
+                  {repo.description ?? "No Description Set"}
+                </Card.Subtitle>
+                <Card.Link href={repo.pullUrl}>GitHub Url</Card.Link>
+              </Card>
+            )}
+          />
+        ) : (
+          <Loader />
+        )}
       </div>
     </>
   );
