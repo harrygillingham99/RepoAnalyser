@@ -1,14 +1,18 @@
 import Masonry from "react-masonry-css";
 import "@styles/Masonry.scss";
-import { PropsWithChildren } from "react";
+import * as React from "react";
+
+type ResponsiveGridItemMapper<T> = {
+  items: T[];
+  mapToElemFunc: (item: T) => JSX.Element;
+};
 
 interface IResponsiveGridProps<T> {
-  items?: T[];
-  mapFunc?: (item: T) => JSX.Element;
+  gridBuilder?: ResponsiveGridItemMapper<T>;
 }
 /* Will accept children for the grid OR a list of items with a mapper function  */
 export function ResponsiveGrid<T>(
-  props: PropsWithChildren<IResponsiveGridProps<T>>
+  props: React.PropsWithChildren<IResponsiveGridProps<T>>
 ) {
   return (
     <Masonry
@@ -22,7 +26,11 @@ export function ResponsiveGrid<T>(
       className="masonry-grid mt-1"
       columnClassName="masonry-grid_column"
     >
-      {props.children ?? props!.items!.map((item) => props!.mapFunc!(item))}
+      {props.gridBuilder !== undefined
+        ? props.gridBuilder.items.map((item) =>
+            props.gridBuilder!.mapToElemFunc(item)
+          )
+        : props.children}
     </Masonry>
   );
 }

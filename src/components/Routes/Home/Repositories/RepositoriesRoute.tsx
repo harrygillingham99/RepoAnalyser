@@ -85,20 +85,22 @@ export const RepositoriesRoute = () => {
         </Dropdown>
         {state.repos && state.repos !== [] ? (
           <ResponsiveGrid
-            items={state.repos}
-            mapFunc={(repo) => (
-              <Card
-                key={`${repo.name}`}
-                style={{ height: "300px", background: "#e9ecef" }}
-              >
-                <Card.Header className="p-1">{`Last updated - ${repo.lastUpdated?.toDateString()}`}</Card.Header>
-                <Card.Title className="text-center">{repo.name}</Card.Title>
-                <Card.Subtitle className="m-1">
-                  {repo.description ?? "No Description Set"}
-                </Card.Subtitle>
-                <Card.Link href={repo.pullUrl}>GitHub Url</Card.Link>
-              </Card>
-            )}
+            gridBuilder={{
+              items: state.repos,
+              mapToElemFunc: (repo) => (
+                <Card
+                  key={`${repo.name}`}
+                  style={{ height: "300px", background: "#e9ecef" }}
+                >
+                  <Card.Header className="p-1">{`Last updated - ${repo.lastUpdated?.toDateString()}`}</Card.Header>
+                  <Card.Title className="text-center">{repo.name}</Card.Title>
+                  <Card.Subtitle className="m-1">
+                    {repo.description ?? "No Description Set"}
+                  </Card.Subtitle>
+                  <Card.Link href={repo.pullUrl}>GitHub Url</Card.Link>
+                </Card>
+              ),
+            }}
           />
         ) : (
           <Loader />
