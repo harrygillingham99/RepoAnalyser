@@ -3,6 +3,10 @@ import { AuthorizedRoutes } from "@constants/RouteConstants";
 import { AppContainer } from "@state/AppStateContainer";
 import { HomeSubRoutes, Routes } from "@typeDefinitions/Routes";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { ActivityRoute } from "./Activity/ActivityRoute";
+import { DetailedPullRequestRoute } from "./PullRequests/DetailedPullRequestRoute";
+import { PullRequestRoute } from "./PullRequests/PullRequestRoute";
+import { DetailedRepositoryRoute } from "./Repositories/DetailedRepositoryRoute";
 import { RepositoriesRoute } from "./Repositories/RepositoriesRoute";
 
 export const HomeRoute = () => {
@@ -19,19 +23,28 @@ export const HomeRoute = () => {
 
   return (
     <Switch>
-      <Route path={buildRoute(HomeSubRoutes.Commits)}>Commits</Route>
-      <Route path={buildRoute(HomeSubRoutes.Contributions)}>
-        Contributions
+      <Route path={buildRoute(HomeSubRoutes.PullRequests)}>
+        <PullRequestRoute />
       </Route>
-      <Route path={buildRoute(HomeSubRoutes.PullRequests)}>PRs</Route>
       <Route path={buildRoute(HomeSubRoutes.Repositories)}>
         <RepositoriesRoute />
+      </Route>
+      <Route path={buildRoute(HomeSubRoutes.Activity)}>
+        <ActivityRoute />
       </Route>
       <Route path={buildRoute(HomeSubRoutes.LandingPage)}>
         <DashboardHeader
           text={`Welcome ${appState?.user?.name ?? "please log in"}`}
         />
       </Route>
+      <Route
+        path={buildRoute(HomeSubRoutes.Repository)}
+        component={DetailedRepositoryRoute}
+      />
+      <Route
+        path={buildRoute(HomeSubRoutes.PullRequest)}
+        component={DetailedPullRequestRoute}
+      />
       <Route>
         <Redirect to={Routes.NotFound} />
       </Route>

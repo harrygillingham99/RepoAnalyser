@@ -8,10 +8,11 @@ enum Routes {
 
 enum HomeSubRoutes {
   LandingPage = "/landing",
+  Activity = "/user-activity",
   Repositories = "/repositories",
   PullRequests = "/pull-requests",
-  Contributions = "/contributions",
-  Commits = "/commits",
+  Repository = "/repository/:repoId",
+  PullRequest = "/pull-request/:repoId/:pullRequest",
 }
 
 export { Routes, HomeSubRoutes };

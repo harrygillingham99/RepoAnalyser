@@ -4,7 +4,6 @@ import { AppContainer } from "@state/AppStateContainer";
 import { TestId } from "@tests/TestConstants";
 import { Routes } from "@typeDefinitions/Routes";
 import { splitPath } from "@utils/Urls";
-import React from "react";
 import { Redirect, useLocation } from "react-router-dom";
 import { HomeRoute } from "../Routes/Home/HomeRoute";
 import { Loader } from "./Loader";
@@ -17,7 +16,7 @@ export const Dashboard = () => {
   const getDashboardForRoute = (route: Routes | undefined): JSX.Element => {
     if (loading) return <Loader />;
 
-    if (!appState.user && AuthorizedRoutes.indexOf(route as Routes) >= 0) {
+    if (!appState.user && AuthorizedRoutes.indexOf(pathname) >= 0) {
       return <Redirect to={Routes.Unauthorised} />;
     }
 

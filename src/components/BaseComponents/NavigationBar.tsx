@@ -1,7 +1,7 @@
 import { AppContainer } from "@state/AppStateContainer";
 import { Github } from "react-bootstrap-icons";
 import { Routes } from "@typeDefinitions/Routes";
-import { Button, Form, FormControl, Nav, Navbar } from "react-bootstrap";
+import { Button, Nav, Navbar } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { apiClient, authorisedApiClient } from "@services/api/Index";
 import { buildUserInfo } from "@utils/ClientInfo";
@@ -10,7 +10,6 @@ import { AuthCookieKey } from "@constants/CookieConstants";
 import { getCookie } from "@utils/CookieProvider";
 import { TestId } from "@tests/TestConstants";
 import { splitPath } from "@utils/Urls";
-import { SearchContainer } from "@state/SearchContainer";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 
 export const NavigationBar = () => {
@@ -22,7 +21,6 @@ export const NavigationBar = () => {
     toggleLoading,
   } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
-  const { setSearchText } = SearchContainer.useContainer();
 
   const shouldShowAccountLink =
     appState.user !== undefined && !appState.loading;
@@ -104,9 +102,8 @@ export const NavigationBar = () => {
             </Link>
           )}
         </Nav>
-
         <div>
-          {!appState.user ? (
+          {!appState.user && (
             <a
               className={!canLogin ? "disabled" : ""}
               href={appState.loginRedirectUrl}
@@ -115,16 +112,6 @@ export const NavigationBar = () => {
                 <Github /> Login With GitHub
               </Button>
             </a>
-          ) : (
-            <Form inline>
-              <FormControl
-                type="text"
-                placeholder="Search"
-                className="mr-sm-2"
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-              <Button variant="outline-info">Search</Button>
-            </Form>
           )}
         </div>
       </Navbar.Collapse>

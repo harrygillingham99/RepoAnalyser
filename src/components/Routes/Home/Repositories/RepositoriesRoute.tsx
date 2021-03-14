@@ -4,19 +4,22 @@ import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
 import { buildUserInfo } from "@utils/ClientInfo";
-import { useEffect } from "react";
-import { Card, Dropdown } from "react-bootstrap";
+import React, { useEffect } from "react";
+import { Card, Dropdown, Button } from "react-bootstrap";
 import useSetState from "react-use/lib/useSetState";
 import { Loader } from "@components/BaseComponents/Loader";
 import { ResponsiveGrid } from "@components/BaseComponents/ResponsiveGrid";
+import { Link } from "react-router-dom";
+import { HomeSubRoutes, Routes } from "@typeDefinitions/Routes";
 
 interface RepositoriesRouteState {
   repos: UserRepositoryResult[];
   repoFilterType: RepoFilterOptions;
 }
 export const RepositoriesRoute = () => {
-  const { appState, toggleLoading } = AppContainer.useContainer();
+  const { appState } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
+  const [loading, setLoading] = React.useState(false);
   const [state, setState] = useSetState<RepositoriesRouteState>({
     repos: [],
     repoFilterType: RepoFilterOptions.All,
@@ -24,19 +27,19 @@ export const RepositoriesRoute = () => {
 
   /* eslint-disable react-hooks/exhaustive-deps*/
   useEffect(() => {
-    try {
-      toggleLoading(true);
-      (async () => {
+    (async () => {
+      try {
+        setLoading(true);
         var result = await authorisedApiClient(
           appState.token
         ).repository_Repositories(state.repoFilterType, buildUserInfo());
         setState({ repos: result });
-      })();
-    } catch (error) {
-      showErrorAlert("Error", "Error fetching repositories");
-    } finally {
-      toggleLoading(false);
-    }
+      } catch (error) {
+        showErrorAlert("Error", "Error fetching repositories");
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [state.repoFilterType]);
   /* eslint-enable react-hooks/exhaustive-deps*/
 
@@ -83,7 +86,7 @@ export const RepositoriesRoute = () => {
             </Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
-        {state.repos && state.repos !== [] ? (
+        {state.repos && state.repos.length > 0 && !loading ? (
           <ResponsiveGrid
             gridBuilder={{
               items: state.repos,
@@ -97,11 +100,24 @@ export const RepositoriesRoute = () => {
                   <Card.Subtitle className="m-1">
                     {repo.description ?? "No Description Set"}
                   </Card.Subtitle>
-                  <Card.Link href={repo.pullUrl}>GitHub Url</Card.Link>
+                  <Card.Footer className="mt-auto">
+                    <Link
+                      to={`${Routes.Home}${HomeSubRoutes.Repository}`.replace(
+                        ":repoId",
+                        repo!.id!.toString()
+                      )}
+                    >
+                      <Button size="sm" variant="info">
+                        Detailed View
+                      </Button>
+                    </Link>
+                  </Card.Footer>
                 </Card>
               ),
             }}
           />
+        ) : state.repos && state.repos.length === 0 && !loading ? (
+          <span>No Repositories</span>
         ) : (
           <Loader />
         )}
