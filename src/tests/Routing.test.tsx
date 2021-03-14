@@ -36,7 +36,7 @@ test("bad sub route still results in 404 page", () => {
 
 test("unauthenticated page when not logged in", () => {
   const history = createMemoryHistory();
-  history.push(Routes.Account);
+  history.push(Routes.Settings);
   render(
     <Router history={history}>
       <App />
