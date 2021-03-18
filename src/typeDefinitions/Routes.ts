@@ -1,18 +1,42 @@
 enum Routes {
-  Home = "/home",
   CallbackUrl = "/auth",
   Settings = "/settings",
   NotFound = "/not-found",
   Unauthorised = "/unauthorised",
-}
+  Landing = "/home/landing",
+  Activity = "/home/user-activity",
+  Repositories = "/home/repositories",
+  PullRequests = "/home/pull-requests",
+  Repository = "/home/repository/:repoId",
+  PullRequest = "/home/pull-request/:repoId/:pullRequest",
+};
 
-enum HomeSubRoutes {
-  LandingPage = "/landing",
-  Activity = "/user-activity",
-  Repositories = "/repositories",
-  PullRequests = "/pull-requests",
-  Repository = "/repository/:repoId",
-  PullRequest = "/pull-request/:repoId/:pullRequest",
-}
+const HomeRoutes: Routes[] = [
+  Routes.Activity,
+  Routes.Landing,
+  Routes.PullRequest,
+  Routes.PullRequests,
+  Routes.Repositories,
+  Routes.Repository,
+];
 
-export { Routes, HomeSubRoutes };
+const DashboardRoutes: Routes[] = [
+  Routes.Activity,
+  Routes.Landing,
+  Routes.PullRequest,
+  Routes.PullRequests,
+  Routes.Repositories,
+  Routes.Repository,
+  Routes.Settings,
+];
+
+const AuthorizedRoutes: Routes[] = [
+  Routes.Settings,
+  Routes.PullRequest,
+  Routes.PullRequests,
+  Routes.Repositories,
+  Routes.Repository,
+  Routes.Activity,
+];
+
+export { Routes, AuthorizedRoutes, DashboardRoutes, HomeRoutes };

@@ -21,7 +21,7 @@ test("bad routes result in 404 page", () => {
 
 test("bad sub route still results in 404 page", () => {
   const history = createMemoryHistory();
-  history.push(`${Routes.Home}/unhandledSubRoute`);
+  history.push(`/home/unhandledSubRoute`);
   render(
     <Router history={history}>
       <App />

@@ -22,7 +22,7 @@ export const AuthenticationHandler = () => {
         var result = await apiClient.authentication_GetOAuthTokenWithUserInfo(
           code,
           state,
-          buildUserInfo()
+          buildUserInfo
         );
         if (result && result.user && result.accessToken) {
           setUserAndToken(result.user, result.accessToken);
@@ -40,5 +40,5 @@ export const AuthenticationHandler = () => {
 
   useEffectOnce(() => resolveAuthenticationToken(code, "state"));
 
-  return <Redirect to={Routes.Home} />;
+  return <Redirect to={Routes.Landing} />;
 };

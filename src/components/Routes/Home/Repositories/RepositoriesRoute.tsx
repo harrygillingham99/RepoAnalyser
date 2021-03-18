@@ -10,7 +10,7 @@ import useSetState from "react-use/lib/useSetState";
 import { Loader } from "@components/BaseComponents/Loader";
 import { ResponsiveGrid } from "@components/BaseComponents/ResponsiveGrid";
 import { Link } from "react-router-dom";
-import { HomeSubRoutes, Routes } from "@typeDefinitions/Routes";
+import { Routes } from "@typeDefinitions/Routes";
 
 interface RepositoriesRouteState {
   repos: UserRepositoryResult[];
@@ -25,14 +25,13 @@ export const RepositoriesRoute = () => {
     repoFilterType: RepoFilterOptions.All,
   });
 
-  /* eslint-disable react-hooks/exhaustive-deps*/
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         var result = await authorisedApiClient(
           appState.token
-        ).repository_Repositories(state.repoFilterType, buildUserInfo());
+        ).repository_Repositories(state.repoFilterType, buildUserInfo);
         setState({ repos: result });
       } catch (error) {
         showErrorAlert("Error", "Error fetching repositories");
@@ -40,8 +39,8 @@ export const RepositoriesRoute = () => {
         setLoading(false);
       }
     })();
+    /* eslint-disable-next-line react-hooks/exhaustive-deps*/
   }, [state.repoFilterType]);
-  /* eslint-enable react-hooks/exhaustive-deps*/
 
   const getHeaderText = (filterOption: RepoFilterOptions) => {
     switch (filterOption) {
@@ -102,7 +101,7 @@ export const RepositoriesRoute = () => {
                   </Card.Subtitle>
                   <Card.Footer className="mt-auto">
                     <Link
-                      to={`${Routes.Home}${HomeSubRoutes.Repository}`.replace(
+                      to={Routes.Repository.replace(
                         ":repoId",
                         repo!.id!.toString()
                       )}

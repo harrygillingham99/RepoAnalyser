@@ -5,7 +5,7 @@ import { NavigationBar } from "@components/BaseComponents/NavigationBar";
 import { Dashboard } from "@components/BaseComponents/Dashboard";
 import { SideBar } from "@components/BaseComponents/SideBar";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { HomeSubRoutes, Routes } from "@typeDefinitions/Routes";
+import { DashboardRoutes, Routes } from "@typeDefinitions/Routes";
 import { AuthenticationHandler } from "@components/BaseComponents/AuthenticationHandler";
 import { AppContainer } from "@state/AppStateContainer";
 import { AlertContainer } from "@state/AlertContainer";
@@ -28,10 +28,7 @@ const App = () => {
                 <AuthenticationHandler />
               </Route>
               <Route exact path="/">
-                <Redirect to={`${Routes.Home}${HomeSubRoutes.LandingPage}`} />
-              </Route>
-              <Route exact path={Routes.Home}>
-                <Redirect to={`${Routes.Home}${HomeSubRoutes.LandingPage}`} />
+                <Redirect to={Routes.Landing} />
               </Route>
               <Route exact path={Routes.NotFound}>
                 <FourOhFour />
@@ -39,7 +36,7 @@ const App = () => {
               <Route exact path={Routes.Unauthorised}>
                 <Unauthorised />
               </Route>
-              <Route path={[Routes.Home, Routes.Settings]}>
+              <Route path={DashboardRoutes}>
                 <Container fluid>
                   <Row>
                     <Col className="col-md-2 d-none d-md-block bg-light sidebar">

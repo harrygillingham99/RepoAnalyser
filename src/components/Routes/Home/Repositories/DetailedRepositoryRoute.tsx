@@ -18,7 +18,7 @@ interface DetailedRepositoryRouteState {
   repo: DetailedRepository;
 }
 
-export const DetailedRepositoryRoute: React.FC = () => {
+export const DetailedRepositoryRoute = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const params = useParams<RouteParams>();
   const repoId = Number.parseInt(params.repoId);
@@ -35,7 +35,7 @@ export const DetailedRepositoryRoute: React.FC = () => {
         setLoading(true);
         const result = await authorisedApiClient(
           appState.token
-        ).repository_GetDetailedRepository(repoId, buildUserInfo());
+        ).repository_GetDetailedRepository(repoId, buildUserInfo);
         setState({ repo: result });
       } catch (error) {
         showErrorAlert(
@@ -49,12 +49,11 @@ export const DetailedRepositoryRoute: React.FC = () => {
   });
 
   return appState.token === undefined ? (
-    <Redirect to={Routes.Home} />
+    <Redirect to={Routes.Landing} />
   ) : (
     <>
       <DashboardHeader text={state.repo?.repository?.name ?? ""} />
       {loading && <Loader />}
-
       {state.repo && !loading && <>{JSON.stringify(state.repo)}</>}
     </>
   );

@@ -1,4 +1,4 @@
-import { Routes } from "@typeDefinitions/Routes";
+import { HomeRoutes, Routes } from "@typeDefinitions/Routes";
 import { Nav } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import "@styles/Nav.scss";
@@ -10,42 +10,45 @@ import {
 import { AppContainer } from "@state/AppStateContainer";
 import { RedirectContainer } from "@state/RedirectContainer";
 import { WrapChildrenIf } from "./WrapChildrenIf";
-import { AuthorizedRoutes } from "@constants/RouteConstants";
+import { AuthorizedRoutes } from "@typeDefinitions/Routes";
 import { TestId } from "@tests/TestConstants";
-import { splitPath } from "@utils/Urls";
 
 export const SideBar = () => {
   const { pathname } = useLocation();
   const { redirectToRoute } = RedirectContainer.useContainer();
   const { signOut, appState } = AppContainer.useContainer();
-  const basePathName = splitPath(pathname);
 
   const canViewRoute = (path: string) =>
-    (appState.user === undefined && AuthorizedRoutes.indexOf(path) < 0) ||
+    (appState.user === undefined &&
+      AuthorizedRoutes.indexOf(path as Routes) < 0) ||
     appState.user !== undefined;
 
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
       .sort((a, b) => a.orderBy - b.orderBy)
-      .map(({ title, Icon, onPress, linkTo, forRoute }) => {
-        const isActiveLink =
-          linkTo !== undefined && pathname === `${forRoute}${linkTo}`;
-        const shouldWrapInAnchor =
-          linkTo !== undefined && canViewRoute(`${forRoute}${linkTo}`);
+      .map(({ title, Icon, onPress, linkTo, openInNewTab }) => {
+        const isActiveLink = linkTo !== undefined && pathname === linkTo;
+        const shouldWrapInAnchor = linkTo !== undefined && canViewRoute(linkTo);
         return (
           <WrapChildrenIf
             condition={shouldWrapInAnchor}
-            wrapper={(children) => (
-              <Link to={`${forRoute}${linkTo}`}>{children}</Link>
-            )}
+            wrapper={(children) =>
+              openInNewTab ? (
+                <a href={linkTo} target="_blank" rel="noreferrer">
+                  {children}
+                </a>
+              ) : (
+                <Link to={linkTo!}>{children}</Link>
+              )
+            }
             key={`${title}-${pathname}-nav-item`}
           >
             <li
-              className={`nav-item ${
-                shouldWrapInAnchor || linkTo === undefined
-                  ? "clickable"
-                  : "disabled"
-              } ${linkTo === undefined ? "list-group-item-action" : ""}`}
+              className={`nav-item ${shouldWrapInAnchor ? "clickable" : ""} ${
+                linkTo === undefined && onPress !== undefined
+                  ? "list-group-item-action"
+                  : ""
+              }`}
               onClick={onPress}
               data-testid={TestId.SideBarRowItem}
             >
@@ -60,12 +63,16 @@ export const SideBar = () => {
   };
 
   const getLinksForRoute = (route: Routes | undefined) => {
+    if (route && HomeRoutes.indexOf(route) >= 0) {
+      return generateLinksForItems(HomeSidebarItems);
+    }
     switch (route) {
-      case Routes.Home:
-        return generateLinksForItems(HomeSidebarItems);
       case Routes.Settings:
         return generateLinksForItems(
-          SettingsSidebarItems({ signOut: () => signOut(redirectToRoute) })
+          SettingsSidebarItems({
+            signOut: () => signOut(redirectToRoute),
+            profileUrl: appState.user.url,
+          })
         );
       default:
         return (
@@ -80,8 +87,8 @@ export const SideBar = () => {
     <div className="sidebar-sticky" data-testid={TestId.SideBar}>
       <Nav as="ul" className="flex-column list-group list-group-flush">
         {getLinksForRoute(
-          !appState.loading && canViewRoute(basePathName)
-            ? (basePathName as Routes)
+          !appState.loading && canViewRoute(pathname as Routes)
+            ? (pathname as Routes)
             : undefined
         )}
       </Nav>

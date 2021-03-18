@@ -33,7 +33,7 @@ export const DetailedPullRequestRoute = () => {
         setLoading(true);
         const result = await authorisedApiClient(
           appState.token
-        ).pullRequest_GetDetailedPullRequest(repo, pull, buildUserInfo());
+        ).pullRequest_GetDetailedPullRequest(repo, pull, buildUserInfo);
         setState({ pullRequest: result });
       } catch (error) {
         showErrorAlert("Error", "Error getting detailed pull request");
@@ -47,7 +47,7 @@ export const DetailedPullRequestRoute = () => {
     <>
       <DashboardHeader text={`#${pull} for ${repo}`} />
       {loading && <Loader />}
-      {!loading && `repo - ${repo} pull - ${pull}`}
+      {!loading && `repo - ${repo} pull - ${pull}` + JSON.stringify(state)}
     </>
   );
 };

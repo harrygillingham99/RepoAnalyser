@@ -8,7 +8,7 @@ export const FourOhFour = () => {
       message="The page you were looking for was not found."
       title="Not Found"
       redirectSubtitle="Back to Home"
-      redirectTo={Routes.Home}
+      redirectTo={Routes.Landing}
     />
   );
 };

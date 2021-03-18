@@ -13,7 +13,7 @@ import useSetState from "react-use/lib/useSetState";
 import { Loader } from "@components/BaseComponents/Loader";
 import { ResponsiveGrid } from "@components/BaseComponents/ResponsiveGrid";
 import React from "react";
-import { HomeSubRoutes, Routes } from "@typeDefinitions/Routes";
+import { Routes } from "@typeDefinitions/Routes";
 import { Link } from "react-router-dom";
 
 interface PullRequestRouteState {
@@ -28,24 +28,24 @@ export const PullRequestRoute = () => {
     filterOption: PullRequestFilterOption.All,
   });
   const [loading, toggleLoading] = React.useState(false);
-
-  /* eslint-disable react-hooks/exhaustive-deps*/
+  
   useEffect(() => {
     (async () => {
       try {
         toggleLoading(true);
         var result = await authorisedApiClient(
           appState.token
-        ).pullRequest_GetPullRequests(state.filterOption, buildUserInfo());
+        ).pullRequest_GetPullRequests(state.filterOption, buildUserInfo);
         setState({ pulls: result });
       } catch (error) {
-        showErrorAlert("Error", "Error fetching repositories");
+        showErrorAlert("Error", "Error fetching pull requests");
       } finally {
         toggleLoading(false);
       }
     })();
+    /* eslint-disable-next-line react-hooks/exhaustive-deps*/
   }, [state.filterOption]);
-  /* eslint-enable react-hooks/exhaustive-deps*/
+
   return (
     <>
       <DashboardHeader
@@ -53,7 +53,7 @@ export const PullRequestRoute = () => {
       />
       <div className="container-fluid">
         <Dropdown className="">
-          <Dropdown.Toggle variant="info">Repository Filter</Dropdown.Toggle>
+          <Dropdown.Toggle variant="info">Pull Request Filter</Dropdown.Toggle>
           <Dropdown.Menu>
             <Dropdown.Item
               onClick={() =>
@@ -102,9 +102,8 @@ export const PullRequestRoute = () => {
                   <Card.Body className="p-0"></Card.Body>
                   <Card.Footer className="mt-auto">
                     <>
-                      {/*TODO: wire up detailed pull request link */}
                       <Link
-                        to={`${Routes.Home}${HomeSubRoutes.PullRequest}`
+                        to={Routes.PullRequest
                           .replace(":repoId", pull.repositoryId!.toString())
                           .replace(
                             ":pullRequest",

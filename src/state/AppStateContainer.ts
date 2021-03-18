@@ -22,7 +22,7 @@ const useAppState = () => {
   const signOut = (redirectToRoute: (route: Routes) => void) => {
     setAppState({ user: undefined, token: undefined });
     expireCookie(AuthCookieKey);
-    redirectToRoute(Routes.Home);
+    redirectToRoute(Routes.Landing);
   };
 
   const setUser = (user: User) => setAppState({ user: user });

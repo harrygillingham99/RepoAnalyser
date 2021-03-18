@@ -9,7 +9,6 @@ import { AlertContainer } from "@state/AlertContainer";
 import { AuthCookieKey } from "@constants/CookieConstants";
 import { getCookie } from "@utils/CookieProvider";
 import { TestId } from "@tests/TestConstants";
-import { splitPath } from "@utils/Urls";
 import useEffectOnce from "react-use/lib/useEffectOnce";
 
 export const NavigationBar = () => {
@@ -36,7 +35,7 @@ export const NavigationBar = () => {
         try {
           const { user, loginRedirectUrl } = await authorisedApiClient(
             savedAuthCookie
-          ).authentication_GetUserInformationForToken(buildUserInfo());
+          ).authentication_GetUserInformationForToken(buildUserInfo);
           if (user === undefined || loginRedirectUrl === undefined)
             throw new Error();
           setUserTokenAndUrl(user, savedAuthCookie, loginRedirectUrl);
@@ -54,7 +53,7 @@ export const NavigationBar = () => {
       (async () => {
         try {
           const urlResult = await apiClient.authentication_GetLoginRedirectUrl(
-            buildUserInfo()
+            buildUserInfo
           );
           setLoginRedirect(urlResult);
         } catch (error) {
@@ -77,7 +76,7 @@ export const NavigationBar = () => {
       style={{ zIndex: 9999 }}
       data-testid={TestId.Nav}
     >
-      <Link to={Routes.Home}>
+      <Link to={Routes.Landing}>
         <Navbar.Brand>Repo Analyser</Navbar.Brand>
       </Link>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -85,16 +84,16 @@ export const NavigationBar = () => {
         <Nav className="mr-auto">
           <Link
             className={`nav-link ${
-              splitPath(pathname) === Routes.Home ? "active" : ""
+              pathname.includes("home") ? "active" : ""
             }`}
-            to={Routes.Home}
+            to={Routes.Landing}
           >
             Home
           </Link>
           {shouldShowAccountLink && (
             <Link
               className={`nav-link ${
-                splitPath(pathname) === Routes.Settings ? "active" : ""
+                pathname.includes(Routes.Settings) ? "active" : ""
               }`}
               to={Routes.Settings}
             >

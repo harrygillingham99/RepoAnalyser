@@ -3,12 +3,12 @@ import { render, screen } from "@testing-library/react";
 import App from "../App";
 import { createMemoryHistory } from "history";
 import { TestId, waitForLoadThenAssert } from "./TestConstants";
-import { HomeSubRoutes, Routes } from "@typeDefinitions/Routes";
+import { Routes } from "@typeDefinitions/Routes";
 import { Router } from "react-router-dom";
 
 test("Side nav items disabled when not authenticated", () => {
   const history = createMemoryHistory();
-  history.push(`${Routes.Home}/${HomeSubRoutes.LandingPage}`);
+  history.push(Routes.Landing);
   render(
     <Router history={history}>
       <App />
@@ -18,11 +18,7 @@ test("Side nav items disabled when not authenticated", () => {
   waitForLoadThenAssert(() => {
     const elems = screen.getAllByTestId(TestId.SideBarRowItem);
     elems.forEach((navItem) => {
-      if (navItem.innerText !== "Home") {
-        expect(navItem).toHaveClass("disabled");
-      } else {
-        expect(navItem).toHaveClass("clickable");
-      }
+      expect(navItem).toHaveClass(navItem.innerText !== "Home" ? "disabled":"clickable")
     });
   });
 });

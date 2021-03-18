@@ -8,7 +8,7 @@ export const Unauthorised = () => {
       message="You need to log in to view this page."
       title="Unauthorised"
       redirectSubtitle="Back to Home"
-      redirectTo={Routes.Home}
+      redirectTo={Routes.Landing}
     />
   );
 };

@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import App from "../App";
-import { TestId } from "./TestConstants";
+import { TestId, waitForLoadThenAssert } from "./TestConstants";
 import { BrowserRouter } from "react-router-dom";
 
 test("renders side bar", () => {
@@ -12,8 +12,10 @@ test("renders side bar", () => {
 
 test("renders home page on first load", () => {
   renderAppWithRouter();
-  const HomeRoute = screen.getByTestId(TestId.Dashboard);
-  expect(HomeRoute).toBeInTheDocument();
+  waitForLoadThenAssert(() => {
+    const HomeRoute = screen.getByTestId(TestId.Dashboard);
+    expect(HomeRoute).toBeInTheDocument();
+  })
 });
 
 test("renders nav", () => {

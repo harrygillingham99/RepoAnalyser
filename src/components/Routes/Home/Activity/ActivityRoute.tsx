@@ -25,7 +25,7 @@ export const ActivityRoute = () => {
         setLoading(true);
         const result = await authorisedApiClient(
           appState.token
-        ).statistics_GetUserStatistics(buildUserInfo());
+        ).statistics_GetUserStatistics(buildUserInfo);
         setState({ userActivity: result });
       } catch (error) {
         showErrorAlert("Error", "Error getting user activity information");
