@@ -71,7 +71,7 @@ export const SideBar = () => {
         return generateLinksForItems(
           SettingsSidebarItems({
             signOut: () => signOut(redirectToRoute),
-            profileUrl: appState.user.url,
+            profileUrl: appState.user.htmlUrl,
           })
         );
       default:
