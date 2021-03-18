@@ -19,6 +19,7 @@
     "@types/recharts": "^1.8.19",
     "bootstrap": "^4.6.0",
     "concurrently": "^5.3.0",
+    "craco-interpolate-html-plugin": "0.0.5",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",
     "react": "^17.0.1",
@@ -71,11 +72,11 @@
     "postinstall": "husky install",
     "pre-commit": "lint-staged --verbose --allow-empty",
     "start-electron": "concurrently \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && cross-env ELECTRON_START_URL=http://localhost:3000 electron . \"",
-    "package-electron": "npm run build && npm run build-electron && electron-builder build -c.extraMetadata.main=build/electron/main.js --publish never",
+    "package-electron": "cross-env IS_ELECTRON=true npm run build && npm run build-electron && electron-builder build -c.extraMetadata.main=build/electron/main.js --publish never",
     "package-electron-dev": "npm run build-dev && npm run build-electron && electron-builder build -c.extraMetadata.main=build/electron/main.js --publish never",
     "build-electron": "mkdir build\\src && Xcopy /E /I /Y electron build\\electron"
   },
-  "stylelint":{
+  "stylelint": {
     "extends": "stylelint-config-recommended"
   },
   "eslintConfig": {
