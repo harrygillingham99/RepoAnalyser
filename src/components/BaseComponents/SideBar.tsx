@@ -13,6 +13,7 @@ import { WrapChildrenIf } from "./WrapChildrenIf";
 import { AuthorizedRoutes } from "@typeDefinitions/Routes";
 import { TestId } from "@tests/TestConstants";
 import clsx from "clsx";
+import { orderByDescending } from "@utils/Array";
 
 export const SideBar = () => {
   const { pathname } = useLocation();
@@ -27,8 +28,7 @@ export const SideBar = () => {
   const route : Routes | undefined = (!appState.loading && canViewRoute(pathname as Routes)) ? (pathname as Routes) : undefined
 
   const generateLinksForItems = (items: ISideBarItem[]) => {
-    return items
-      .sort((a, b) => a.orderBy - b.orderBy)
+    return orderByDescending(items, 'orderBy')
       .map(({ title, Icon, onPress, linkTo, openInNewTab }) => {
         const isActiveLink = linkTo !== undefined && pathname === linkTo;
         const shouldWrapInAnchor = linkTo !== undefined && canViewRoute(linkTo);

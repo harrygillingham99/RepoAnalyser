@@ -7,3 +7,7 @@ export function chunk<T>(array: T[], size: number) {
   }
   return chunkedArray;
 }
+
+export function orderByDescending<T extends Object>(array: T[], propName: keyof(T) & string ) : Array<T>{
+  return array.sort((a,b) => +a[propName] - +b[propName])
+}
