@@ -18,12 +18,10 @@ const createWindow = () => {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
-    mainWindow.webContents.on('dom-ready', ()=>{
-      let code = `var base = document.getElementById("base");
-                  base.setAttribute('href', './');`;
-                  
-      mainWindow.webContents.executeJavaScript(code);
-  });
+    mainWindow.webContents.on('will-navigate', (event) => {
+      event.preventDefault()
+
+    })
   });
 
   mainWindow.on("closed", () => mainWindow.destroy());
