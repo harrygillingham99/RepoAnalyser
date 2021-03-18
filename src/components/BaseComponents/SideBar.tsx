@@ -23,6 +23,8 @@ export const SideBar = () => {
       AuthorizedRoutes.indexOf(path as Routes) < 0) ||
     appState.user !== undefined;
 
+  const route : Routes | undefined = (!appState.loading && canViewRoute(pathname as Routes)) ? (pathname as Routes) : undefined
+
   const generateLinksForItems = (items: ISideBarItem[]) => {
     return items
       .sort((a, b) => a.orderBy - b.orderBy)
@@ -86,11 +88,7 @@ export const SideBar = () => {
   return (
     <div className="sidebar-sticky" data-testid={TestId.SideBar}>
       <Nav as="ul" className="flex-column list-group list-group-flush">
-        {getLinksForRoute(
-          !appState.loading && canViewRoute(pathname as Routes)
-            ? (pathname as Routes)
-            : undefined
-        )}
+        {getLinksForRoute(route)}
       </Nav>
     </div>
   );

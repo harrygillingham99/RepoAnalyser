@@ -13,7 +13,7 @@ export const Dashboard = () => {
   const { appState } = AppContainer.useContainer();
   const { loading } = appState;
 
-  if (!appState.user && AuthorizedRoutes.indexOf(pathname as Routes) >= 0) {
+  if (!loading && !appState.user && AuthorizedRoutes.indexOf(pathname as Routes) >= 0) {
     return <Redirect to={Routes.Unauthorised} />;
   }
 
