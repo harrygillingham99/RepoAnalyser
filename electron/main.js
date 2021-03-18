@@ -18,6 +18,12 @@ const createWindow = () => {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
+    mainWindow.webContents.on('did-finish-load', ()=>{
+      let code = `var base = document.getElementById("base");
+                  base.setAttribute('href', './');`;
+                  
+      mainWindow.webContents.executeJavaScript(code);
+  });
   });
 
   mainWindow.on("closed", () => mainWindow.destroy());
