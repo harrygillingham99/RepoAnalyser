@@ -18,7 +18,7 @@ const createWindow = () => {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
-    mainWindow.webContents.on('did-finish-load', ()=>{
+    mainWindow.webContents.on('dom-ready', ()=>{
       let code = `var base = document.getElementById("base");
                   base.setAttribute('href', './');`;
                   
