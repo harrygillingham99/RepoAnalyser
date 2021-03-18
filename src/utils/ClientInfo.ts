@@ -1,6 +1,6 @@
 import { ClientMetadata } from "@services/api/Client";
 
-export const buildUserInfo =
+export const buildUserInfo = JSON.stringify(
     new ClientMetadata({
       page: window.location.pathname,
       referrer: document.referrer,
@@ -8,4 +8,4 @@ export const buildUserInfo =
       browserEngine: navigator.product,
       browserLanguage: navigator.language,
       cookiesEnabled: navigator.cookieEnabled,
-    });
+    }));
