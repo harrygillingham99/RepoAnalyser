@@ -1,4 +1,3 @@
-import { DashboardHeader } from "@components/BaseComponents/DashboardHeader";
 import { AuthorizedRoutes } from "@typeDefinitions/Routes";
 import { AppContainer } from "@state/AppStateContainer";
 import { Routes } from "@typeDefinitions/Routes";
@@ -8,44 +7,27 @@ import { DetailedPullRequestRoute } from "./PullRequests/DetailedPullRequestRout
 import { PullRequestRoute } from "./PullRequests/PullRequestRoute";
 import { DetailedRepositoryRoute } from "./Repositories/DetailedRepositoryRoute";
 import { RepositoriesRoute } from "./Repositories/RepositoriesRoute";
+import { LandingRoute } from "./Landing/LandingRoute";
 
 export const HomeRoute = () => {
   const { pathname } = useLocation();
   const { appState } = AppContainer.useContainer();
 
-  const canViewRoute = (path: string) =>
-    (appState.user === undefined && AuthorizedRoutes.indexOf(path as Routes) < 0) ||
+  const canViewRoute =
+    (appState.user === undefined &&
+      AuthorizedRoutes.indexOf(pathname as Routes) < 0) ||
     appState.user !== undefined;
 
-  if (!canViewRoute(pathname)) return <Redirect to={Routes.Unauthorised} />;
+  if (!canViewRoute) return <Redirect to={Routes.Unauthorised} />;
 
   return (
     <Switch>
-      <Route path={Routes.PullRequests}>
-        <PullRequestRoute />
-      </Route>
-      <Route path={Routes.Repositories}>
-        <RepositoriesRoute />
-      </Route>
-      <Route path={Routes.Activity}>
-        <ActivityRoute />
-      </Route>
-      <Route path={Routes.Landing}>
-        <DashboardHeader
-          text={`Welcome ${appState?.user?.name ?? "please log in"}`}
-        />
-      </Route>
-      <Route
-        path={Routes.Repository}
-        component={DetailedRepositoryRoute}
-      />
-      <Route
-        path={Routes.PullRequest}
-        component={DetailedPullRequestRoute}
-      />
-      <Route>
-        <Redirect to={Routes.NotFound} />
-      </Route>
+      <Route path={Routes.PullRequests} component={PullRequestRoute} />
+      <Route path={Routes.Repositories} component={RepositoriesRoute} />
+      <Route path={Routes.Activity} component={ActivityRoute} />
+      <Route path={Routes.Landing} component={LandingRoute} />
+      <Route path={Routes.Repository} component={DetailedRepositoryRoute} />
+      <Route path={Routes.PullRequest} component={DetailedPullRequestRoute} />
     </Switch>
   );
 };

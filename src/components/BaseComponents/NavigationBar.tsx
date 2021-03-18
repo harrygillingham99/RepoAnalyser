@@ -22,7 +22,7 @@ export const NavigationBar = () => {
   } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
 
-  const shouldShowAccountLink =
+  const showSettingsLink =
     appState.user !== undefined && !appState.loading;
 
   const canLogin = !appState.loading && appState.loginRedirectUrl;
@@ -83,13 +83,7 @@ export const NavigationBar = () => {
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
-          <Link
-            className={clsx('nav-link', pathname.includes('home') && "active")}
-            to={Routes.Landing}
-          >
-            Home
-          </Link>
-          {shouldShowAccountLink && (
+          {showSettingsLink && (
             <Link
               className={clsx('nav-link', pathname.includes(Routes.Settings) && 'active')}
               to={Routes.Settings}
