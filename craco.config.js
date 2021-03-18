@@ -1,6 +1,6 @@
 const CracoAlias = require("craco-alias");
 const { whenDev } = require("@craco/craco");
-const path = require("path")
+const path = require("path");
 const StyleLintPlugin = require("stylelint-webpack-plugin");
 const interpolateHtml = require("craco-interpolate-html-plugin");
 
@@ -21,10 +21,8 @@ module.exports = {
     {
       plugin: interpolateHtml,
       // Enter the variable to be interpolated in the html file
-      options: {
-        appBaseDir: process.env.IS_ELECTRON === 'true' ? './' : '/',
-      },
-    }
+      options: {},
+    },
   ],
   webpack: {
     devServer: whenDev(() => ({ https: true })),

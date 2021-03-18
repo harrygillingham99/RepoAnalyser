@@ -57,7 +57,7 @@ export const RepositoriesRoute = () => {
     <>
       <DashboardHeader text={getHeaderText(state.repoFilterType)} />
       <div className="container-fluid">
-        <Dropdown className="">
+        <Dropdown>
           <Dropdown.Toggle variant="info">Repository Filter</Dropdown.Toggle>
           <Dropdown.Menu>
             <Dropdown.Item

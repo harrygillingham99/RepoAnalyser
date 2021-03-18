@@ -10,6 +10,7 @@ import { AuthCookieKey } from "@constants/CookieConstants";
 import { getCookie } from "@utils/CookieProvider";
 import { TestId } from "@tests/TestConstants";
 import useEffectOnce from "react-use/lib/useEffectOnce";
+import clsx from "clsx";
 
 export const NavigationBar = () => {
   const { pathname } = useLocation();
@@ -83,18 +84,14 @@ export const NavigationBar = () => {
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
           <Link
-            className={`nav-link ${
-              pathname.includes("home") ? "active" : ""
-            }`}
+            className={clsx('nav-link', pathname.includes('home') && "active")}
             to={Routes.Landing}
           >
             Home
           </Link>
           {shouldShowAccountLink && (
             <Link
-              className={`nav-link ${
-                pathname.includes(Routes.Settings) ? "active" : ""
-              }`}
+              className={clsx('nav-link', pathname.includes(Routes.Settings) && 'active')}
               to={Routes.Settings}
             >
               Settings
@@ -104,7 +101,7 @@ export const NavigationBar = () => {
         <div>
           {!appState.user && (
             <a
-              className={!canLogin ? "disabled" : ""}
+              className={clsx(!canLogin && 'disabled')}
               href={appState.loginRedirectUrl}
             >
               <Button variant="info" disabled={!canLogin}>

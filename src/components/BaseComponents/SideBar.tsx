@@ -12,6 +12,7 @@ import { RedirectContainer } from "@state/RedirectContainer";
 import { WrapChildrenIf } from "./WrapChildrenIf";
 import { AuthorizedRoutes } from "@typeDefinitions/Routes";
 import { TestId } from "@tests/TestConstants";
+import clsx from "clsx";
 
 export const SideBar = () => {
   const { pathname } = useLocation();
@@ -46,15 +47,11 @@ export const SideBar = () => {
             key={`${title}-${pathname}-nav-item`}
           >
             <li
-              className={`nav-item ${shouldWrapInAnchor ? "clickable" : ""} ${
-                linkTo === undefined && onPress !== undefined
-                  ? "list-group-item-action"
-                  : ""
-              }`}
+              className={clsx('nav-item', shouldWrapInAnchor && 'clickable')}
               onClick={onPress}
               data-testid={TestId.SideBarRowItem}
             >
-              <span className={`nav-link ${isActiveLink ? "active" : ""}`}>
+              <span className={clsx(' nav-link', isActiveLink && "active")}>
                 <Icon className="nav-link-icon" />
                 {title}
               </span>
