@@ -1,4 +1,4 @@
-import { HomeRoutes, Routes } from "@typeDefinitions/Routes";
+import { HomeRoutes, Routes, HomeRoutesWithParams } from "@typeDefinitions/Routes";
 import { Nav } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import "@styles/Nav.scss";
@@ -63,7 +63,7 @@ export const SideBar = () => {
   };
 
   const getLinksForRoute = (route: Routes | undefined) => {
-    if (route && HomeRoutes.indexOf(route) >= 0) {
+    if (route && (HomeRoutes.indexOf(route) >= 0 || HomeRoutesWithParams.findIndex(r => route.includes(r)) >= 0)){
       return generateLinksForItems(HomeSidebarItems);
     }
     switch (route) {

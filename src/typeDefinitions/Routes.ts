@@ -11,6 +11,8 @@ enum Routes {
   PullRequest = "/home/pull-request/:repoId/:pullRequest",
 };
 
+const HomeRoutesWithParams = ['/home/pull-request', '/home/repository']
+
 const HomeRoutes: Routes[] = [
   Routes.Activity,
   Routes.Landing,
@@ -39,4 +41,4 @@ const AuthorizedRoutes: Routes[] = [
   Routes.Activity,
 ];
 
-export { Routes, AuthorizedRoutes, DashboardRoutes, HomeRoutes };
+export { Routes, AuthorizedRoutes, DashboardRoutes, HomeRoutes, HomeRoutesWithParams };
