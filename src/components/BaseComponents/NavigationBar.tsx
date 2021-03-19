@@ -29,7 +29,7 @@ export const NavigationBar = () => {
 
   useEffectOnce(() => {
     toggleLoading(true);
-    const savedAuthCookie = getCookie(AuthCookieKey);
+    const savedAuthCookie = getCookie<string>(AuthCookieKey);
     //if the cookie is there we can use it to just fetch the user info straight away
     if (savedAuthCookie) {
       (async () => {
