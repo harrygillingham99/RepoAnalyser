@@ -58,7 +58,7 @@
     "build-dev": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
-    "generate-client": "nswag run ./api.nswag /runtime:WinX64",
+    "generate-client": "wait-on https://localhost:44306/swagger/API/swagger.json && nswag run ./api.nswag /runtime:WinX64",
     "postinstall": "husky install",
     "pre-commit": "lint-staged --verbose --allow-empty"
   },
