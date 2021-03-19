@@ -53,7 +53,7 @@
     "stylelint-config-recommended": "^4.0.0"
   },
   "scripts": {
-    "start": "craco start --verbose",
+    "start": "cross-env HTTPS=true craco start --verbose",
     "build": "cross-env NODE_ENV=production craco build",
     "build-dev": "craco build",
     "test": "craco test",

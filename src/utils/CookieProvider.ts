@@ -24,8 +24,12 @@ export const expireCookie = (name: string) => {
 };
 
 function mapFromCookieValue<T>(stringVal?: string): T | undefined {
-  if (!stringVal || stringVal.length === 0) return;
-  return JSON.parse(stringVal) as T;
+  try {
+    if (!stringVal || stringVal.length === 0) return;
+    return JSON.parse(stringVal) as T;
+  } catch (error) {
+    return;
+  }
 }
 
 function mapToCookieValue<T>(value: T): string {

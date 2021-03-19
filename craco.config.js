@@ -19,7 +19,6 @@ module.exports = {
     },
   ],
   webpack: {
-    devServer: whenDev(() => ({ https: true })),
     plugins: {
       add: [
         new StyleLintPlugin({
