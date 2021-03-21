@@ -1,4 +1,3 @@
-import React from "react";
 import "@styles/App.scss";
 import { Col, Container, Row } from "react-bootstrap";
 import { NavigationBar } from "@components/BaseComponents/NavigationBar";
