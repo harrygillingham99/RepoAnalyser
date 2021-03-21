@@ -69,7 +69,6 @@ export class Client extends AuthorizedApiBase {
 
   /**
    * @param metadata (optional) ClientMetadata
-   * @return Success getting auth token
    */
   authentication_GetOAuthTokenWithUserInfo(
     code: string | null,
@@ -111,30 +110,20 @@ export class Client extends AuthorizedApiBase {
     if (response.headers && response.headers.forEach) {
       response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-    if (status === 200) {
+    if (status === 404) {
       return response.text().then((_responseText) => {
-        let result200: any = null;
-        let resultData200 =
+        let result404: any = null;
+        let resultData404 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result200 = TokenUserResponse.fromJS(resultData200);
-        return result200;
-      });
-    } else if (status === 400) {
-      return response.text().then((_responseText) => {
-        let result400: any = null;
-        let resultData400 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result400 = ValidationResponse.fromJS(resultData400);
+        result404 = NotFoundResponse.fromJS(resultData404);
         return throwException(
-          "Bad request getting auth token",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
-          result400
+          result404
         );
       });
     } else if (status === 401) {
@@ -146,27 +135,27 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result401 = UnauthorizedResponse.fromJS(resultData401);
         return throwException(
-          "No token provided when getting user info",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result401
         );
       });
-    } else if (status === 404) {
+    } else if (status === 400) {
       return response.text().then((_responseText) => {
-        let result404: any = null;
-        let resultData404 =
+        let result400: any = null;
+        let resultData400 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result404 = NotFoundResponse.fromJS(resultData404);
+        result400 = ValidationResponse.fromJS(resultData400);
         return throwException(
-          "Error getting auth token, code provided not found",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
-          result404
+          result400
         );
       });
     } else if (status === 500) {
@@ -178,12 +167,22 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result500 = ProblemDetails.fromJS(resultData500);
         return throwException(
-          "Error getting auth token",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result500
         );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = TokenUserResponse.fromJS(resultData200);
+        return result200;
       });
     } else if (status !== 200 && status !== 204) {
       return response.text().then((_responseText) => {
@@ -200,7 +199,6 @@ export class Client extends AuthorizedApiBase {
 
   /**
    * @param metadata (optional) ClientMetadata
-   * @return Success getting github redirect url
    */
   authentication_GetLoginRedirectUrl(
     metadata: any | undefined
@@ -234,15 +232,37 @@ export class Client extends AuthorizedApiBase {
     if (response.headers && response.headers.forEach) {
       response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-    if (status === 200) {
+    if (status === 404) {
       return response.text().then((_responseText) => {
-        let result200: any = null;
-        let resultData200 =
+        let result404: any = null;
+        let resultData404 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result200 = resultData200 !== undefined ? resultData200 : <any>null;
-        return result200;
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
       });
     } else if (status === 400) {
       return response.text().then((_responseText) => {
@@ -253,27 +273,11 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result400 = ValidationResponse.fromJS(resultData400);
         return throwException(
-          "Bad request getting redirect url",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result400
-        );
-      });
-    } else if (status === 404) {
-      return response.text().then((_responseText) => {
-        let result404: any = null;
-        let resultData404 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result404 = NotFoundResponse.fromJS(resultData404);
-        return throwException(
-          "Error getting redirect url",
-          status,
-          _responseText,
-          _headers,
-          result404
         );
       });
     } else if (status === 500) {
@@ -285,12 +289,22 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result500 = ProblemDetails.fromJS(resultData500);
         return throwException(
-          "Error getting redirect url",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result500
         );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = resultData200 !== undefined ? resultData200 : <any>null;
+        return result200;
       });
     } else if (status !== 200 && status !== 204) {
       return response.text().then((_responseText) => {
@@ -307,7 +321,6 @@ export class Client extends AuthorizedApiBase {
 
   /**
    * @param metadata (optional) ClientMetadata
-   * @return Success getting user info
    */
   authentication_GetUserInformationForToken(
     metadata: any | undefined
@@ -341,15 +354,21 @@ export class Client extends AuthorizedApiBase {
     if (response.headers && response.headers.forEach) {
       response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-    if (status === 200) {
+    if (status === 404) {
       return response.text().then((_responseText) => {
-        let result200: any = null;
-        let resultData200 =
+        let result404: any = null;
+        let resultData404 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result200 = UserInfoResult.fromJS(resultData200);
-        return result200;
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
       });
     } else if (status === 401) {
       return response.text().then((_responseText) => {
@@ -360,27 +379,27 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result401 = UnauthorizedResponse.fromJS(resultData401);
         return throwException(
-          "No token provided",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result401
         );
       });
-    } else if (status === 404) {
+    } else if (status === 400) {
       return response.text().then((_responseText) => {
-        let result404: any = null;
-        let resultData404 =
+        let result400: any = null;
+        let resultData400 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result404 = NotFoundResponse.fromJS(resultData404);
+        result400 = ValidationResponse.fromJS(resultData400);
         return throwException(
-          "User not found",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
-          result404
+          result400
         );
       });
     } else if (status === 500) {
@@ -392,12 +411,22 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result500 = ProblemDetails.fromJS(resultData500);
         return throwException(
-          "Error getting user",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result500
         );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = UserInfoResult.fromJS(resultData200);
+        return result200;
       });
     } else if (status !== 200 && status !== 204) {
       return response.text().then((_responseText) => {
@@ -414,7 +443,6 @@ export class Client extends AuthorizedApiBase {
 
   /**
    * @param metadata (optional) ClientMetadata
-   * @return Success getting pull requests
    */
   pullRequest_GetPullRequests(
     pullFilterOption: PullRequestFilterOption,
@@ -455,7 +483,71 @@ export class Client extends AuthorizedApiBase {
     if (response.headers && response.headers.forEach) {
       response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-    if (status === 200) {
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
       return response.text().then((_responseText) => {
         let result200: any = null;
         let resultData200 =
@@ -468,54 +560,6 @@ export class Client extends AuthorizedApiBase {
             result200!.push(UserPullRequestResult.fromJS(item));
         }
         return result200;
-      });
-    } else if (status === 401) {
-      return response.text().then((_responseText) => {
-        let result401: any = null;
-        let resultData401 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result401 = UnauthorizedResponse.fromJS(resultData401);
-        return throwException(
-          "No token provided",
-          status,
-          _responseText,
-          _headers,
-          result401
-        );
-      });
-    } else if (status === 404) {
-      return response.text().then((_responseText) => {
-        let result404: any = null;
-        let resultData404 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result404 = NotFoundResponse.fromJS(resultData404);
-        return throwException(
-          "not found",
-          status,
-          _responseText,
-          _headers,
-          result404
-        );
-      });
-    } else if (status === 500) {
-      return response.text().then((_responseText) => {
-        let result500: any = null;
-        let resultData500 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result500 = ProblemDetails.fromJS(resultData500);
-        return throwException(
-          "Error getting pull requests",
-          status,
-          _responseText,
-          _headers,
-          result500
-        );
       });
     } else if (status !== 200 && status !== 204) {
       return response.text().then((_responseText) => {
@@ -532,7 +576,6 @@ export class Client extends AuthorizedApiBase {
 
   /**
    * @param metadata (optional) ClientMetadata
-   * @return Success getting pull requests
    */
   pullRequest_GetDetailedPullRequest(
     repoId: number,
@@ -574,15 +617,21 @@ export class Client extends AuthorizedApiBase {
     if (response.headers && response.headers.forEach) {
       response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-    if (status === 200) {
+    if (status === 404) {
       return response.text().then((_responseText) => {
-        let result200: any = null;
-        let resultData200 =
+        let result404: any = null;
+        let resultData404 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result200 = DetailedPullRequest.fromJS(resultData200);
-        return result200;
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
       });
     } else if (status === 401) {
       return response.text().then((_responseText) => {
@@ -593,27 +642,27 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result401 = UnauthorizedResponse.fromJS(resultData401);
         return throwException(
-          "No token provided",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result401
         );
       });
-    } else if (status === 404) {
+    } else if (status === 400) {
       return response.text().then((_responseText) => {
-        let result404: any = null;
-        let resultData404 =
+        let result400: any = null;
+        let resultData400 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result404 = NotFoundResponse.fromJS(resultData404);
+        result400 = ValidationResponse.fromJS(resultData400);
         return throwException(
-          "not found",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
-          result404
+          result400
         );
       });
     } else if (status === 500) {
@@ -625,12 +674,22 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result500 = ProblemDetails.fromJS(resultData500);
         return throwException(
-          "Error getting pull requests",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result500
         );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = DetailedPullRequest.fromJS(resultData200);
+        return result200;
       });
     } else if (status !== 200 && status !== 204) {
       return response.text().then((_responseText) => {
@@ -647,7 +706,6 @@ export class Client extends AuthorizedApiBase {
 
   /**
    * @param metadata (optional) ClientMetadata
-   * @return Success getting repos
    */
   repository_Repositories(
     filterOption: RepoFilterOptions,
@@ -688,7 +746,71 @@ export class Client extends AuthorizedApiBase {
     if (response.headers && response.headers.forEach) {
       response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-    if (status === 200) {
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
       return response.text().then((_responseText) => {
         let result200: any = null;
         let resultData200 =
@@ -701,54 +823,6 @@ export class Client extends AuthorizedApiBase {
             result200!.push(UserRepositoryResult.fromJS(item));
         }
         return result200;
-      });
-    } else if (status === 401) {
-      return response.text().then((_responseText) => {
-        let result401: any = null;
-        let resultData401 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result401 = UnauthorizedResponse.fromJS(resultData401);
-        return throwException(
-          "No token provided",
-          status,
-          _responseText,
-          _headers,
-          result401
-        );
-      });
-    } else if (status === 404) {
-      return response.text().then((_responseText) => {
-        let result404: any = null;
-        let resultData404 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result404 = NotFoundResponse.fromJS(resultData404);
-        return throwException(
-          "not found",
-          status,
-          _responseText,
-          _headers,
-          result404
-        );
-      });
-    } else if (status === 500) {
-      return response.text().then((_responseText) => {
-        let result500: any = null;
-        let resultData500 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result500 = ProblemDetails.fromJS(resultData500);
-        return throwException(
-          "Error getting repos",
-          status,
-          _responseText,
-          _headers,
-          result500
-        );
       });
     } else if (status !== 200 && status !== 204) {
       return response.text().then((_responseText) => {
@@ -765,7 +839,6 @@ export class Client extends AuthorizedApiBase {
 
   /**
    * @param metadata (optional) ClientMetadata
-   * @return Success getting detailed repo
    */
   repository_GetDetailedRepository(
     repoId: number,
@@ -803,15 +876,21 @@ export class Client extends AuthorizedApiBase {
     if (response.headers && response.headers.forEach) {
       response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-    if (status === 200) {
+    if (status === 404) {
       return response.text().then((_responseText) => {
-        let result200: any = null;
-        let resultData200 =
+        let result404: any = null;
+        let resultData404 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result200 = DetailedRepository.fromJS(resultData200);
-        return result200;
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
       });
     } else if (status === 401) {
       return response.text().then((_responseText) => {
@@ -822,27 +901,27 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result401 = UnauthorizedResponse.fromJS(resultData401);
         return throwException(
-          "No token provided",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result401
         );
       });
-    } else if (status === 404) {
+    } else if (status === 400) {
       return response.text().then((_responseText) => {
-        let result404: any = null;
-        let resultData404 =
+        let result400: any = null;
+        let resultData400 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result404 = NotFoundResponse.fromJS(resultData404);
+        result400 = ValidationResponse.fromJS(resultData400);
         return throwException(
-          "Repo not found",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
-          result404
+          result400
         );
       });
     } else if (status === 500) {
@@ -854,12 +933,22 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result500 = ProblemDetails.fromJS(resultData500);
         return throwException(
-          "Error getting detailed repo information",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result500
         );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = DetailedRepository.fromJS(resultData200);
+        return result200;
       });
     } else if (status !== 200 && status !== 204) {
       return response.text().then((_responseText) => {
@@ -876,7 +965,6 @@ export class Client extends AuthorizedApiBase {
 
   /**
    * @param metadata (optional) ClientMetadata
-   * @return Success getting codeowners
    */
   repository_GetCodeOwnersForRepo(
     repoId: number,
@@ -914,7 +1002,71 @@ export class Client extends AuthorizedApiBase {
     if (response.headers && response.headers.forEach) {
       response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-    if (status === 200) {
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
       return response.text().then((_responseText) => {
         let result200: any = null;
         let resultData200 =
@@ -929,54 +1081,6 @@ export class Client extends AuthorizedApiBase {
           }
         }
         return result200;
-      });
-    } else if (status === 401) {
-      return response.text().then((_responseText) => {
-        let result401: any = null;
-        let resultData401 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result401 = UnauthorizedResponse.fromJS(resultData401);
-        return throwException(
-          "No token provided",
-          status,
-          _responseText,
-          _headers,
-          result401
-        );
-      });
-    } else if (status === 404) {
-      return response.text().then((_responseText) => {
-        let result404: any = null;
-        let resultData404 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result404 = NotFoundResponse.fromJS(resultData404);
-        return throwException(
-          "Not found",
-          status,
-          _responseText,
-          _headers,
-          result404
-        );
-      });
-    } else if (status === 500) {
-      return response.text().then((_responseText) => {
-        let result500: any = null;
-        let resultData500 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result500 = ProblemDetails.fromJS(resultData500);
-        return throwException(
-          "Error getting code owners",
-          status,
-          _responseText,
-          _headers,
-          result500
-        );
       });
     } else if (status !== 200 && status !== 204) {
       return response.text().then((_responseText) => {
@@ -993,7 +1097,6 @@ export class Client extends AuthorizedApiBase {
 
   /**
    * @param metadata (optional) ClientMetadata
-   * @return Success getting user stats
    */
   statistics_GetUserStatistics(
     metadata: any | undefined
@@ -1027,30 +1130,20 @@ export class Client extends AuthorizedApiBase {
     if (response.headers && response.headers.forEach) {
       response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-    if (status === 200) {
+    if (status === 404) {
       return response.text().then((_responseText) => {
-        let result200: any = null;
-        let resultData200 =
+        let result404: any = null;
+        let resultData404 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result200 = UserActivity.fromJS(resultData200);
-        return result200;
-      });
-    } else if (status === 400) {
-      return response.text().then((_responseText) => {
-        let result400: any = null;
-        let resultData400 =
-          _responseText === ""
-            ? null
-            : JSON.parse(_responseText, this.jsonParseReviver);
-        result400 = ValidationResponse.fromJS(resultData400);
+        result404 = NotFoundResponse.fromJS(resultData404);
         return throwException(
-          "Bad request getting user stats",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
-          result400
+          result404
         );
       });
     } else if (status === 401) {
@@ -1062,27 +1155,27 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result401 = UnauthorizedResponse.fromJS(resultData401);
         return throwException(
-          "No token provided when getting user stats",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result401
         );
       });
-    } else if (status === 404) {
+    } else if (status === 400) {
       return response.text().then((_responseText) => {
-        let result404: any = null;
-        let resultData404 =
+        let result400: any = null;
+        let resultData400 =
           _responseText === ""
             ? null
             : JSON.parse(_responseText, this.jsonParseReviver);
-        result404 = NotFoundResponse.fromJS(resultData404);
+        result400 = ValidationResponse.fromJS(resultData400);
         return throwException(
-          "Error getting user stats, user not found",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
-          result404
+          result400
         );
       });
     } else if (status === 500) {
@@ -1094,12 +1187,22 @@ export class Client extends AuthorizedApiBase {
             : JSON.parse(_responseText, this.jsonParseReviver);
         result500 = ProblemDetails.fromJS(resultData500);
         return throwException(
-          "Error getting user stats",
+          "A server side error occurred.",
           status,
           _responseText,
           _headers,
           result500
         );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = UserActivity.fromJS(resultData200);
+        return result200;
       });
     } else if (status !== 200 && status !== 204) {
       return response.text().then((_responseText) => {
@@ -1113,6 +1216,235 @@ export class Client extends AuthorizedApiBase {
     }
     return Promise.resolve<UserActivity>(<any>null);
   }
+}
+
+export abstract class BaseResponse implements IBaseResponse {
+  message?: string | undefined;
+  title?: string | undefined;
+
+  constructor(data?: IBaseResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.message = _data["message"];
+      this.title = _data["title"];
+    }
+  }
+
+  static fromJS(data: any): BaseResponse {
+    data = typeof data === "object" ? data : {};
+    throw new Error(
+      "The abstract class 'BaseResponse' cannot be instantiated."
+    );
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["message"] = this.message;
+    data["title"] = this.title;
+    return data;
+  }
+}
+
+export interface IBaseResponse {
+  message?: string | undefined;
+  title?: string | undefined;
+}
+
+export class NotFoundResponse
+  extends BaseResponse
+  implements INotFoundResponse {
+  badProperties?: { [key: string]: string } | undefined;
+
+  constructor(data?: INotFoundResponse) {
+    super(data);
+  }
+
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      if (_data["badProperties"]) {
+        this.badProperties = {} as any;
+        for (let key in _data["badProperties"]) {
+          if (_data["badProperties"].hasOwnProperty(key))
+            this.badProperties![key] = _data["badProperties"][key];
+        }
+      }
+    }
+  }
+
+  static fromJS(data: any): NotFoundResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new NotFoundResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (this.badProperties) {
+      data["badProperties"] = {};
+      for (let key in this.badProperties) {
+        if (this.badProperties.hasOwnProperty(key))
+          data["badProperties"][key] = this.badProperties[key];
+      }
+    }
+    super.toJSON(data);
+    return data;
+  }
+}
+
+export interface INotFoundResponse extends IBaseResponse {
+  badProperties?: { [key: string]: string } | undefined;
+}
+
+export class UnauthorizedResponse
+  extends BaseResponse
+  implements IUnauthorizedResponse {
+  constructor(data?: IUnauthorizedResponse) {
+    super(data);
+  }
+
+  init(_data?: any) {
+    super.init(_data);
+  }
+
+  static fromJS(data: any): UnauthorizedResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new UnauthorizedResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    super.toJSON(data);
+    return data;
+  }
+}
+
+export interface IUnauthorizedResponse extends IBaseResponse {}
+
+export class ValidationResponse
+  extends BaseResponse
+  implements IValidationResponse {
+  validationErrors?: { [key: string]: string } | undefined;
+
+  constructor(data?: IValidationResponse) {
+    super(data);
+  }
+
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      if (_data["validationErrors"]) {
+        this.validationErrors = {} as any;
+        for (let key in _data["validationErrors"]) {
+          if (_data["validationErrors"].hasOwnProperty(key))
+            this.validationErrors![key] = _data["validationErrors"][key];
+        }
+      }
+    }
+  }
+
+  static fromJS(data: any): ValidationResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new ValidationResponse();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (this.validationErrors) {
+      data["validationErrors"] = {};
+      for (let key in this.validationErrors) {
+        if (this.validationErrors.hasOwnProperty(key))
+          data["validationErrors"][key] = this.validationErrors[key];
+      }
+    }
+    super.toJSON(data);
+    return data;
+  }
+}
+
+export interface IValidationResponse extends IBaseResponse {
+  validationErrors?: { [key: string]: string } | undefined;
+}
+
+export class ProblemDetails implements IProblemDetails {
+  type?: string | undefined;
+  title?: string | undefined;
+  status?: number | undefined;
+  detail?: string | undefined;
+  instance?: string | undefined;
+  extensions?: { [key: string]: any } | undefined;
+
+  constructor(data?: IProblemDetails) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.type = _data["type"];
+      this.title = _data["title"];
+      this.status = _data["status"];
+      this.detail = _data["detail"];
+      this.instance = _data["instance"];
+      if (_data["extensions"]) {
+        this.extensions = {} as any;
+        for (let key in _data["extensions"]) {
+          if (_data["extensions"].hasOwnProperty(key))
+            this.extensions![key] = _data["extensions"][key];
+        }
+      }
+    }
+  }
+
+  static fromJS(data: any): ProblemDetails {
+    data = typeof data === "object" ? data : {};
+    let result = new ProblemDetails();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["type"] = this.type;
+    data["title"] = this.title;
+    data["status"] = this.status;
+    data["detail"] = this.detail;
+    data["instance"] = this.instance;
+    if (this.extensions) {
+      data["extensions"] = {};
+      for (let key in this.extensions) {
+        if (this.extensions.hasOwnProperty(key))
+          data["extensions"][key] = this.extensions[key];
+      }
+    }
+    return data;
+  }
+}
+
+export interface IProblemDetails {
+  type?: string | undefined;
+  title?: string | undefined;
+  status?: number | undefined;
+  detail?: string | undefined;
+  instance?: string | undefined;
+  extensions?: { [key: string]: any } | undefined;
 }
 
 export class TokenUserResponse implements ITokenUserResponse {
@@ -1454,235 +1786,6 @@ export interface IPlan {
   privateRepos?: number;
   space?: number;
   billingEmail?: string | undefined;
-}
-
-export abstract class BaseResponse implements IBaseResponse {
-  message?: string | undefined;
-  title?: string | undefined;
-
-  constructor(data?: IBaseResponse) {
-    if (data) {
-      for (var property in data) {
-        if (data.hasOwnProperty(property))
-          (<any>this)[property] = (<any>data)[property];
-      }
-    }
-  }
-
-  init(_data?: any) {
-    if (_data) {
-      this.message = _data["message"];
-      this.title = _data["title"];
-    }
-  }
-
-  static fromJS(data: any): BaseResponse {
-    data = typeof data === "object" ? data : {};
-    throw new Error(
-      "The abstract class 'BaseResponse' cannot be instantiated."
-    );
-  }
-
-  toJSON(data?: any) {
-    data = typeof data === "object" ? data : {};
-    data["message"] = this.message;
-    data["title"] = this.title;
-    return data;
-  }
-}
-
-export interface IBaseResponse {
-  message?: string | undefined;
-  title?: string | undefined;
-}
-
-export class ValidationResponse
-  extends BaseResponse
-  implements IValidationResponse {
-  validationErrors?: { [key: string]: string } | undefined;
-
-  constructor(data?: IValidationResponse) {
-    super(data);
-  }
-
-  init(_data?: any) {
-    super.init(_data);
-    if (_data) {
-      if (_data["validationErrors"]) {
-        this.validationErrors = {} as any;
-        for (let key in _data["validationErrors"]) {
-          if (_data["validationErrors"].hasOwnProperty(key))
-            this.validationErrors![key] = _data["validationErrors"][key];
-        }
-      }
-    }
-  }
-
-  static fromJS(data: any): ValidationResponse {
-    data = typeof data === "object" ? data : {};
-    let result = new ValidationResponse();
-    result.init(data);
-    return result;
-  }
-
-  toJSON(data?: any) {
-    data = typeof data === "object" ? data : {};
-    if (this.validationErrors) {
-      data["validationErrors"] = {};
-      for (let key in this.validationErrors) {
-        if (this.validationErrors.hasOwnProperty(key))
-          data["validationErrors"][key] = this.validationErrors[key];
-      }
-    }
-    super.toJSON(data);
-    return data;
-  }
-}
-
-export interface IValidationResponse extends IBaseResponse {
-  validationErrors?: { [key: string]: string } | undefined;
-}
-
-export class UnauthorizedResponse
-  extends BaseResponse
-  implements IUnauthorizedResponse {
-  constructor(data?: IUnauthorizedResponse) {
-    super(data);
-  }
-
-  init(_data?: any) {
-    super.init(_data);
-  }
-
-  static fromJS(data: any): UnauthorizedResponse {
-    data = typeof data === "object" ? data : {};
-    let result = new UnauthorizedResponse();
-    result.init(data);
-    return result;
-  }
-
-  toJSON(data?: any) {
-    data = typeof data === "object" ? data : {};
-    super.toJSON(data);
-    return data;
-  }
-}
-
-export interface IUnauthorizedResponse extends IBaseResponse {}
-
-export class NotFoundResponse
-  extends BaseResponse
-  implements INotFoundResponse {
-  badProperties?: { [key: string]: string } | undefined;
-
-  constructor(data?: INotFoundResponse) {
-    super(data);
-  }
-
-  init(_data?: any) {
-    super.init(_data);
-    if (_data) {
-      if (_data["badProperties"]) {
-        this.badProperties = {} as any;
-        for (let key in _data["badProperties"]) {
-          if (_data["badProperties"].hasOwnProperty(key))
-            this.badProperties![key] = _data["badProperties"][key];
-        }
-      }
-    }
-  }
-
-  static fromJS(data: any): NotFoundResponse {
-    data = typeof data === "object" ? data : {};
-    let result = new NotFoundResponse();
-    result.init(data);
-    return result;
-  }
-
-  toJSON(data?: any) {
-    data = typeof data === "object" ? data : {};
-    if (this.badProperties) {
-      data["badProperties"] = {};
-      for (let key in this.badProperties) {
-        if (this.badProperties.hasOwnProperty(key))
-          data["badProperties"][key] = this.badProperties[key];
-      }
-    }
-    super.toJSON(data);
-    return data;
-  }
-}
-
-export interface INotFoundResponse extends IBaseResponse {
-  badProperties?: { [key: string]: string } | undefined;
-}
-
-export class ProblemDetails implements IProblemDetails {
-  type?: string | undefined;
-  title?: string | undefined;
-  status?: number | undefined;
-  detail?: string | undefined;
-  instance?: string | undefined;
-  extensions?: { [key: string]: any } | undefined;
-
-  constructor(data?: IProblemDetails) {
-    if (data) {
-      for (var property in data) {
-        if (data.hasOwnProperty(property))
-          (<any>this)[property] = (<any>data)[property];
-      }
-    }
-  }
-
-  init(_data?: any) {
-    if (_data) {
-      this.type = _data["type"];
-      this.title = _data["title"];
-      this.status = _data["status"];
-      this.detail = _data["detail"];
-      this.instance = _data["instance"];
-      if (_data["extensions"]) {
-        this.extensions = {} as any;
-        for (let key in _data["extensions"]) {
-          if (_data["extensions"].hasOwnProperty(key))
-            this.extensions![key] = _data["extensions"][key];
-        }
-      }
-    }
-  }
-
-  static fromJS(data: any): ProblemDetails {
-    data = typeof data === "object" ? data : {};
-    let result = new ProblemDetails();
-    result.init(data);
-    return result;
-  }
-
-  toJSON(data?: any) {
-    data = typeof data === "object" ? data : {};
-    data["type"] = this.type;
-    data["title"] = this.title;
-    data["status"] = this.status;
-    data["detail"] = this.detail;
-    data["instance"] = this.instance;
-    if (this.extensions) {
-      data["extensions"] = {};
-      for (let key in this.extensions) {
-        if (this.extensions.hasOwnProperty(key))
-          data["extensions"][key] = this.extensions[key];
-      }
-    }
-    return data;
-  }
-}
-
-export interface IProblemDetails {
-  type?: string | undefined;
-  title?: string | undefined;
-  status?: number | undefined;
-  detail?: string | undefined;
-  instance?: string | undefined;
-  extensions?: { [key: string]: any } | undefined;
 }
 
 export class UserInfoResult implements IUserInfoResult {
