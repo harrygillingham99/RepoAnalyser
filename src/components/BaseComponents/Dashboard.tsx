@@ -13,7 +13,7 @@ export const Dashboard = () => {
   const { appState } = AppContainer.useContainer();
   const { loading } = appState;
 
-  //Add SignalR event handlers here, there is access to all the state containers
+  //Add SignalR event handlers in effects, don't want duplicate messages firing
   useEffectOnce(() => {
     appState.connection.on("test", (test: string) => console.log(test));
   });
