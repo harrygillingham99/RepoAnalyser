@@ -7,15 +7,27 @@ import { Redirect, Route, useLocation, Switch } from "react-router-dom";
 import { HomeRoute } from "../Routes/Home/HomeRoute";
 import { Loader } from "./Loader";
 import { useEffectOnce } from "react-use";
+import { SignalRNotificationType } from "@services/api/Client";
 
 export const Dashboard = () => {
   const { pathname } = useLocation();
   const { appState } = AppContainer.useContainer();
   const { loading } = appState;
 
-  //Add SignalR event handlers in effects, don't want duplicate messages firing
+  //Add SignalR notification event handlers here
   useEffectOnce(() => {
-    appState.connection.on("test", (test: string) => console.log(test));
+    appState.connection.on(
+      "DirectNotification",
+      (user: string, message: string, type: SignalRNotificationType) => {
+        console.log(`Message Recieved ${user} ${message} ${type}`);
+        switch (type) {
+          case SignalRNotificationType.PullRequestAnalysisProgressUpdate:
+            break;
+          case SignalRNotificationType.RepoAnalysisProgressUpdate:
+            break;
+        }
+      }
+    );
   });
 
   if (

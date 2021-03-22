@@ -3964,6 +3964,11 @@ export interface IClientMetadata {
   cookiesEnabled?: boolean;
 }
 
+export enum SignalRNotificationType {
+  RepoAnalysisProgressUpdate = 1,
+  PullRequestAnalysisProgressUpdate = 2,
+}
+
 export class ApiException extends Error {
   message: string;
   status: number;

@@ -5,7 +5,6 @@ import { expireCookie } from "@utils/CookieProvider";
 import { useSetState } from "react-use";
 import { createContainer } from "unstated-next";
 import * as SignalR from "@microsoft/signalr";
-import { buildStartSignalR } from "@utils/SignalR";
 
 interface IAppState {
   token: string;
@@ -15,12 +14,39 @@ interface IAppState {
   connection: SignalR.HubConnection;
 }
 const useAppState = () => {
+  const startSignalR = () => {
+    const connection = new SignalR.HubConnectionBuilder()
+      .withUrl(
+        process.env.NODE_ENV === "production"
+          ? "https://server.local:4471/app-hub"
+          : "https://localhost:44306/app-hub"
+      )
+      .configureLogging(SignalR.LogLevel.Information)
+      .build();
+
+    async function start() {
+      try {
+        await connection.start();
+        console.log("SignalR Connected.");
+      } catch (err) {
+        console.log(err);
+        setTimeout(start, 5000);
+      }
+    }
+
+    connection.onclose(start);
+
+    start();
+
+    return connection;
+  };
+
   const [appState, setAppState] = useSetState<IAppState>({
     token: undefined!,
     user: undefined!,
     loginRedirectUrl: undefined!,
     loading: true,
-    connection: buildStartSignalR(),
+    connection: startSignalR(),
   });
 
   const signOut = (redirectToRoute: (route: Routes) => void) => {
