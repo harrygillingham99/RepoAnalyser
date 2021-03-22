@@ -1,5 +1,4 @@
 const CracoAlias = require("craco-alias");
-const { whenDev } = require("@craco/craco");
 const path = require("path");
 const StyleLintPlugin = require("stylelint-webpack-plugin");
 

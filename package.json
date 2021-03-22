@@ -7,6 +7,7 @@
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.1.0",
+    "@microsoft/signalr": "^5.0.4",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.6.2",
@@ -51,7 +52,7 @@
     "stylelint-config-recommended": "^4.0.0"
   },
   "scripts": {
-    "start": "cross-env HTTPS=true craco start --verbose",
+    "start": "craco start --verbose",
     "build": "cross-env NODE_ENV=production craco build",
     "build-dev": "craco build",
     "test": "craco test",
@@ -82,6 +83,9 @@
     ]
   },
   "lint-staged": {
-      "*.{js,css,md,ts,tsx}": ["eslint", "prettier --write"]
+    "*.{js,css,md,ts,tsx}": [
+      "eslint",
+      "prettier --write"
+    ]
   }
 }

@@ -4,12 +4,15 @@ import { Routes } from "@typeDefinitions/Routes";
 import { expireCookie } from "@utils/CookieProvider";
 import { useSetState } from "react-use";
 import { createContainer } from "unstated-next";
+import * as SignalR from "@microsoft/signalr";
+import { buildStartSignalR } from "@utils/SignalR";
 
 interface IAppState {
   token: string;
   loginRedirectUrl: string;
   user: User;
   loading: boolean;
+  connection: SignalR.HubConnection;
 }
 const useAppState = () => {
   const [appState, setAppState] = useSetState<IAppState>({
@@ -17,6 +20,7 @@ const useAppState = () => {
     user: undefined!,
     loginRedirectUrl: undefined!,
     loading: true,
+    connection: buildStartSignalR(),
   });
 
   const signOut = (redirectToRoute: (route: Routes) => void) => {
