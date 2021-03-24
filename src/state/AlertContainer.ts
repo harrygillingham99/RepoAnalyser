@@ -24,17 +24,12 @@ const useAlertState = () => {
   });
 
   const showInfoAlert = (title: string, message: string) => {
-    const shouldWait = alert.visible ? 3000 : 0;
-    setTimeout(
-      () =>
-        setAlert({
-          type: AlertType.Info,
-          visible: true,
-          message: message,
-          title: title,
-        }),
-      shouldWait
-    );
+    setAlert({
+      type: AlertType.Info,
+      visible: true,
+      message: message,
+      title: title,
+    });
   };
 
   const showErrorAlert = (title: string, message: string) =>
