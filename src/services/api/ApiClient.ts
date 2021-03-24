@@ -1,3 +1,5 @@
+import { apiUrl } from "@constants/Config";
+
 export class IConfig {
   /* 
       ApiClient.ts
@@ -31,10 +33,6 @@ class AuthorizedApiBase {
   };
 
   protected getBaseUrl = (defaultUrl: string, baseUrl?: string) => {
-    const ApiUrl =
-      process.env.NODE_ENV === "production"
-        ? "https://server.local:4471"
-        : "https://localhost:44306";
-    return ApiUrl !== undefined ? ApiUrl : defaultUrl;
+    return apiUrl ?? defaultUrl;
   };
 }

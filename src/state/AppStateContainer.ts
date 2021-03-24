@@ -5,6 +5,7 @@ import { expireCookie } from "@utils/CookieProvider";
 import { useSetState } from "react-use";
 import { createContainer } from "unstated-next";
 import * as SignalR from "@microsoft/signalr";
+import { appHubUrl } from "@constants/Config";
 
 interface IAppState {
   token: string;
@@ -15,11 +16,7 @@ interface IAppState {
 }
 
 const connection = new SignalR.HubConnectionBuilder()
-  .withUrl(
-    process.env.NODE_ENV === "production"
-      ? "https://server.local:4471/app-hub"
-      : "https://localhost:44306/app-hub"
-  )
+  .withUrl(appHubUrl)
   .configureLogging(SignalR.LogLevel.Information)
   .withAutomaticReconnect()
   .build();
