@@ -59,7 +59,7 @@ export const DetailedRepositoryRoute = () => {
       appState.token
     ).repository_GetCodeOwnersForRepo(
       state.repo.repository.id,
-      appState.connection.connectionId,
+      appState.connection.connectionId ?? "",
       buildUserInfo
     );
     setState({ codeOwners: result });
