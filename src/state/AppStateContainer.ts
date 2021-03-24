@@ -13,17 +13,19 @@ interface IAppState {
   loading: boolean;
   connection: SignalR.HubConnection;
 }
+
+const connection = new SignalR.HubConnectionBuilder()
+  .withUrl(
+    process.env.NODE_ENV === "production"
+      ? "https://server.local:4471/app-hub"
+      : "https://localhost:44306/app-hub"
+  )
+  .configureLogging(SignalR.LogLevel.Information)
+  .withAutomaticReconnect()
+  .build();
+
 const useAppState = () => {
   const startSignalR = () => {
-    const connection = new SignalR.HubConnectionBuilder()
-      .withUrl(
-        process.env.NODE_ENV === "production"
-          ? "https://server.local:4471/app-hub"
-          : "https://localhost:44306/app-hub"
-      )
-      .configureLogging(SignalR.LogLevel.Information)
-      .build();
-
     async function start() {
       try {
         await connection.start();
@@ -34,9 +36,11 @@ const useAppState = () => {
       }
     }
 
-    connection.onclose(start);
+    connection.onreconnecting(() => console.log("SignalR Reconnecting"));
 
-    start();
+    connection.onreconnected(() => console.log("SignalR Reconnected"));
+
+    connection.state === SignalR.HubConnectionState.Disconnected && start();
 
     return connection;
   };

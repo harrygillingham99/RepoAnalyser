@@ -7,6 +7,7 @@ import { AppContainer } from "@state/AppStateContainer";
 import { Routes } from "@typeDefinitions/Routes";
 import { buildUserInfo } from "@utils/ClientInfo";
 import React from "react";
+import { Button } from "react-bootstrap";
 import { Redirect, useParams } from "react-router-dom";
 import { useEffectOnce, useSetState } from "react-use";
 
@@ -16,6 +17,7 @@ interface RouteParams {
 
 interface DetailedRepositoryRouteState {
   repo: DetailedRepository;
+  codeOwners?: { [key: string]: string };
 }
 
 export const DetailedRepositoryRoute = () => {
@@ -26,6 +28,7 @@ export const DetailedRepositoryRoute = () => {
   const { showErrorAlert } = AlertContainer.useContainer();
   const [state, setState] = useSetState<DetailedRepositoryRouteState>({
     repo: undefined!,
+    codeOwners: undefined,
   });
 
   useEffectOnce(() => {
@@ -48,13 +51,32 @@ export const DetailedRepositoryRoute = () => {
     })();
   });
 
+  const calculateCodeOwners = async () => {
+    if (!state.repo || !state.repo.repository || !state.repo.repository.id)
+      return;
+    setLoading(true);
+    var result = await authorisedApiClient(
+      appState.token
+    ).repository_GetCodeOwnersForRepo(
+      state.repo.repository.id,
+      appState.connection.connectionId,
+      buildUserInfo
+    );
+    setState({ codeOwners: result });
+    setLoading(false);
+  };
+
   return appState.token === undefined ? (
     <Redirect to={Routes.Landing} />
   ) : (
     <>
       <DashboardHeader text={state.repo?.repository?.name ?? ""} />
+      <Button variant="info" onClick={() => calculateCodeOwners()}>
+        Calculate code owners
+      </Button>
       {loading && <Loader />}
       {state.repo && !loading && <>{JSON.stringify(state.repo)}</>}
+      {state.codeOwners && !loading && <>{JSON.stringify(state.codeOwners)}</>}
     </>
   );
 };

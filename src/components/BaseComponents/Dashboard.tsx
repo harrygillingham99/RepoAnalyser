@@ -8,10 +8,12 @@ import { HomeRoute } from "../Routes/Home/HomeRoute";
 import { Loader } from "./Loader";
 import { useEffectOnce } from "react-use";
 import { SignalRNotificationType } from "@services/api/Client";
+import { AlertContainer } from "@state/AlertContainer";
 
 export const Dashboard = () => {
   const { pathname } = useLocation();
   const { appState } = AppContainer.useContainer();
+  const { showInfoAlert, hideAlert } = AlertContainer.useContainer();
   const { loading } = appState;
 
   //Add SignalR notification event handlers here
@@ -22,9 +24,18 @@ export const Dashboard = () => {
         console.log(`Message Recieved ${user} ${message} ${type}`);
         switch (type) {
           case SignalRNotificationType.PullRequestAnalysisProgressUpdate:
+            showInfoAlert("Pull Request Analysis", message);
             break;
           case SignalRNotificationType.RepoAnalysisProgressUpdate:
+            showInfoAlert("Repository Analysis", message);
             break;
+          case SignalRNotificationType.RepoAnalysisDone:
+            showInfoAlert("Repository Analysis Complete", message);
+            setTimeout(() => hideAlert(), 4000);
+            break;
+          case SignalRNotificationType.PullRequestAnalysisDone:
+            showInfoAlert("Pull Request Analysis Complete", message);
+            setTimeout(() => hideAlert(), 4000);
         }
       }
     );

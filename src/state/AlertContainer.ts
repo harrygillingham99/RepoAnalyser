@@ -23,13 +23,19 @@ const useAlertState = () => {
     type: AlertType.Info,
   });
 
-  const showInfoAlert = (title: string, message: string) =>
-    setAlert({
-      type: AlertType.Info,
-      visible: true,
-      message: message,
-      title: title,
-    });
+  const showInfoAlert = (title: string, message: string) => {
+    const shouldWait = alert.visible ? 3000 : 0;
+    setTimeout(
+      () =>
+        setAlert({
+          type: AlertType.Info,
+          visible: true,
+          message: message,
+          title: title,
+        }),
+      shouldWait
+    );
+  };
 
   const showErrorAlert = (title: string, message: string) =>
     setAlert({
@@ -55,7 +61,7 @@ const useAlertState = () => {
       title: title,
     });
 
-  const hideAlert = () => setAlert({ visible: false });
+  const hideAlert = () => setAlert({ visible: false, title: "", message: "" });
 
   return {
     alert,
