@@ -76,7 +76,15 @@ export const DetailedRepositoryRoute = () => {
       </Button>
       {loading && <Loader />}
       {state.repo && !loading && <>{JSON.stringify(state.repo)}</>}
-      {state.codeOwners && !loading && <>{JSON.stringify(state.codeOwners)}</>}
+      {state.codeOwners && !loading && (
+        <>
+          {Object.keys(state.codeOwners).map((file) => (
+            <p>
+              {file} owned by {state.codeOwners![file] ?? "unknown"}
+            </p>
+          ))}
+        </>
+      )}
     </>
   );
 };
