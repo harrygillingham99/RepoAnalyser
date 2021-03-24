@@ -90,10 +90,7 @@ export const RepositoriesRoute = () => {
             gridBuilder={{
               items: state.repos,
               mapToElemFunc: (repo) => (
-                <Card
-                  key={`${repo.name}`}
-                  style={{ height: "300px", background: "#e9ecef" }}
-                >
+                <Card key={`${repo.name}`} className="grid-card">
                   <Card.Header className="p-1">{`Last updated - ${repo.lastUpdated?.toDateString()}`}</Card.Header>
                   <Card.Title className="text-center">{repo.name}</Card.Title>
                   <Card.Subtitle className="m-1">

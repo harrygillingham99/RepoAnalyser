@@ -22,8 +22,7 @@ export const NavigationBar = () => {
   } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
 
-  const showSettingsLink =
-    appState.user !== undefined && !appState.loading;
+  const showSettingsLink = appState.user !== undefined && !appState.loading;
 
   const canLogin = !appState.loading && appState.loginRedirectUrl;
 
@@ -74,7 +73,7 @@ export const NavigationBar = () => {
       bg="dark"
       variant="dark"
       expand="lg"
-      style={{ zIndex: 9999 }}
+      className="nav-top"
       data-testid={TestId.Nav}
     >
       <Link to={Routes.Landing}>
@@ -85,7 +84,10 @@ export const NavigationBar = () => {
         <Nav className="mr-auto">
           {showSettingsLink && (
             <Link
-              className={clsx('nav-link', pathname.includes(Routes.Settings) && 'active')}
+              className={clsx(
+                "nav-link",
+                pathname.includes(Routes.Settings) && "active"
+              )}
               to={Routes.Settings}
             >
               Settings
@@ -95,7 +97,7 @@ export const NavigationBar = () => {
         <div>
           {!appState.user && (
             <a
-              className={clsx(!canLogin && 'disabled')}
+              className={clsx(!canLogin && "disabled")}
               href={appState.loginRedirectUrl}
             >
               <Button variant="info" disabled={!canLogin}>

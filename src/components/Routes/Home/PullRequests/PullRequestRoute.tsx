@@ -28,7 +28,7 @@ export const PullRequestRoute = () => {
     filterOption: PullRequestFilterOption.All,
   });
   const [loading, toggleLoading] = React.useState(false);
-  
+
   useEffect(() => {
     (async () => {
       try {
@@ -90,10 +90,7 @@ export const PullRequestRoute = () => {
             gridBuilder={{
               items: state.pulls,
               mapToElemFunc: (pull) => (
-                <Card
-                  key={`${pull.title}`}
-                  style={{ height: "300px", background: "#e9ecef" }}
-                >
+                <Card key={`${pull.title}`} className="grid-card">
                   <Card.Header className="p-1">{`Last Updated - ${pull.updatedAt?.toDateString()}`}</Card.Header>
                   <Card.Title className="text-center">{pull.title}</Card.Title>
                   <Card.Subtitle className="m-1">
@@ -103,12 +100,13 @@ export const PullRequestRoute = () => {
                   <Card.Footer className="mt-auto">
                     <>
                       <Link
-                        to={Routes.PullRequest
-                          .replace(":repoId", pull.repositoryId!.toString())
-                          .replace(
-                            ":pullRequest",
-                            pull.pullRequestNumber!.toString()
-                          )}
+                        to={Routes.PullRequest.replace(
+                          ":repoId",
+                          pull.repositoryId!.toString()
+                        ).replace(
+                          ":pullRequest",
+                          pull.pullRequestNumber!.toString()
+                        )}
                       >
                         <Button variant="info" size="sm">
                           Detailed View

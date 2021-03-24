@@ -48,14 +48,14 @@ function move<T>(
 ) {
   const sourceClone = Array.from(source);
   const destClone = Array.from(destination);
-  const sInd = +droppableSource.droppableId;
+  const sInd = droppableSource.droppableId;
   const [removed] = sourceClone.splice(droppableSource.index, 1);
 
   destClone.splice(droppableDestination.index, 0, removed);
 
   const result: { [key: string]: Array<T> } = {};
   result[sInd] = sourceClone;
-  result[+droppableDestination.droppableId] = destClone;
+  result[droppableDestination.droppableId] = destClone;
 
   return result;
 }
