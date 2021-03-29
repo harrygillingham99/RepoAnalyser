@@ -15,6 +15,7 @@ import { ResponsiveGrid } from "@components/BaseComponents/ResponsiveGrid";
 import React from "react";
 import { Routes } from "@typeDefinitions/Routes";
 import { Link } from "react-router-dom";
+import { getCardTitle } from "@utils/Strings";
 
 interface PullRequestRouteState {
   pulls: UserPullRequestResult[];
@@ -90,10 +91,16 @@ export const PullRequestRoute = () => {
             gridBuilder={{
               items: state.pulls,
               mapToElemFunc: (pull) => (
-                <Card key={`${pull.title}`} className="grid-card">
+                <Card
+                  key={`${pull.pullRequestNumber}-${pull.repositoryId}`}
+                  className="grid-card"
+                >
                   <Card.Header className="p-1">{`Last Updated - ${pull.updatedAt?.toDateString()}`}</Card.Header>
-                  <Card.Title className="text-center">{pull.title}</Card.Title>
-                  <Card.Body className="p-0">
+                  <Card.Title className="text-center">
+                    {getCardTitle(pull.title)}
+                  </Card.Title>
+                  <Card.Subtitle>For: {pull.repositoryName}</Card.Subtitle>
+                  <Card.Body className="p-0 overflow-auto">
                     {pull.description ?? "No Description Set"}
                   </Card.Body>
                   <Card.Footer className="mt-auto">

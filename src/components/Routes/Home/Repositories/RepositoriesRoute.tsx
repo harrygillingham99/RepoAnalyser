@@ -11,6 +11,7 @@ import { Loader } from "@components/BaseComponents/Loader";
 import { ResponsiveGrid } from "@components/BaseComponents/ResponsiveGrid";
 import { Link } from "react-router-dom";
 import { Routes } from "@typeDefinitions/Routes";
+import { getCardTitle } from "@utils/Strings";
 
 interface RepositoriesRouteState {
   repos: UserRepositoryResult[];
@@ -92,7 +93,9 @@ export const RepositoriesRoute = () => {
               mapToElemFunc: (repo) => (
                 <Card key={`${repo.name}`} className="grid-card">
                   <Card.Header className="p-1">{`Last updated - ${repo.lastUpdated?.toDateString()}`}</Card.Header>
-                  <Card.Title className="text-center">{repo.name}</Card.Title>
+                  <Card.Title className="text-center">
+                    {getCardTitle(repo.name)}
+                  </Card.Title>
                   <Card.Subtitle className="m-1">
                     {repo.description ?? "No Description Set"}
                   </Card.Subtitle>
