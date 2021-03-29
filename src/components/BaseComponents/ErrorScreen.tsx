@@ -1,6 +1,6 @@
 import { Routes } from "@typeDefinitions/Routes";
 import React from "react";
-import { Container } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 interface IErrorScreenProps {
@@ -14,15 +14,15 @@ export const ErrorScreen = (props: IErrorScreenProps) => {
   return (
     <div className="page-wrap d-flex flex-row align-items-center">
       <Container>
-        <div className="row justify-content-center">
-          <div className="col-md-12 text-center">
+        <Row className="justify-content-center">
+          <Col md={12} className="text-center">
             <span className="display-1 d-block">{props.title}</span>
             <div className="mb-4 lead">{props.message}</div>
             <Link to={props.redirectTo} className="btn btn-link">
               {props.redirectSubtitle}
             </Link>
-          </div>
-        </div>
+          </Col>
+        </Row>
       </Container>
     </div>
   );
