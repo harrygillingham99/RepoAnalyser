@@ -93,10 +93,9 @@ export const PullRequestRoute = () => {
                 <Card key={`${pull.title}`} className="grid-card">
                   <Card.Header className="p-1">{`Last Updated - ${pull.updatedAt?.toDateString()}`}</Card.Header>
                   <Card.Title className="text-center">{pull.title}</Card.Title>
-                  <Card.Subtitle className="m-1">
+                  <Card.Body className="p-0">
                     {pull.description ?? "No Description Set"}
-                  </Card.Subtitle>
-                  <Card.Body className="p-0"></Card.Body>
+                  </Card.Body>
                   <Card.Footer className="mt-auto">
                     <>
                       <Link
