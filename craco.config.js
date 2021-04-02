@@ -1,6 +1,7 @@
 const CracoAlias = require("craco-alias");
 const path = require("path");
 const StyleLintPlugin = require("stylelint-webpack-plugin");
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
 
 module.exports = {
   plugins: [
@@ -25,7 +26,14 @@ module.exports = {
           context: path.resolve(__dirname, "src"),
           files: ["**/*.scss"],
         }),
+        new SpeedMeasurePlugin(),
       ],
+    },
+  },
+  babel: {
+    loaderOptions: {
+      cacheDirectory: true,
+      exclude: /(node_modules|bower_components)/,
     },
   },
 };

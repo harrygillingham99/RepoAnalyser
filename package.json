@@ -49,6 +49,7 @@
     "nswag": "^13.10.1",
     "pinst": "^2.1.4",
     "prettier": "2.2.1",
+    "speed-measure-webpack-plugin": "^1.5.0",
     "stylelint-config-recommended": "^4.0.0"
   },
   "scripts": {
