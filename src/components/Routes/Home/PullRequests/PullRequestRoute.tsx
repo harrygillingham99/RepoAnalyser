@@ -13,7 +13,7 @@ import useSetState from "react-use/lib/useSetState";
 import { Loader } from "@components/BaseComponents/Loader";
 import { ResponsiveGrid } from "@components/BaseComponents/ResponsiveGrid";
 import React from "react";
-import { Routes } from "@typeDefinitions/Routes";
+import { addUrlParameters, Routes } from "@typeDefinitions/Routes";
 import { Link } from "react-router-dom";
 import { getCardTitle } from "@utils/Strings";
 
@@ -106,13 +106,11 @@ export const PullRequestRoute = () => {
                   <Card.Footer className="mt-auto">
                     <>
                       <Link
-                        to={Routes.PullRequest.replace(
-                          ":repoId",
-                          pull.repositoryId!.toString()
-                        ).replace(
-                          ":pullRequest",
-                          pull.pullRequestNumber!.toString()
-                        )}
+                        to={addUrlParameters(Routes.PullRequest, {
+                          ":repoId": pull.repositoryId!.toString(),
+                          ":pullRequest": pull.pullRequestNumber!.toString(),
+                          ":repoName": pull.repositoryName!.toString(),
+                        })}
                       >
                         <Button variant="info" size="sm">
                           Detailed View

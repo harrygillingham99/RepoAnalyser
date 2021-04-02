@@ -10,7 +10,7 @@ import useSetState from "react-use/lib/useSetState";
 import { Loader } from "@components/BaseComponents/Loader";
 import { ResponsiveGrid } from "@components/BaseComponents/ResponsiveGrid";
 import { Link } from "react-router-dom";
-import { Routes } from "@typeDefinitions/Routes";
+import { addUrlParameters, Routes } from "@typeDefinitions/Routes";
 import { getCardTitle } from "@utils/Strings";
 
 interface RepositoriesRouteState {
@@ -101,10 +101,10 @@ export const RepositoriesRoute = () => {
                   </Card.Subtitle>
                   <Card.Footer className="mt-auto">
                     <Link
-                      to={Routes.Repository.replace(
-                        ":repoId",
-                        repo!.id!.toString()
-                      )}
+                      to={addUrlParameters(Routes.Repository, {
+                        ":repoId": repo.id!.toString(),
+                        ":repoName": repo.name!.toString(),
+                      })}
                     >
                       <Button size="sm" variant="info">
                         Detailed View

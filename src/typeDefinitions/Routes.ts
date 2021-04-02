@@ -7,11 +7,11 @@ enum Routes {
   Activity = "/home/user-activity",
   Repositories = "/home/repositories",
   PullRequests = "/home/pull-requests",
-  Repository = "/home/repository/:repoId",
-  PullRequest = "/home/pull-request/:repoId/:pullRequest",
-};
+  Repository = "/home/repository/:repoId/:repoName",
+  PullRequest = "/home/pull-request/:repoId/:pullRequest/:repoName",
+}
 
-const HomeRoutesWithParams = ['/home/pull-request', '/home/repository']
+const HomeRoutesWithParams = ["/home/pull-request", "/home/repository"];
 
 const HomeRoutes: Routes[] = [
   Routes.Activity,
@@ -41,4 +41,23 @@ const AuthorizedRoutes: Routes[] = [
   Routes.Activity,
 ];
 
-export { Routes, AuthorizedRoutes, DashboardRoutes, HomeRoutes, HomeRoutesWithParams };
+//add any more routes with params to the route type definition
+const addUrlParameters = (
+  route: Routes.Repository | Routes.PullRequest,
+  params: { [key: string]: string }
+): string => {
+  let routeWithParams = route as string;
+  Object.keys(params).forEach((key) => {
+    routeWithParams = routeWithParams.replace(key, params[key]);
+  });
+  return routeWithParams;
+};
+
+export {
+  Routes,
+  AuthorizedRoutes,
+  DashboardRoutes,
+  HomeRoutes,
+  HomeRoutesWithParams,
+  addUrlParameters,
+};

@@ -13,6 +13,7 @@ import { useEffectOnce, useSetState } from "react-use";
 
 interface RouteParams {
   repoId: string;
+  repoName: string;
 }
 
 interface DetailedRepositoryRouteState {
@@ -22,8 +23,8 @@ interface DetailedRepositoryRouteState {
 
 export const DetailedRepositoryRoute = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
-  const params = useParams<RouteParams>();
-  const repoId = Number.parseInt(params.repoId);
+  const { repoId, repoName } = useParams<RouteParams>();
+  const repoNumber = Number.parseInt(repoId);
   const { appState } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
   const [state, setState] = useSetState<DetailedRepositoryRouteState>({
@@ -38,7 +39,7 @@ export const DetailedRepositoryRoute = () => {
         setLoading(true);
         const result = await authorisedApiClient(
           appState.token
-        ).repository_GetDetailedRepository(repoId, buildUserInfo);
+        ).repository_GetDetailedRepository(repoNumber, buildUserInfo);
         setState({ repo: result });
       } catch (error) {
         showErrorAlert(
@@ -70,7 +71,7 @@ export const DetailedRepositoryRoute = () => {
     <Redirect to={Routes.Landing} />
   ) : (
     <>
-      <DashboardHeader text={state.repo?.repository?.name ?? ""} />
+      <DashboardHeader text={repoName} />
       <Button variant="info" onClick={() => calculateCodeOwners()}>
         Calculate code owners
       </Button>
