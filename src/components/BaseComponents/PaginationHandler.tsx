@@ -29,6 +29,7 @@ export const PaginationHandler = (props: IPaginationHandlerProps) => {
         props.setPage(props.page + 1);
         break;
       case "previous":
+        if (props.page === 1) return;
         props.setPage(props.page - 1);
         break;
     }
