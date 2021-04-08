@@ -5,8 +5,8 @@ import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
 import { buildUserInfo } from "@utils/ClientInfo";
-import React, { useState } from "react";
-import { useEffectOnce, useSetState } from "react-use";
+import React, { useEffect, useState } from "react";
+import { useSetState } from "react-use";
 import {
   VerticalTimeline,
   VerticalTimelineElement,
@@ -24,33 +24,44 @@ import {
   PersonPlus,
   X,
 } from "react-bootstrap-icons";
+import { PaginationHandler } from "@components/BaseComponents/PaginationHandler";
 
 interface IActivityRouteState {
   userActivity: UserActivity;
+  page: number;
+  pageSize: number;
 }
 export const ActivityRoute = () => {
   const { appState } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
   const [state, setState] = useSetState<IActivityRouteState>({
     userActivity: undefined!,
+    page: 1,
+    pageSize: 25,
   });
   const [loading, setLoading] = useState(false);
 
-  useEffectOnce(() => {
+  useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         const result = await authorisedApiClient(
           appState.token
-        ).statistics_GetUserStatistics(buildUserInfo);
+        ).statistics_GetUserStatistics(
+          state.page,
+          state.pageSize,
+          buildUserInfo
+        );
         setState({ userActivity: result });
       } catch (error) {
         showErrorAlert("Error", "Error getting user activity information");
       } finally {
         setLoading(false);
+        window.scrollTo(0, 0);
       }
     })();
-  });
+    /* eslint-disable-next-line react-hooks/exhaustive-deps*/
+  }, [state.page, state.pageSize]);
 
   const getIconColourFriendlyNameForEvent = (
     eventType?: string
@@ -83,42 +94,51 @@ export const ActivityRoute = () => {
     <>
       <DashboardHeader text="Activity" />
       {!loading && state.userActivity && state.userActivity.events && (
-        <VerticalTimeline>
-          {state.userActivity.events.map((event) => {
-            const [
-              friendlyEventName,
-              colour,
-              icon,
-            ] = getIconColourFriendlyNameForEvent(event.type);
-            return (
-              <VerticalTimelineElement
-                className="vertical-timeline-element--work"
-                contentStyle={{
-                  background: colour,
-                  color: "#fff",
-                }}
-                contentArrowStyle={{
-                  borderRight: `7px solid  ${colour}`,
-                }}
-                date={event.createdAt?.toDateString()}
-                iconStyle={{ background: colour, color: "#fff" }}
-                icon={icon}
-              >
-                <h3 className="vertical-timeline-element-title">
-                  {friendlyEventName}
-                </h3>
-                <h4 className="vertical-timeline-element-subtitle">
-                  {event.repo?.name}
-                </h4>
-                <p>
-                  {`Created at: ${event.createdAt?.toLocaleString("en-GB", {
-                    timeZone: "UTC",
-                  })}`}
-                </p>
-              </VerticalTimelineElement>
-            );
-          })}
-        </VerticalTimeline>
+        <>
+          <VerticalTimeline>
+            {state.userActivity.events.map((event) => {
+              const [
+                friendlyEventName,
+                colour,
+                icon,
+              ] = getIconColourFriendlyNameForEvent(event.type);
+              return (
+                <VerticalTimelineElement
+                  key={`timeLineItem-${event.id}`}
+                  className="vertical-timeline-element--work"
+                  contentStyle={{
+                    background: colour,
+                    color: "#fff",
+                  }}
+                  contentArrowStyle={{
+                    borderRight: `7px solid  ${colour}`,
+                  }}
+                  date={event.createdAt?.toDateString()}
+                  iconStyle={{ background: colour, color: "#fff" }}
+                  icon={icon}
+                >
+                  <h3 className="vertical-timeline-element-title">
+                    {friendlyEventName}
+                  </h3>
+                  <h4 className="vertical-timeline-element-subtitle">
+                    {event.repo?.name}
+                  </h4>
+                  <p>
+                    {`Created at: ${event.createdAt?.toLocaleString("en-GB", {
+                      timeZone: "UTC",
+                    })}`}
+                  </p>
+                </VerticalTimelineElement>
+              );
+            })}
+          </VerticalTimeline>
+          <PaginationHandler
+            setPage={(page) => setState({ page: page })}
+            setPageSize={(pageSize) => setState({ pageSize: pageSize })}
+            page={state.page}
+            pageSize={state.pageSize}
+          />
+        </>
       )}
       {loading && <Loader />}
     </>
