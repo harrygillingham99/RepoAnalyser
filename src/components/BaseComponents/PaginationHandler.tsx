@@ -17,10 +17,11 @@ interface IPaginationState {
 export const PaginationHandler = (props: IPaginationHandlerProps) => {
   const [state, setState] = useSetState<IPaginationState>();
 
-  useEffect(() => {
-    setState({ page: props.page, pageSize: props.pageSize });
+  useEffect(
+    () => setState({ page: props.page, pageSize: props.pageSize }),
     /* eslint-disable-next-line react-hooks/exhaustive-deps*/
-  }, [props.page, props.pageSize]);
+    [props.page, props.pageSize]
+  );
 
   const handlePaginationButtonPress = (type: "first" | "next" | "previous") => {
     switch (type) {
