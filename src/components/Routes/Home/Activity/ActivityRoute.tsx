@@ -121,7 +121,12 @@ export const ActivityRoute = () => {
                     {friendlyEventName}
                   </h3>
                   <h4 className="vertical-timeline-element-subtitle">
-                    {event.repo?.name}
+                    <a
+                      href={`https://github.com/${event.repo?.name}`}
+                      className="text-reset"
+                    >
+                      {event.repo?.name}
+                    </a>
                   </h4>
                   <p>
                     {`Created at: ${event.createdAt?.toLocaleString("en-GB", {
