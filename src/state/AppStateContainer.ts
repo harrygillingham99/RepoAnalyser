@@ -28,7 +28,7 @@ const useAppState = () => {
         await connection.start();
         console.log("SignalR Connected.");
       } catch (err) {
-        console.log(err);
+        console.log(`SignalR Connection Error: ${JSON.stringify(err)}`);
         setTimeout(start, 5000);
       }
     }
