@@ -8,10 +8,12 @@ interface IPaginationHandlerProps {
   setPage: (page: number) => void;
   setPageSize: (pageSize: number) => void;
 }
+
 interface IPaginationState {
   page: number;
   pageSize: number;
 }
+
 export const PaginationHandler = (props: IPaginationHandlerProps) => {
   const [state, setState] = useSetState<IPaginationState>();
 
@@ -42,6 +44,9 @@ export const PaginationHandler = (props: IPaginationHandlerProps) => {
           Page Size: {state.pageSize}
         </Dropdown.Toggle>
         <Dropdown.Menu>
+          <Dropdown.Item onClick={() => props.setPageSize(10)}>
+            10
+          </Dropdown.Item>
           <Dropdown.Item onClick={() => props.setPageSize(25)}>
             25
           </Dropdown.Item>
@@ -50,6 +55,9 @@ export const PaginationHandler = (props: IPaginationHandlerProps) => {
           </Dropdown.Item>
           <Dropdown.Item onClick={() => props.setPageSize(75)}>
             75
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => props.setPageSize(100)}>
+            100
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
