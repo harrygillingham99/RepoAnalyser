@@ -12,3 +12,5 @@ export const getCardTitle = (title?: string) => {
     ? title.substr(0, titleMaxLength) + "..."
     : title;
 };
+
+export const addSpacesToString = (str : string) => str.replace(/([A-Z])/g, ' $1').trim()

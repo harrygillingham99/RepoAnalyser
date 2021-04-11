@@ -1,0 +1,18 @@
+export const EventTypes = [
+  "CommitCommentEvent",
+  "CreateEvent",
+  "DeleteEvent",
+  "ForkEvent",
+  "GollumEvent",
+  "IssueCommentEvent",
+  "IssuesEvent",
+  "MemberEvent",
+  "PublicEvent",
+  "PullRequestEvent",
+  "PullRequestReviewEvent",
+  "PullRequestReviewCommentEvent",
+  "PushEvent",
+  "ReleaseEvent",
+  "SponsorshipEvent",
+  "WatchEvent",
+];

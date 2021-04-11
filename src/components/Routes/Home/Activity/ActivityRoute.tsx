@@ -1,6 +1,6 @@
 import { DashboardHeader } from "@components/BaseComponents/DashboardHeader";
 import { Loader } from "@components/BaseComponents/Loader";
-import { UserActivity } from "@services/api/Client";
+import { Activity, UserActivity } from "@services/api/Client";
 import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
@@ -25,6 +25,10 @@ import {
   X,
 } from "react-bootstrap-icons";
 import { PaginationHandler } from "@components/BaseComponents/PaginationHandler";
+import useListTransform from "use-list-transform";
+import { Container, Dropdown } from "react-bootstrap";
+import { EventTypes } from "@constants/GitHub";
+import { addSpacesToString } from "@utils/Strings";
 
 interface IActivityRouteState {
   userActivity: UserActivity;
@@ -40,6 +44,19 @@ export const ActivityRoute = () => {
     pageSize: 25,
   });
   const [loading, setLoading] = useState(false);
+
+  const filterByProperty = ({ data }: { data: any }) => (item: Activity) => {
+    if (data.type) {
+      return data.type === item.type;
+    }
+    return true;
+  };
+
+  const { transformed, setData } = useListTransform({
+    list: state?.userActivity?.events ?? new Array<Activity>(),
+    transform: [filterByProperty],
+    onLoading: (loading) => setLoading(loading),
+  });
 
   useEffect(() => {
     (async () => {
@@ -86,7 +103,11 @@ export const ActivityRoute = () => {
       case "DeleteEvent":
         return ["Delete", "#dc3545", <X />];
       default:
-        return [eventType ?? "Unknown", "blue", <Github />];
+        return [
+          eventType ? addSpacesToString(eventType) : "Unknown",
+          "blue",
+          <Github />,
+        ];
     }
   };
 
@@ -94,9 +115,22 @@ export const ActivityRoute = () => {
     <>
       <DashboardHeader text="Activity" />
       {!loading && state.userActivity && state.userActivity.events && (
-        <>
+        <Container fluid>
+          <Dropdown className="">
+            <Dropdown.Toggle variant="info">Type Filter</Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={() => setData({ type: undefined })}>
+                All
+              </Dropdown.Item>
+              {EventTypes.map((type) => (
+                <Dropdown.Item onClick={() => setData({ type: type })}>
+                  {addSpacesToString(type)}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
           <VerticalTimeline>
-            {state.userActivity.events.map((event) => {
+            {transformed.map((event) => {
               const [
                 friendlyEventName,
                 colour,
@@ -143,7 +177,7 @@ export const ActivityRoute = () => {
             page={state.page}
             pageSize={state.pageSize}
           />
-        </>
+        </Container>
       )}
       {loading && <Loader />}
     </>
