@@ -123,7 +123,10 @@ export const ActivityRoute = () => {
                 All
               </Dropdown.Item>
               {EventTypes.map((type) => (
-                <Dropdown.Item onClick={() => setData({ type: type })}>
+                <Dropdown.Item
+                  onClick={() => setData({ type: type })}
+                  key={`${type}-Filter`}
+                >
                   {addSpacesToString(type)}
                 </Dropdown.Item>
               ))}
@@ -138,7 +141,7 @@ export const ActivityRoute = () => {
               ] = getIconColourFriendlyNameForEvent(event.type);
               return (
                 <VerticalTimelineElement
-                  key={`timeLineItem-${event.id}`}
+                  key={`timeLineItem-${event.id?.toString()}`}
                   className="vertical-timeline-element--work"
                   contentStyle={{
                     background: colour,

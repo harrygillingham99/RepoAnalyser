@@ -46,3483 +46,4238 @@ export class AuthorizedApiBase {
 }
 
 export class Client extends AuthorizedApiBase {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+  private http: {
+    fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
+  };
+  private baseUrl: string;
+  protected jsonParseReviver:
+    | ((key: string, value: any) => any)
+    | undefined = undefined;
 
-    constructor(configuration: IConfig, baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        super(configuration);
-        this.http = http ? http : <any>window;
-        this.baseUrl = this.getBaseUrl("https://localhost:44306", baseUrl);
+  constructor(
+    configuration: IConfig,
+    baseUrl?: string,
+    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }
+  ) {
+    super(configuration);
+    this.http = http ? http : <any>window;
+    this.baseUrl = this.getBaseUrl("https://localhost:44306", baseUrl);
+  }
+
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
+  authentication_GetOAuthTokenWithUserInfo(
+    code: string | null,
+    state: string | null,
+    metadata: any | undefined
+  ): Promise<TokenUserResponse> {
+    let url_ = this.baseUrl + "/auth/token/{code}/{state}";
+    if (code === undefined || code === null)
+      throw new Error("The parameter 'code' must be defined.");
+    url_ = url_.replace("{code}", encodeURIComponent("" + code));
+    if (state === undefined || state === null)
+      throw new Error("The parameter 'state' must be defined.");
+    url_ = url_.replace("{state}", encodeURIComponent("" + state));
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processAuthentication_GetOAuthTokenWithUserInfo(_response);
+      });
+  }
+
+  protected processAuthentication_GetOAuthTokenWithUserInfo(
+    response: Response
+  ): Promise<TokenUserResponse> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-
-    /**
-     * @param metadata (optional) Client Metadata JSON
-     */
-    authentication_GetOAuthTokenWithUserInfo(code: string | null, state: string | null, metadata: any | undefined): Promise<TokenUserResponse> {
-        let url_ = this.baseUrl + "/auth/token/{code}/{state}";
-        if (code === undefined || code === null)
-            throw new Error("The parameter 'code' must be defined.");
-        url_ = url_.replace("{code}", encodeURIComponent("" + code));
-        if (state === undefined || state === null)
-            throw new Error("The parameter 'state' must be defined.");
-        url_ = url_.replace("{state}", encodeURIComponent("" + state));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processAuthentication_GetOAuthTokenWithUserInfo(_response);
-        });
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = TokenUserResponse.fromJS(resultData200);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
     }
+    return Promise.resolve<TokenUserResponse>(<any>null);
+  }
 
-    protected processAuthentication_GetOAuthTokenWithUserInfo(response: Response): Promise<TokenUserResponse> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = TokenUserResponse.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
+  authentication_GetLoginRedirectUrl(
+    metadata: any | undefined
+  ): Promise<string> {
+    let url_ = this.baseUrl + "/auth/login-redirect";
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processAuthentication_GetLoginRedirectUrl(_response);
+      });
+  }
+
+  protected processAuthentication_GetLoginRedirectUrl(
+    response: Response
+  ): Promise<string> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = resultData200 !== undefined ? resultData200 : <any>null;
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
+    }
+    return Promise.resolve<string>(<any>null);
+  }
+
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
+  authentication_GetUserInformationForToken(
+    metadata: any | undefined
+  ): Promise<UserInfoResult> {
+    let url_ = this.baseUrl + "/auth/user-info";
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processAuthentication_GetUserInformationForToken(_response);
+      });
+  }
+
+  protected processAuthentication_GetUserInformationForToken(
+    response: Response
+  ): Promise<UserInfoResult> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = UserInfoResult.fromJS(resultData200);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
+    }
+    return Promise.resolve<UserInfoResult>(<any>null);
+  }
+
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
+  pullRequest_GetPullRequests(
+    pullFilterOption: PullRequestFilterOption,
+    metadata: any | undefined
+  ): Promise<UserPullRequestResult[]> {
+    let url_ = this.baseUrl + "/pull-requests/{pullFilterOption}";
+    if (pullFilterOption === undefined || pullFilterOption === null)
+      throw new Error("The parameter 'pullFilterOption' must be defined.");
+    url_ = url_.replace(
+      "{pullFilterOption}",
+      encodeURIComponent("" + pullFilterOption)
+    );
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processPullRequest_GetPullRequests(_response);
+      });
+  }
+
+  protected processPullRequest_GetPullRequests(
+    response: Response
+  ): Promise<UserPullRequestResult[]> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        if (Array.isArray(resultData200)) {
+          result200 = [] as any;
+          for (let item of resultData200)
+            result200!.push(UserPullRequestResult.fromJS(item));
         }
-        return Promise.resolve<TokenUserResponse>(<any>null);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
     }
+    return Promise.resolve<UserPullRequestResult[]>(<any>null);
+  }
 
-    /**
-     * @param metadata (optional) Client Metadata JSON
-     */
-    authentication_GetLoginRedirectUrl(metadata: any | undefined): Promise<string> {
-        let url_ = this.baseUrl + "/auth/login-redirect";
-        url_ = url_.replace(/[?&]$/, "");
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
+  pullRequest_GetDetailedPullRequest(
+    repoId: number,
+    pullNumber: number,
+    metadata: any | undefined
+  ): Promise<DetailedPullRequest> {
+    let url_ = this.baseUrl + "/pull-requests/detailed/{repoId}/{pullNumber}";
+    if (repoId === undefined || repoId === null)
+      throw new Error("The parameter 'repoId' must be defined.");
+    url_ = url_.replace("{repoId}", encodeURIComponent("" + repoId));
+    if (pullNumber === undefined || pullNumber === null)
+      throw new Error("The parameter 'pullNumber' must be defined.");
+    url_ = url_.replace("{pullNumber}", encodeURIComponent("" + pullNumber));
+    url_ = url_.replace(/[?&]$/, "");
 
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
 
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processAuthentication_GetLoginRedirectUrl(_response);
-        });
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processPullRequest_GetDetailedPullRequest(_response);
+      });
+  }
+
+  protected processPullRequest_GetDetailedPullRequest(
+    response: Response
+  ): Promise<DetailedPullRequest> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = DetailedPullRequest.fromJS(resultData200);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
+    }
+    return Promise.resolve<DetailedPullRequest>(<any>null);
+  }
 
-    protected processAuthentication_GetLoginRedirectUrl(response: Response): Promise<string> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
+  repository_Repositories(
+    filterOption: RepoFilterOptions,
+    metadata: any | undefined
+  ): Promise<UserRepositoryResult[]> {
+    let url_ = this.baseUrl + "/repositories/{filterOption}";
+    if (filterOption === undefined || filterOption === null)
+      throw new Error("The parameter 'filterOption' must be defined.");
+    url_ = url_.replace(
+      "{filterOption}",
+      encodeURIComponent("" + filterOption)
+    );
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processRepository_Repositories(_response);
+      });
+  }
+
+  protected processRepository_Repositories(
+    response: Response
+  ): Promise<UserRepositoryResult[]> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        if (Array.isArray(resultData200)) {
+          result200 = [] as any;
+          for (let item of resultData200)
+            result200!.push(UserRepositoryResult.fromJS(item));
         }
-        return Promise.resolve<string>(<any>null);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
     }
+    return Promise.resolve<UserRepositoryResult[]>(<any>null);
+  }
 
-    /**
-     * @param metadata (optional) Client Metadata JSON
-     */
-    authentication_GetUserInformationForToken(metadata: any | undefined): Promise<UserInfoResult> {
-        let url_ = this.baseUrl + "/auth/user-info";
-        url_ = url_.replace(/[?&]$/, "");
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
+  repository_GetDetailedRepository(
+    repoId: number,
+    metadata: any | undefined
+  ): Promise<DetailedRepository> {
+    let url_ = this.baseUrl + "/repositories/detailed/{repoId}";
+    if (repoId === undefined || repoId === null)
+      throw new Error("The parameter 'repoId' must be defined.");
+    url_ = url_.replace("{repoId}", encodeURIComponent("" + repoId));
+    url_ = url_.replace(/[?&]$/, "");
 
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
 
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processAuthentication_GetUserInformationForToken(_response);
-        });
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processRepository_GetDetailedRepository(_response);
+      });
+  }
+
+  protected processRepository_GetDetailedRepository(
+    response: Response
+  ): Promise<DetailedRepository> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = DetailedRepository.fromJS(resultData200);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
+    }
+    return Promise.resolve<DetailedRepository>(<any>null);
+  }
 
-    protected processAuthentication_GetUserInformationForToken(response: Response): Promise<UserInfoResult> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = UserInfoResult.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
+  /**
+   * @param connectionId SignalR Client Connection ID
+   * @param metadata (optional) Client Metadata JSON
+   */
+  repository_GetCodeOwnersForRepo(
+    repoId: number,
+    connectionId: string,
+    metadata: any | undefined
+  ): Promise<{ [key: string]: string }> {
+    let url_ = this.baseUrl + "/repositories/code-owners/{repoId}";
+    if (repoId === undefined || repoId === null)
+      throw new Error("The parameter 'repoId' must be defined.");
+    url_ = url_.replace("{repoId}", encodeURIComponent("" + repoId));
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        ConnectionId:
+          connectionId !== undefined && connectionId !== null
+            ? "" + connectionId
+            : "",
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processRepository_GetCodeOwnersForRepo(_response);
+      });
+  }
+
+  protected processRepository_GetCodeOwnersForRepo(
+    response: Response
+  ): Promise<{ [key: string]: string }> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        if (resultData200) {
+          result200 = {} as any;
+          for (let key in resultData200) {
+            if (resultData200.hasOwnProperty(key))
+              result200![key] = resultData200[key];
+          }
         }
-        return Promise.resolve<UserInfoResult>(<any>null);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
     }
+    return Promise.resolve<{ [key: string]: string }>(<any>null);
+  }
 
-    /**
-     * @param metadata (optional) Client Metadata JSON
-     */
-    pullRequest_GetPullRequests(pullFilterOption: PullRequestFilterOption, metadata: any | undefined): Promise<UserPullRequestResult[]> {
-        let url_ = this.baseUrl + "/pull-requests/{pullFilterOption}";
-        if (pullFilterOption === undefined || pullFilterOption === null)
-            throw new Error("The parameter 'pullFilterOption' must be defined.");
-        url_ = url_.replace("{pullFilterOption}", encodeURIComponent("" + pullFilterOption));
-        url_ = url_.replace(/[?&]$/, "");
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
+  statistics_GetUserStatistics(
+    page: number,
+    pageSize: number,
+    metadata: any | undefined
+  ): Promise<UserActivity> {
+    let url_ = this.baseUrl + "/statistics/user/{page}/{pageSize}";
+    if (page === undefined || page === null)
+      throw new Error("The parameter 'page' must be defined.");
+    url_ = url_.replace("{page}", encodeURIComponent("" + page));
+    if (pageSize === undefined || pageSize === null)
+      throw new Error("The parameter 'pageSize' must be defined.");
+    url_ = url_.replace("{pageSize}", encodeURIComponent("" + pageSize));
+    url_ = url_.replace(/[?&]$/, "");
 
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
 
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processPullRequest_GetPullRequests(_response);
-        });
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processStatistics_GetUserStatistics(_response);
+      });
+  }
+
+  protected processStatistics_GetUserStatistics(
+    response: Response
+  ): Promise<UserActivity> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-
-    protected processPullRequest_GetPullRequests(response: Response): Promise<UserPullRequestResult[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(UserPullRequestResult.fromJS(item));
-            }
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<UserPullRequestResult[]>(<any>null);
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = UserActivity.fromJS(resultData200);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
     }
+    return Promise.resolve<UserActivity>(<any>null);
+  }
 
-    /**
-     * @param metadata (optional) Client Metadata JSON
-     */
-    pullRequest_GetDetailedPullRequest(repoId: number, pullNumber: number, metadata: any | undefined): Promise<DetailedPullRequest> {
-        let url_ = this.baseUrl + "/pull-requests/detailed/{repoId}/{pullNumber}";
-        if (repoId === undefined || repoId === null)
-            throw new Error("The parameter 'repoId' must be defined.");
-        url_ = url_.replace("{repoId}", encodeURIComponent("" + repoId));
-        if (pullNumber === undefined || pullNumber === null)
-            throw new Error("The parameter 'pullNumber' must be defined.");
-        url_ = url_.replace("{pullNumber}", encodeURIComponent("" + pullNumber));
-        url_ = url_.replace(/[?&]$/, "");
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
+  utilities_GetDetailedRepository(metadata: any | undefined): Promise<boolean> {
+    let url_ = this.baseUrl + "/utilities/truncate-request-audits";
+    url_ = url_.replace(/[?&]$/, "");
 
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
+    let options_ = <RequestInit>{
+      method: "DELETE",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
 
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processPullRequest_GetDetailedPullRequest(_response);
-        });
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processUtilities_GetDetailedRepository(_response);
+      });
+  }
+
+  protected processUtilities_GetDetailedRepository(
+    response: Response
+  ): Promise<boolean> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
     }
-
-    protected processPullRequest_GetDetailedPullRequest(response: Response): Promise<DetailedPullRequest> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = DetailedPullRequest.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<DetailedPullRequest>(<any>null);
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = resultData200 !== undefined ? resultData200 : <any>null;
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
     }
-
-    /**
-     * @param metadata (optional) Client Metadata JSON
-     */
-    repository_Repositories(filterOption: RepoFilterOptions, metadata: any | undefined): Promise<UserRepositoryResult[]> {
-        let url_ = this.baseUrl + "/repositories/{filterOption}";
-        if (filterOption === undefined || filterOption === null)
-            throw new Error("The parameter 'filterOption' must be defined.");
-        url_ = url_.replace("{filterOption}", encodeURIComponent("" + filterOption));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processRepository_Repositories(_response);
-        });
-    }
-
-    protected processRepository_Repositories(response: Response): Promise<UserRepositoryResult[]> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200!.push(UserRepositoryResult.fromJS(item));
-            }
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<UserRepositoryResult[]>(<any>null);
-    }
-
-    /**
-     * @param metadata (optional) Client Metadata JSON
-     */
-    repository_GetDetailedRepository(repoId: number, metadata: any | undefined): Promise<DetailedRepository> {
-        let url_ = this.baseUrl + "/repositories/detailed/{repoId}";
-        if (repoId === undefined || repoId === null)
-            throw new Error("The parameter 'repoId' must be defined.");
-        url_ = url_.replace("{repoId}", encodeURIComponent("" + repoId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processRepository_GetDetailedRepository(_response);
-        });
-    }
-
-    protected processRepository_GetDetailedRepository(response: Response): Promise<DetailedRepository> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = DetailedRepository.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<DetailedRepository>(<any>null);
-    }
-
-    /**
-     * @param connectionId SignalR Client Connection ID
-     * @param metadata (optional) Client Metadata JSON
-     */
-    repository_GetCodeOwnersForRepo(repoId: number, connectionId: string, metadata: any | undefined): Promise<{ [key: string]: string; }> {
-        let url_ = this.baseUrl + "/repositories/code-owners/{repoId}";
-        if (repoId === undefined || repoId === null)
-            throw new Error("The parameter 'repoId' must be defined.");
-        url_ = url_.replace("{repoId}", encodeURIComponent("" + repoId));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "ConnectionId": connectionId !== undefined && connectionId !== null ? "" + connectionId : "",
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processRepository_GetCodeOwnersForRepo(_response);
-        });
-    }
-
-    protected processRepository_GetCodeOwnersForRepo(response: Response): Promise<{ [key: string]: string; }> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (resultData200) {
-                result200 = {} as any;
-                for (let key in resultData200) {
-                    if (resultData200.hasOwnProperty(key))
-                        result200![key] = resultData200[key];
-                }
-            }
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<{ [key: string]: string; }>(<any>null);
-    }
-
-    /**
-     * @param metadata (optional) Client Metadata JSON
-     */
-    statistics_GetUserStatistics(page: number, pageSize: number, metadata: any | undefined): Promise<UserActivity> {
-        let url_ = this.baseUrl + "/statistics/user/{page}/{pageSize}";
-        if (page === undefined || page === null)
-            throw new Error("The parameter 'page' must be defined.");
-        url_ = url_.replace("{page}", encodeURIComponent("" + page));
-        if (pageSize === undefined || pageSize === null)
-            throw new Error("The parameter 'pageSize' must be defined.");
-        url_ = url_.replace("{pageSize}", encodeURIComponent("" + pageSize));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "GET",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processStatistics_GetUserStatistics(_response);
-        });
-    }
-
-    protected processStatistics_GetUserStatistics(response: Response): Promise<UserActivity> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = UserActivity.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<UserActivity>(<any>null);
-    }
-
-    /**
-     * @param metadata (optional) Client Metadata JSON
-     */
-    utilities_GetDetailedRepository(metadata: any | undefined): Promise<boolean> {
-        let url_ = this.baseUrl + "/utilities/truncate-request-audits";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ = <RequestInit>{
-            method: "DELETE",
-            headers: {
-                "Metadata": metadata !== undefined && metadata !== null ? "" + metadata : "",
-                "Accept": "application/json"
-            }
-        };
-
-        return this.transformOptions(options_).then(transformedOptions_ => {
-            return this.http.fetch(url_, transformedOptions_);
-        }).then((_response: Response) => {
-            return this.processUtilities_GetDetailedRepository(_response);
-        });
-    }
-
-    protected processUtilities_GetDetailedRepository(response: Response): Promise<boolean> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 404) {
-            return response.text().then((_responseText) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = NotFoundResponse.fromJS(resultData404);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
-            });
-        } else if (status === 401) {
-            return response.text().then((_responseText) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = UnauthorizedResponse.fromJS(resultData401);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result401);
-            });
-        } else if (status === 400) {
-            return response.text().then((_responseText) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ValidationResponse.fromJS(resultData400);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
-            });
-        } else if (status === 500) {
-            return response.text().then((_responseText) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ProblemDetails.fromJS(resultData500);
-            return throwException("A server side error occurred.", status, _responseText, _headers, result500);
-            });
-        } else if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<boolean>(<any>null);
-    }
+    return Promise.resolve<boolean>(<any>null);
+  }
 }
 
 export abstract class BaseResponse implements IBaseResponse {
-    message?: string | undefined;
-    title?: string | undefined;
+  message?: string | undefined;
+  title?: string | undefined;
 
-    constructor(data?: IBaseResponse) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IBaseResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.message = _data["message"];
-            this.title = _data["title"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.message = _data["message"];
+      this.title = _data["title"];
     }
+  }
 
-    static fromJS(data: any): BaseResponse {
-        data = typeof data === 'object' ? data : {};
-        throw new Error("The abstract class 'BaseResponse' cannot be instantiated.");
-    }
+  static fromJS(data: any): BaseResponse {
+    data = typeof data === "object" ? data : {};
+    throw new Error(
+      "The abstract class 'BaseResponse' cannot be instantiated."
+    );
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["message"] = this.message;
-        data["title"] = this.title;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["message"] = this.message;
+    data["title"] = this.title;
+    return data;
+  }
 }
 
 export interface IBaseResponse {
-    message?: string | undefined;
-    title?: string | undefined;
+  message?: string | undefined;
+  title?: string | undefined;
 }
 
-export class NotFoundResponse extends BaseResponse implements INotFoundResponse {
-    badProperties?: { [key: string]: string; } | undefined;
+export class NotFoundResponse
+  extends BaseResponse
+  implements INotFoundResponse {
+  badProperties?: { [key: string]: string } | undefined;
 
-    constructor(data?: INotFoundResponse) {
-        super(data);
-    }
+  constructor(data?: INotFoundResponse) {
+    super(data);
+  }
 
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            if (_data["badProperties"]) {
-                this.badProperties = {} as any;
-                for (let key in _data["badProperties"]) {
-                    if (_data["badProperties"].hasOwnProperty(key))
-                        this.badProperties![key] = _data["badProperties"][key];
-                }
-            }
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      if (_data["badProperties"]) {
+        this.badProperties = {} as any;
+        for (let key in _data["badProperties"]) {
+          if (_data["badProperties"].hasOwnProperty(key))
+            this.badProperties![key] = _data["badProperties"][key];
         }
+      }
     }
+  }
 
-    static fromJS(data: any): NotFoundResponse {
-        data = typeof data === 'object' ? data : {};
-        let result = new NotFoundResponse();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): NotFoundResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new NotFoundResponse();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (this.badProperties) {
-            data["badProperties"] = {};
-            for (let key in this.badProperties) {
-                if (this.badProperties.hasOwnProperty(key))
-                    data["badProperties"][key] = this.badProperties[key];
-            }
-        }
-        super.toJSON(data);
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (this.badProperties) {
+      data["badProperties"] = {};
+      for (let key in this.badProperties) {
+        if (this.badProperties.hasOwnProperty(key))
+          data["badProperties"][key] = this.badProperties[key];
+      }
     }
+    super.toJSON(data);
+    return data;
+  }
 }
 
 export interface INotFoundResponse extends IBaseResponse {
-    badProperties?: { [key: string]: string; } | undefined;
+  badProperties?: { [key: string]: string } | undefined;
 }
 
-export class UnauthorizedResponse extends BaseResponse implements IUnauthorizedResponse {
+export class UnauthorizedResponse
+  extends BaseResponse
+  implements IUnauthorizedResponse {
+  constructor(data?: IUnauthorizedResponse) {
+    super(data);
+  }
 
-    constructor(data?: IUnauthorizedResponse) {
-        super(data);
-    }
+  init(_data?: any) {
+    super.init(_data);
+  }
 
-    init(_data?: any) {
-        super.init(_data);
-    }
+  static fromJS(data: any): UnauthorizedResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new UnauthorizedResponse();
+    result.init(data);
+    return result;
+  }
 
-    static fromJS(data: any): UnauthorizedResponse {
-        data = typeof data === 'object' ? data : {};
-        let result = new UnauthorizedResponse();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        super.toJSON(data);
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    super.toJSON(data);
+    return data;
+  }
 }
 
-export interface IUnauthorizedResponse extends IBaseResponse {
-}
+export interface IUnauthorizedResponse extends IBaseResponse {}
 
-export class ValidationResponse extends BaseResponse implements IValidationResponse {
-    validationErrors?: { [key: string]: string; } | undefined;
+export class ValidationResponse
+  extends BaseResponse
+  implements IValidationResponse {
+  validationErrors?: { [key: string]: string } | undefined;
 
-    constructor(data?: IValidationResponse) {
-        super(data);
-    }
+  constructor(data?: IValidationResponse) {
+    super(data);
+  }
 
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            if (_data["validationErrors"]) {
-                this.validationErrors = {} as any;
-                for (let key in _data["validationErrors"]) {
-                    if (_data["validationErrors"].hasOwnProperty(key))
-                        this.validationErrors![key] = _data["validationErrors"][key];
-                }
-            }
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      if (_data["validationErrors"]) {
+        this.validationErrors = {} as any;
+        for (let key in _data["validationErrors"]) {
+          if (_data["validationErrors"].hasOwnProperty(key))
+            this.validationErrors![key] = _data["validationErrors"][key];
         }
+      }
     }
+  }
 
-    static fromJS(data: any): ValidationResponse {
-        data = typeof data === 'object' ? data : {};
-        let result = new ValidationResponse();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): ValidationResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new ValidationResponse();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (this.validationErrors) {
-            data["validationErrors"] = {};
-            for (let key in this.validationErrors) {
-                if (this.validationErrors.hasOwnProperty(key))
-                    data["validationErrors"][key] = this.validationErrors[key];
-            }
-        }
-        super.toJSON(data);
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (this.validationErrors) {
+      data["validationErrors"] = {};
+      for (let key in this.validationErrors) {
+        if (this.validationErrors.hasOwnProperty(key))
+          data["validationErrors"][key] = this.validationErrors[key];
+      }
     }
+    super.toJSON(data);
+    return data;
+  }
 }
 
 export interface IValidationResponse extends IBaseResponse {
-    validationErrors?: { [key: string]: string; } | undefined;
+  validationErrors?: { [key: string]: string } | undefined;
 }
 
 export class ProblemDetails implements IProblemDetails {
-    type?: string | undefined;
-    title?: string | undefined;
-    status?: number | undefined;
-    detail?: string | undefined;
-    instance?: string | undefined;
-    extensions?: { [key: string]: any; } | undefined;
+  type?: string | undefined;
+  title?: string | undefined;
+  status?: number | undefined;
+  detail?: string | undefined;
+  instance?: string | undefined;
+  extensions?: { [key: string]: any } | undefined;
 
-    constructor(data?: IProblemDetails) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
+  constructor(data?: IProblemDetails) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.type = _data["type"];
+      this.title = _data["title"];
+      this.status = _data["status"];
+      this.detail = _data["detail"];
+      this.instance = _data["instance"];
+      if (_data["extensions"]) {
+        this.extensions = {} as any;
+        for (let key in _data["extensions"]) {
+          if (_data["extensions"].hasOwnProperty(key))
+            this.extensions![key] = _data["extensions"][key];
         }
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.type = _data["type"];
-            this.title = _data["title"];
-            this.status = _data["status"];
-            this.detail = _data["detail"];
-            this.instance = _data["instance"];
-            if (_data["extensions"]) {
-                this.extensions = {} as any;
-                for (let key in _data["extensions"]) {
-                    if (_data["extensions"].hasOwnProperty(key))
-                        this.extensions![key] = _data["extensions"][key];
-                }
-            }
-        }
-    }
+  static fromJS(data: any): ProblemDetails {
+    data = typeof data === "object" ? data : {};
+    let result = new ProblemDetails();
+    result.init(data);
+    return result;
+  }
 
-    static fromJS(data: any): ProblemDetails {
-        data = typeof data === 'object' ? data : {};
-        let result = new ProblemDetails();
-        result.init(data);
-        return result;
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["type"] = this.type;
+    data["title"] = this.title;
+    data["status"] = this.status;
+    data["detail"] = this.detail;
+    data["instance"] = this.instance;
+    if (this.extensions) {
+      data["extensions"] = {};
+      for (let key in this.extensions) {
+        if (this.extensions.hasOwnProperty(key))
+          data["extensions"][key] = this.extensions[key];
+      }
     }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["type"] = this.type;
-        data["title"] = this.title;
-        data["status"] = this.status;
-        data["detail"] = this.detail;
-        data["instance"] = this.instance;
-        if (this.extensions) {
-            data["extensions"] = {};
-            for (let key in this.extensions) {
-                if (this.extensions.hasOwnProperty(key))
-                    data["extensions"][key] = this.extensions[key];
-            }
-        }
-        return data; 
-    }
+    return data;
+  }
 }
 
 export interface IProblemDetails {
-    type?: string | undefined;
-    title?: string | undefined;
-    status?: number | undefined;
-    detail?: string | undefined;
-    instance?: string | undefined;
-    extensions?: { [key: string]: any; } | undefined;
+  type?: string | undefined;
+  title?: string | undefined;
+  status?: number | undefined;
+  detail?: string | undefined;
+  instance?: string | undefined;
+  extensions?: { [key: string]: any } | undefined;
 }
 
 export class TokenUserResponse implements ITokenUserResponse {
-    accessToken?: string | undefined;
-    user?: User | undefined;
+  accessToken?: string | undefined;
+  user?: User | undefined;
 
-    constructor(data?: ITokenUserResponse) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: ITokenUserResponse) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.accessToken = _data["accessToken"];
-            this.user = _data["user"] ? User.fromJS(_data["user"]) : <any>undefined;
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.accessToken = _data["accessToken"];
+      this.user = _data["user"] ? User.fromJS(_data["user"]) : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): TokenUserResponse {
-        data = typeof data === 'object' ? data : {};
-        let result = new TokenUserResponse();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): TokenUserResponse {
+    data = typeof data === "object" ? data : {};
+    let result = new TokenUserResponse();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["accessToken"] = this.accessToken;
-        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["accessToken"] = this.accessToken;
+    data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+    return data;
+  }
 }
 
 export interface ITokenUserResponse {
-    accessToken?: string | undefined;
-    user?: User | undefined;
+  accessToken?: string | undefined;
+  user?: User | undefined;
 }
 
 export abstract class Account implements IAccount {
-    avatarUrl?: string | undefined;
-    bio?: string | undefined;
-    blog?: string | undefined;
-    collaborators?: number | undefined;
-    company?: string | undefined;
-    createdAt?: Date;
-    diskUsage?: number | undefined;
-    email?: string | undefined;
-    followers?: number;
-    following?: number;
-    hireable?: boolean | undefined;
-    htmlUrl?: string | undefined;
-    id?: number;
-    nodeId?: string | undefined;
-    location?: string | undefined;
-    login?: string | undefined;
-    name?: string | undefined;
-    type?: AccountType | undefined;
-    ownedPrivateRepos?: number;
-    plan?: Plan | undefined;
-    privateGists?: number | undefined;
-    publicGists?: number;
-    publicRepos?: number;
-    totalPrivateRepos?: number;
-    url?: string | undefined;
+  avatarUrl?: string | undefined;
+  bio?: string | undefined;
+  blog?: string | undefined;
+  collaborators?: number | undefined;
+  company?: string | undefined;
+  createdAt?: Date;
+  diskUsage?: number | undefined;
+  email?: string | undefined;
+  followers?: number;
+  following?: number;
+  hireable?: boolean | undefined;
+  htmlUrl?: string | undefined;
+  id?: number;
+  nodeId?: string | undefined;
+  location?: string | undefined;
+  login?: string | undefined;
+  name?: string | undefined;
+  type?: AccountType | undefined;
+  ownedPrivateRepos?: number;
+  plan?: Plan | undefined;
+  privateGists?: number | undefined;
+  publicGists?: number;
+  publicRepos?: number;
+  totalPrivateRepos?: number;
+  url?: string | undefined;
 
-    constructor(data?: IAccount) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IAccount) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.avatarUrl = _data["avatarUrl"];
-            this.bio = _data["bio"];
-            this.blog = _data["blog"];
-            this.collaborators = _data["collaborators"];
-            this.company = _data["company"];
-            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
-            this.diskUsage = _data["diskUsage"];
-            this.email = _data["email"];
-            this.followers = _data["followers"];
-            this.following = _data["following"];
-            this.hireable = _data["hireable"];
-            this.htmlUrl = _data["htmlUrl"];
-            this.id = _data["id"];
-            this.nodeId = _data["nodeId"];
-            this.location = _data["location"];
-            this.login = _data["login"];
-            this.name = _data["name"];
-            this.type = _data["type"];
-            this.ownedPrivateRepos = _data["ownedPrivateRepos"];
-            this.plan = _data["plan"] ? Plan.fromJS(_data["plan"]) : <any>undefined;
-            this.privateGists = _data["privateGists"];
-            this.publicGists = _data["publicGists"];
-            this.publicRepos = _data["publicRepos"];
-            this.totalPrivateRepos = _data["totalPrivateRepos"];
-            this.url = _data["url"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.avatarUrl = _data["avatarUrl"];
+      this.bio = _data["bio"];
+      this.blog = _data["blog"];
+      this.collaborators = _data["collaborators"];
+      this.company = _data["company"];
+      this.createdAt = _data["createdAt"]
+        ? new Date(_data["createdAt"].toString())
+        : <any>undefined;
+      this.diskUsage = _data["diskUsage"];
+      this.email = _data["email"];
+      this.followers = _data["followers"];
+      this.following = _data["following"];
+      this.hireable = _data["hireable"];
+      this.htmlUrl = _data["htmlUrl"];
+      this.id = _data["id"];
+      this.nodeId = _data["nodeId"];
+      this.location = _data["location"];
+      this.login = _data["login"];
+      this.name = _data["name"];
+      this.type = _data["type"];
+      this.ownedPrivateRepos = _data["ownedPrivateRepos"];
+      this.plan = _data["plan"] ? Plan.fromJS(_data["plan"]) : <any>undefined;
+      this.privateGists = _data["privateGists"];
+      this.publicGists = _data["publicGists"];
+      this.publicRepos = _data["publicRepos"];
+      this.totalPrivateRepos = _data["totalPrivateRepos"];
+      this.url = _data["url"];
     }
+  }
 
-    static fromJS(data: any): Account {
-        data = typeof data === 'object' ? data : {};
-        throw new Error("The abstract class 'Account' cannot be instantiated.");
-    }
+  static fromJS(data: any): Account {
+    data = typeof data === "object" ? data : {};
+    throw new Error("The abstract class 'Account' cannot be instantiated.");
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["avatarUrl"] = this.avatarUrl;
-        data["bio"] = this.bio;
-        data["blog"] = this.blog;
-        data["collaborators"] = this.collaborators;
-        data["company"] = this.company;
-        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
-        data["diskUsage"] = this.diskUsage;
-        data["email"] = this.email;
-        data["followers"] = this.followers;
-        data["following"] = this.following;
-        data["hireable"] = this.hireable;
-        data["htmlUrl"] = this.htmlUrl;
-        data["id"] = this.id;
-        data["nodeId"] = this.nodeId;
-        data["location"] = this.location;
-        data["login"] = this.login;
-        data["name"] = this.name;
-        data["type"] = this.type;
-        data["ownedPrivateRepos"] = this.ownedPrivateRepos;
-        data["plan"] = this.plan ? this.plan.toJSON() : <any>undefined;
-        data["privateGists"] = this.privateGists;
-        data["publicGists"] = this.publicGists;
-        data["publicRepos"] = this.publicRepos;
-        data["totalPrivateRepos"] = this.totalPrivateRepos;
-        data["url"] = this.url;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["avatarUrl"] = this.avatarUrl;
+    data["bio"] = this.bio;
+    data["blog"] = this.blog;
+    data["collaborators"] = this.collaborators;
+    data["company"] = this.company;
+    data["createdAt"] = this.createdAt
+      ? this.createdAt.toISOString()
+      : <any>undefined;
+    data["diskUsage"] = this.diskUsage;
+    data["email"] = this.email;
+    data["followers"] = this.followers;
+    data["following"] = this.following;
+    data["hireable"] = this.hireable;
+    data["htmlUrl"] = this.htmlUrl;
+    data["id"] = this.id;
+    data["nodeId"] = this.nodeId;
+    data["location"] = this.location;
+    data["login"] = this.login;
+    data["name"] = this.name;
+    data["type"] = this.type;
+    data["ownedPrivateRepos"] = this.ownedPrivateRepos;
+    data["plan"] = this.plan ? this.plan.toJSON() : <any>undefined;
+    data["privateGists"] = this.privateGists;
+    data["publicGists"] = this.publicGists;
+    data["publicRepos"] = this.publicRepos;
+    data["totalPrivateRepos"] = this.totalPrivateRepos;
+    data["url"] = this.url;
+    return data;
+  }
 }
 
 export interface IAccount {
-    avatarUrl?: string | undefined;
-    bio?: string | undefined;
-    blog?: string | undefined;
-    collaborators?: number | undefined;
-    company?: string | undefined;
-    createdAt?: Date;
-    diskUsage?: number | undefined;
-    email?: string | undefined;
-    followers?: number;
-    following?: number;
-    hireable?: boolean | undefined;
-    htmlUrl?: string | undefined;
-    id?: number;
-    nodeId?: string | undefined;
-    location?: string | undefined;
-    login?: string | undefined;
-    name?: string | undefined;
-    type?: AccountType | undefined;
-    ownedPrivateRepos?: number;
-    plan?: Plan | undefined;
-    privateGists?: number | undefined;
-    publicGists?: number;
-    publicRepos?: number;
-    totalPrivateRepos?: number;
-    url?: string | undefined;
+  avatarUrl?: string | undefined;
+  bio?: string | undefined;
+  blog?: string | undefined;
+  collaborators?: number | undefined;
+  company?: string | undefined;
+  createdAt?: Date;
+  diskUsage?: number | undefined;
+  email?: string | undefined;
+  followers?: number;
+  following?: number;
+  hireable?: boolean | undefined;
+  htmlUrl?: string | undefined;
+  id?: number;
+  nodeId?: string | undefined;
+  location?: string | undefined;
+  login?: string | undefined;
+  name?: string | undefined;
+  type?: AccountType | undefined;
+  ownedPrivateRepos?: number;
+  plan?: Plan | undefined;
+  privateGists?: number | undefined;
+  publicGists?: number;
+  publicRepos?: number;
+  totalPrivateRepos?: number;
+  url?: string | undefined;
 }
 
 export class User extends Account implements IUser {
-    permissions?: RepositoryPermissions | undefined;
-    siteAdmin?: boolean;
-    suspendedAt?: Date | undefined;
-    suspended?: boolean;
-    ldapDistinguishedName?: string | undefined;
-    updatedAt?: Date;
+  permissions?: RepositoryPermissions | undefined;
+  siteAdmin?: boolean;
+  suspendedAt?: Date | undefined;
+  suspended?: boolean;
+  ldapDistinguishedName?: string | undefined;
+  updatedAt?: Date;
 
-    constructor(data?: IUser) {
-        super(data);
-    }
+  constructor(data?: IUser) {
+    super(data);
+  }
 
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            this.permissions = _data["permissions"] ? RepositoryPermissions.fromJS(_data["permissions"]) : <any>undefined;
-            this.siteAdmin = _data["siteAdmin"];
-            this.suspendedAt = _data["suspendedAt"] ? new Date(_data["suspendedAt"].toString()) : <any>undefined;
-            this.suspended = _data["suspended"];
-            this.ldapDistinguishedName = _data["ldapDistinguishedName"];
-            this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
-        }
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      this.permissions = _data["permissions"]
+        ? RepositoryPermissions.fromJS(_data["permissions"])
+        : <any>undefined;
+      this.siteAdmin = _data["siteAdmin"];
+      this.suspendedAt = _data["suspendedAt"]
+        ? new Date(_data["suspendedAt"].toString())
+        : <any>undefined;
+      this.suspended = _data["suspended"];
+      this.ldapDistinguishedName = _data["ldapDistinguishedName"];
+      this.updatedAt = _data["updatedAt"]
+        ? new Date(_data["updatedAt"].toString())
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): User {
-        data = typeof data === 'object' ? data : {};
-        let result = new User();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): User {
+    data = typeof data === "object" ? data : {};
+    let result = new User();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["permissions"] = this.permissions ? this.permissions.toJSON() : <any>undefined;
-        data["siteAdmin"] = this.siteAdmin;
-        data["suspendedAt"] = this.suspendedAt ? this.suspendedAt.toISOString() : <any>undefined;
-        data["suspended"] = this.suspended;
-        data["ldapDistinguishedName"] = this.ldapDistinguishedName;
-        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
-        super.toJSON(data);
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["permissions"] = this.permissions
+      ? this.permissions.toJSON()
+      : <any>undefined;
+    data["siteAdmin"] = this.siteAdmin;
+    data["suspendedAt"] = this.suspendedAt
+      ? this.suspendedAt.toISOString()
+      : <any>undefined;
+    data["suspended"] = this.suspended;
+    data["ldapDistinguishedName"] = this.ldapDistinguishedName;
+    data["updatedAt"] = this.updatedAt
+      ? this.updatedAt.toISOString()
+      : <any>undefined;
+    super.toJSON(data);
+    return data;
+  }
 }
 
 export interface IUser extends IAccount {
-    permissions?: RepositoryPermissions | undefined;
-    siteAdmin?: boolean;
-    suspendedAt?: Date | undefined;
-    suspended?: boolean;
-    ldapDistinguishedName?: string | undefined;
-    updatedAt?: Date;
+  permissions?: RepositoryPermissions | undefined;
+  siteAdmin?: boolean;
+  suspendedAt?: Date | undefined;
+  suspended?: boolean;
+  ldapDistinguishedName?: string | undefined;
+  updatedAt?: Date;
 }
 
 export class RepositoryPermissions implements IRepositoryPermissions {
-    admin?: boolean;
-    push?: boolean;
-    pull?: boolean;
+  admin?: boolean;
+  push?: boolean;
+  pull?: boolean;
 
-    constructor(data?: IRepositoryPermissions) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IRepositoryPermissions) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.admin = _data["admin"];
-            this.push = _data["push"];
-            this.pull = _data["pull"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.admin = _data["admin"];
+      this.push = _data["push"];
+      this.pull = _data["pull"];
     }
+  }
 
-    static fromJS(data: any): RepositoryPermissions {
-        data = typeof data === 'object' ? data : {};
-        let result = new RepositoryPermissions();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): RepositoryPermissions {
+    data = typeof data === "object" ? data : {};
+    let result = new RepositoryPermissions();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["admin"] = this.admin;
-        data["push"] = this.push;
-        data["pull"] = this.pull;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["admin"] = this.admin;
+    data["push"] = this.push;
+    data["pull"] = this.pull;
+    return data;
+  }
 }
 
 export interface IRepositoryPermissions {
-    admin?: boolean;
-    push?: boolean;
-    pull?: boolean;
+  admin?: boolean;
+  push?: boolean;
+  pull?: boolean;
 }
 
 export enum AccountType {
-    User = 0,
-    Organization = 1,
-    Bot = 2,
+  User = 0,
+  Organization = 1,
+  Bot = 2,
 }
 
 export class Plan implements IPlan {
-    collaborators?: number;
-    name?: string | undefined;
-    privateRepos?: number;
-    space?: number;
-    billingEmail?: string | undefined;
+  collaborators?: number;
+  name?: string | undefined;
+  privateRepos?: number;
+  space?: number;
+  billingEmail?: string | undefined;
 
-    constructor(data?: IPlan) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IPlan) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.collaborators = _data["collaborators"];
-            this.name = _data["name"];
-            this.privateRepos = _data["privateRepos"];
-            this.space = _data["space"];
-            this.billingEmail = _data["billingEmail"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.collaborators = _data["collaborators"];
+      this.name = _data["name"];
+      this.privateRepos = _data["privateRepos"];
+      this.space = _data["space"];
+      this.billingEmail = _data["billingEmail"];
     }
+  }
 
-    static fromJS(data: any): Plan {
-        data = typeof data === 'object' ? data : {};
-        let result = new Plan();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Plan {
+    data = typeof data === "object" ? data : {};
+    let result = new Plan();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["collaborators"] = this.collaborators;
-        data["name"] = this.name;
-        data["privateRepos"] = this.privateRepos;
-        data["space"] = this.space;
-        data["billingEmail"] = this.billingEmail;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["collaborators"] = this.collaborators;
+    data["name"] = this.name;
+    data["privateRepos"] = this.privateRepos;
+    data["space"] = this.space;
+    data["billingEmail"] = this.billingEmail;
+    return data;
+  }
 }
 
 export interface IPlan {
-    collaborators?: number;
-    name?: string | undefined;
-    privateRepos?: number;
-    space?: number;
-    billingEmail?: string | undefined;
+  collaborators?: number;
+  name?: string | undefined;
+  privateRepos?: number;
+  space?: number;
+  billingEmail?: string | undefined;
 }
 
 export class UserInfoResult implements IUserInfoResult {
-    user?: User | undefined;
-    loginRedirectUrl?: string | undefined;
+  user?: User | undefined;
+  loginRedirectUrl?: string | undefined;
 
-    constructor(data?: IUserInfoResult) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IUserInfoResult) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.user = _data["user"] ? User.fromJS(_data["user"]) : <any>undefined;
-            this.loginRedirectUrl = _data["loginRedirectUrl"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.user = _data["user"] ? User.fromJS(_data["user"]) : <any>undefined;
+      this.loginRedirectUrl = _data["loginRedirectUrl"];
     }
+  }
 
-    static fromJS(data: any): UserInfoResult {
-        data = typeof data === 'object' ? data : {};
-        let result = new UserInfoResult();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): UserInfoResult {
+    data = typeof data === "object" ? data : {};
+    let result = new UserInfoResult();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
-        data["loginRedirectUrl"] = this.loginRedirectUrl;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+    data["loginRedirectUrl"] = this.loginRedirectUrl;
+    return data;
+  }
 }
 
 export interface IUserInfoResult {
-    user?: User | undefined;
-    loginRedirectUrl?: string | undefined;
+  user?: User | undefined;
+  loginRedirectUrl?: string | undefined;
 }
 
 export class UserPullRequestResult implements IUserPullRequestResult {
-    repositoryId?: number;
-    repositoryName?: string | undefined;
-    pullRequestNumber?: number;
-    closedAt?: Date | undefined;
-    updatedAt?: Date | undefined;
-    additions?: number;
-    deletions?: number;
-    changedFiles?: number;
-    closed?: boolean;
-    state?: PullRequestState;
-    collaborators?: string[] | undefined;
-    title?: string | undefined;
-    description?: string | undefined;
-    descriptionMarkdown?: string | undefined;
+  repositoryId?: number;
+  repositoryName?: string | undefined;
+  pullRequestNumber?: number;
+  closedAt?: Date | undefined;
+  updatedAt?: Date | undefined;
+  additions?: number;
+  deletions?: number;
+  changedFiles?: number;
+  closed?: boolean;
+  state?: PullRequestState;
+  collaborators?: string[] | undefined;
+  title?: string | undefined;
+  description?: string | undefined;
+  descriptionMarkdown?: string | undefined;
 
-    constructor(data?: IUserPullRequestResult) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IUserPullRequestResult) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.repositoryId = _data["repositoryId"];
-            this.repositoryName = _data["repositoryName"];
-            this.pullRequestNumber = _data["pullRequestNumber"];
-            this.closedAt = _data["closedAt"] ? new Date(_data["closedAt"].toString()) : <any>undefined;
-            this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
-            this.additions = _data["additions"];
-            this.deletions = _data["deletions"];
-            this.changedFiles = _data["changedFiles"];
-            this.closed = _data["closed"];
-            this.state = _data["state"];
-            if (Array.isArray(_data["collaborators"])) {
-                this.collaborators = [] as any;
-                for (let item of _data["collaborators"])
-                    this.collaborators!.push(item);
-            }
-            this.title = _data["title"];
-            this.description = _data["description"];
-            this.descriptionMarkdown = _data["descriptionMarkdown"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.repositoryId = _data["repositoryId"];
+      this.repositoryName = _data["repositoryName"];
+      this.pullRequestNumber = _data["pullRequestNumber"];
+      this.closedAt = _data["closedAt"]
+        ? new Date(_data["closedAt"].toString())
+        : <any>undefined;
+      this.updatedAt = _data["updatedAt"]
+        ? new Date(_data["updatedAt"].toString())
+        : <any>undefined;
+      this.additions = _data["additions"];
+      this.deletions = _data["deletions"];
+      this.changedFiles = _data["changedFiles"];
+      this.closed = _data["closed"];
+      this.state = _data["state"];
+      if (Array.isArray(_data["collaborators"])) {
+        this.collaborators = [] as any;
+        for (let item of _data["collaborators"]) this.collaborators!.push(item);
+      }
+      this.title = _data["title"];
+      this.description = _data["description"];
+      this.descriptionMarkdown = _data["descriptionMarkdown"];
     }
+  }
 
-    static fromJS(data: any): UserPullRequestResult {
-        data = typeof data === 'object' ? data : {};
-        let result = new UserPullRequestResult();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): UserPullRequestResult {
+    data = typeof data === "object" ? data : {};
+    let result = new UserPullRequestResult();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["repositoryId"] = this.repositoryId;
-        data["repositoryName"] = this.repositoryName;
-        data["pullRequestNumber"] = this.pullRequestNumber;
-        data["closedAt"] = this.closedAt ? this.closedAt.toISOString() : <any>undefined;
-        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
-        data["additions"] = this.additions;
-        data["deletions"] = this.deletions;
-        data["changedFiles"] = this.changedFiles;
-        data["closed"] = this.closed;
-        data["state"] = this.state;
-        if (Array.isArray(this.collaborators)) {
-            data["collaborators"] = [];
-            for (let item of this.collaborators)
-                data["collaborators"].push(item);
-        }
-        data["title"] = this.title;
-        data["description"] = this.description;
-        data["descriptionMarkdown"] = this.descriptionMarkdown;
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["repositoryId"] = this.repositoryId;
+    data["repositoryName"] = this.repositoryName;
+    data["pullRequestNumber"] = this.pullRequestNumber;
+    data["closedAt"] = this.closedAt
+      ? this.closedAt.toISOString()
+      : <any>undefined;
+    data["updatedAt"] = this.updatedAt
+      ? this.updatedAt.toISOString()
+      : <any>undefined;
+    data["additions"] = this.additions;
+    data["deletions"] = this.deletions;
+    data["changedFiles"] = this.changedFiles;
+    data["closed"] = this.closed;
+    data["state"] = this.state;
+    if (Array.isArray(this.collaborators)) {
+      data["collaborators"] = [];
+      for (let item of this.collaborators) data["collaborators"].push(item);
     }
+    data["title"] = this.title;
+    data["description"] = this.description;
+    data["descriptionMarkdown"] = this.descriptionMarkdown;
+    return data;
+  }
 }
 
 export interface IUserPullRequestResult {
-    repositoryId?: number;
-    repositoryName?: string | undefined;
-    pullRequestNumber?: number;
-    closedAt?: Date | undefined;
-    updatedAt?: Date | undefined;
-    additions?: number;
-    deletions?: number;
-    changedFiles?: number;
-    closed?: boolean;
-    state?: PullRequestState;
-    collaborators?: string[] | undefined;
-    title?: string | undefined;
-    description?: string | undefined;
-    descriptionMarkdown?: string | undefined;
+  repositoryId?: number;
+  repositoryName?: string | undefined;
+  pullRequestNumber?: number;
+  closedAt?: Date | undefined;
+  updatedAt?: Date | undefined;
+  additions?: number;
+  deletions?: number;
+  changedFiles?: number;
+  closed?: boolean;
+  state?: PullRequestState;
+  collaborators?: string[] | undefined;
+  title?: string | undefined;
+  description?: string | undefined;
+  descriptionMarkdown?: string | undefined;
 }
 
 export enum PullRequestState {
-    Open = "OPEN",
-    Closed = "CLOSED",
-    Merged = "MERGED",
+  Open = "OPEN",
+  Closed = "CLOSED",
+  Merged = "MERGED",
 }
 
 export enum PullRequestFilterOption {
-    All = 1,
-    Closed = 2,
-    Open = 3,
-    Merged = 4,
+  All = 1,
+  Closed = 2,
+  Open = 3,
+  Merged = 4,
 }
 
 export class DetailedPullRequest implements IDetailedPullRequest {
-    pullRequest?: UserPullRequestResult | undefined;
-    commits?: PullRequestCommit[] | undefined;
+  pullRequest?: UserPullRequestResult | undefined;
+  commits?: PullRequestCommit[] | undefined;
 
-    constructor(data?: IDetailedPullRequest) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IDetailedPullRequest) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.pullRequest = _data["pullRequest"] ? UserPullRequestResult.fromJS(_data["pullRequest"]) : <any>undefined;
-            if (Array.isArray(_data["commits"])) {
-                this.commits = [] as any;
-                for (let item of _data["commits"])
-                    this.commits!.push(PullRequestCommit.fromJS(item));
-            }
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.pullRequest = _data["pullRequest"]
+        ? UserPullRequestResult.fromJS(_data["pullRequest"])
+        : <any>undefined;
+      if (Array.isArray(_data["commits"])) {
+        this.commits = [] as any;
+        for (let item of _data["commits"])
+          this.commits!.push(PullRequestCommit.fromJS(item));
+      }
     }
+  }
 
-    static fromJS(data: any): DetailedPullRequest {
-        data = typeof data === 'object' ? data : {};
-        let result = new DetailedPullRequest();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): DetailedPullRequest {
+    data = typeof data === "object" ? data : {};
+    let result = new DetailedPullRequest();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["pullRequest"] = this.pullRequest ? this.pullRequest.toJSON() : <any>undefined;
-        if (Array.isArray(this.commits)) {
-            data["commits"] = [];
-            for (let item of this.commits)
-                data["commits"].push(item.toJSON());
-        }
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["pullRequest"] = this.pullRequest
+      ? this.pullRequest.toJSON()
+      : <any>undefined;
+    if (Array.isArray(this.commits)) {
+      data["commits"] = [];
+      for (let item of this.commits) data["commits"].push(item.toJSON());
     }
+    return data;
+  }
 }
 
 export interface IDetailedPullRequest {
-    pullRequest?: UserPullRequestResult | undefined;
-    commits?: PullRequestCommit[] | undefined;
+  pullRequest?: UserPullRequestResult | undefined;
+  commits?: PullRequestCommit[] | undefined;
 }
 
 export class PullRequestCommit implements IPullRequestCommit {
-    nodeId?: string | undefined;
-    author?: User | undefined;
-    commentsUrl?: string | undefined;
-    commit?: Commit | undefined;
-    committer?: User | undefined;
-    htmlUrl?: string | undefined;
-    parents?: GitReference[] | undefined;
-    sha?: string | undefined;
-    url?: string | undefined;
+  nodeId?: string | undefined;
+  author?: User | undefined;
+  commentsUrl?: string | undefined;
+  commit?: Commit | undefined;
+  committer?: User | undefined;
+  htmlUrl?: string | undefined;
+  parents?: GitReference[] | undefined;
+  sha?: string | undefined;
+  url?: string | undefined;
 
-    constructor(data?: IPullRequestCommit) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IPullRequestCommit) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.nodeId = _data["nodeId"];
-            this.author = _data["author"] ? User.fromJS(_data["author"]) : <any>undefined;
-            this.commentsUrl = _data["commentsUrl"];
-            this.commit = _data["commit"] ? Commit.fromJS(_data["commit"]) : <any>undefined;
-            this.committer = _data["committer"] ? User.fromJS(_data["committer"]) : <any>undefined;
-            this.htmlUrl = _data["htmlUrl"];
-            if (Array.isArray(_data["parents"])) {
-                this.parents = [] as any;
-                for (let item of _data["parents"])
-                    this.parents!.push(GitReference.fromJS(item));
-            }
-            this.sha = _data["sha"];
-            this.url = _data["url"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.nodeId = _data["nodeId"];
+      this.author = _data["author"]
+        ? User.fromJS(_data["author"])
+        : <any>undefined;
+      this.commentsUrl = _data["commentsUrl"];
+      this.commit = _data["commit"]
+        ? Commit.fromJS(_data["commit"])
+        : <any>undefined;
+      this.committer = _data["committer"]
+        ? User.fromJS(_data["committer"])
+        : <any>undefined;
+      this.htmlUrl = _data["htmlUrl"];
+      if (Array.isArray(_data["parents"])) {
+        this.parents = [] as any;
+        for (let item of _data["parents"])
+          this.parents!.push(GitReference.fromJS(item));
+      }
+      this.sha = _data["sha"];
+      this.url = _data["url"];
     }
+  }
 
-    static fromJS(data: any): PullRequestCommit {
-        data = typeof data === 'object' ? data : {};
-        let result = new PullRequestCommit();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): PullRequestCommit {
+    data = typeof data === "object" ? data : {};
+    let result = new PullRequestCommit();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["nodeId"] = this.nodeId;
-        data["author"] = this.author ? this.author.toJSON() : <any>undefined;
-        data["commentsUrl"] = this.commentsUrl;
-        data["commit"] = this.commit ? this.commit.toJSON() : <any>undefined;
-        data["committer"] = this.committer ? this.committer.toJSON() : <any>undefined;
-        data["htmlUrl"] = this.htmlUrl;
-        if (Array.isArray(this.parents)) {
-            data["parents"] = [];
-            for (let item of this.parents)
-                data["parents"].push(item.toJSON());
-        }
-        data["sha"] = this.sha;
-        data["url"] = this.url;
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["nodeId"] = this.nodeId;
+    data["author"] = this.author ? this.author.toJSON() : <any>undefined;
+    data["commentsUrl"] = this.commentsUrl;
+    data["commit"] = this.commit ? this.commit.toJSON() : <any>undefined;
+    data["committer"] = this.committer
+      ? this.committer.toJSON()
+      : <any>undefined;
+    data["htmlUrl"] = this.htmlUrl;
+    if (Array.isArray(this.parents)) {
+      data["parents"] = [];
+      for (let item of this.parents) data["parents"].push(item.toJSON());
     }
+    data["sha"] = this.sha;
+    data["url"] = this.url;
+    return data;
+  }
 }
 
 export interface IPullRequestCommit {
-    nodeId?: string | undefined;
-    author?: User | undefined;
-    commentsUrl?: string | undefined;
-    commit?: Commit | undefined;
-    committer?: User | undefined;
-    htmlUrl?: string | undefined;
-    parents?: GitReference[] | undefined;
-    sha?: string | undefined;
-    url?: string | undefined;
+  nodeId?: string | undefined;
+  author?: User | undefined;
+  commentsUrl?: string | undefined;
+  commit?: Commit | undefined;
+  committer?: User | undefined;
+  htmlUrl?: string | undefined;
+  parents?: GitReference[] | undefined;
+  sha?: string | undefined;
+  url?: string | undefined;
 }
 
 export class GitReference implements IGitReference {
-    nodeId?: string | undefined;
-    url?: string | undefined;
-    label?: string | undefined;
-    ref?: string | undefined;
-    sha?: string | undefined;
-    user?: User | undefined;
-    repository?: Repository | undefined;
+  nodeId?: string | undefined;
+  url?: string | undefined;
+  label?: string | undefined;
+  ref?: string | undefined;
+  sha?: string | undefined;
+  user?: User | undefined;
+  repository?: Repository | undefined;
 
-    constructor(data?: IGitReference) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IGitReference) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.nodeId = _data["nodeId"];
-            this.url = _data["url"];
-            this.label = _data["label"];
-            this.ref = _data["ref"];
-            this.sha = _data["sha"];
-            this.user = _data["user"] ? User.fromJS(_data["user"]) : <any>undefined;
-            this.repository = _data["repository"] ? Repository.fromJS(_data["repository"]) : <any>undefined;
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.nodeId = _data["nodeId"];
+      this.url = _data["url"];
+      this.label = _data["label"];
+      this.ref = _data["ref"];
+      this.sha = _data["sha"];
+      this.user = _data["user"] ? User.fromJS(_data["user"]) : <any>undefined;
+      this.repository = _data["repository"]
+        ? Repository.fromJS(_data["repository"])
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): GitReference {
-        data = typeof data === 'object' ? data : {};
-        let result = new GitReference();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): GitReference {
+    data = typeof data === "object" ? data : {};
+    let result = new GitReference();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["nodeId"] = this.nodeId;
-        data["url"] = this.url;
-        data["label"] = this.label;
-        data["ref"] = this.ref;
-        data["sha"] = this.sha;
-        data["user"] = this.user ? this.user.toJSON() : <any>undefined;
-        data["repository"] = this.repository ? this.repository.toJSON() : <any>undefined;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["nodeId"] = this.nodeId;
+    data["url"] = this.url;
+    data["label"] = this.label;
+    data["ref"] = this.ref;
+    data["sha"] = this.sha;
+    data["user"] = this.user ? this.user.toJSON() : <any>undefined;
+    data["repository"] = this.repository
+      ? this.repository.toJSON()
+      : <any>undefined;
+    return data;
+  }
 }
 
 export interface IGitReference {
-    nodeId?: string | undefined;
-    url?: string | undefined;
-    label?: string | undefined;
-    ref?: string | undefined;
-    sha?: string | undefined;
-    user?: User | undefined;
-    repository?: Repository | undefined;
+  nodeId?: string | undefined;
+  url?: string | undefined;
+  label?: string | undefined;
+  ref?: string | undefined;
+  sha?: string | undefined;
+  user?: User | undefined;
+  repository?: Repository | undefined;
 }
 
 export class Commit extends GitReference implements ICommit {
-    message?: string | undefined;
-    author?: Committer | undefined;
-    committer?: Committer | undefined;
-    tree?: GitReference | undefined;
-    parents?: GitReference[] | undefined;
-    commentCount?: number;
-    verification?: Verification | undefined;
+  message?: string | undefined;
+  author?: Committer | undefined;
+  committer?: Committer | undefined;
+  tree?: GitReference | undefined;
+  parents?: GitReference[] | undefined;
+  commentCount?: number;
+  verification?: Verification | undefined;
 
-    constructor(data?: ICommit) {
-        super(data);
-    }
+  constructor(data?: ICommit) {
+    super(data);
+  }
 
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            this.message = _data["message"];
-            this.author = _data["author"] ? Committer.fromJS(_data["author"]) : <any>undefined;
-            this.committer = _data["committer"] ? Committer.fromJS(_data["committer"]) : <any>undefined;
-            this.tree = _data["tree"] ? GitReference.fromJS(_data["tree"]) : <any>undefined;
-            if (Array.isArray(_data["parents"])) {
-                this.parents = [] as any;
-                for (let item of _data["parents"])
-                    this.parents!.push(GitReference.fromJS(item));
-            }
-            this.commentCount = _data["commentCount"];
-            this.verification = _data["verification"] ? Verification.fromJS(_data["verification"]) : <any>undefined;
-        }
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      this.message = _data["message"];
+      this.author = _data["author"]
+        ? Committer.fromJS(_data["author"])
+        : <any>undefined;
+      this.committer = _data["committer"]
+        ? Committer.fromJS(_data["committer"])
+        : <any>undefined;
+      this.tree = _data["tree"]
+        ? GitReference.fromJS(_data["tree"])
+        : <any>undefined;
+      if (Array.isArray(_data["parents"])) {
+        this.parents = [] as any;
+        for (let item of _data["parents"])
+          this.parents!.push(GitReference.fromJS(item));
+      }
+      this.commentCount = _data["commentCount"];
+      this.verification = _data["verification"]
+        ? Verification.fromJS(_data["verification"])
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): Commit {
-        data = typeof data === 'object' ? data : {};
-        let result = new Commit();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Commit {
+    data = typeof data === "object" ? data : {};
+    let result = new Commit();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["message"] = this.message;
-        data["author"] = this.author ? this.author.toJSON() : <any>undefined;
-        data["committer"] = this.committer ? this.committer.toJSON() : <any>undefined;
-        data["tree"] = this.tree ? this.tree.toJSON() : <any>undefined;
-        if (Array.isArray(this.parents)) {
-            data["parents"] = [];
-            for (let item of this.parents)
-                data["parents"].push(item.toJSON());
-        }
-        data["commentCount"] = this.commentCount;
-        data["verification"] = this.verification ? this.verification.toJSON() : <any>undefined;
-        super.toJSON(data);
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["message"] = this.message;
+    data["author"] = this.author ? this.author.toJSON() : <any>undefined;
+    data["committer"] = this.committer
+      ? this.committer.toJSON()
+      : <any>undefined;
+    data["tree"] = this.tree ? this.tree.toJSON() : <any>undefined;
+    if (Array.isArray(this.parents)) {
+      data["parents"] = [];
+      for (let item of this.parents) data["parents"].push(item.toJSON());
     }
+    data["commentCount"] = this.commentCount;
+    data["verification"] = this.verification
+      ? this.verification.toJSON()
+      : <any>undefined;
+    super.toJSON(data);
+    return data;
+  }
 }
 
 export interface ICommit extends IGitReference {
-    message?: string | undefined;
-    author?: Committer | undefined;
-    committer?: Committer | undefined;
-    tree?: GitReference | undefined;
-    parents?: GitReference[] | undefined;
-    commentCount?: number;
-    verification?: Verification | undefined;
+  message?: string | undefined;
+  author?: Committer | undefined;
+  committer?: Committer | undefined;
+  tree?: GitReference | undefined;
+  parents?: GitReference[] | undefined;
+  commentCount?: number;
+  verification?: Verification | undefined;
 }
 
 export class Committer implements ICommitter {
-    nodeId?: string | undefined;
-    name?: string | undefined;
-    email?: string | undefined;
-    date?: Date;
+  nodeId?: string | undefined;
+  name?: string | undefined;
+  email?: string | undefined;
+  date?: Date;
 
-    constructor(data?: ICommitter) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: ICommitter) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.nodeId = _data["nodeId"];
-            this.name = _data["name"];
-            this.email = _data["email"];
-            this.date = _data["date"] ? new Date(_data["date"].toString()) : <any>undefined;
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.nodeId = _data["nodeId"];
+      this.name = _data["name"];
+      this.email = _data["email"];
+      this.date = _data["date"]
+        ? new Date(_data["date"].toString())
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): Committer {
-        data = typeof data === 'object' ? data : {};
-        let result = new Committer();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Committer {
+    data = typeof data === "object" ? data : {};
+    let result = new Committer();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["nodeId"] = this.nodeId;
-        data["name"] = this.name;
-        data["email"] = this.email;
-        data["date"] = this.date ? this.date.toISOString() : <any>undefined;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["nodeId"] = this.nodeId;
+    data["name"] = this.name;
+    data["email"] = this.email;
+    data["date"] = this.date ? this.date.toISOString() : <any>undefined;
+    return data;
+  }
 }
 
 export interface ICommitter {
-    nodeId?: string | undefined;
-    name?: string | undefined;
-    email?: string | undefined;
-    date?: Date;
+  nodeId?: string | undefined;
+  name?: string | undefined;
+  email?: string | undefined;
+  date?: Date;
 }
 
 export class Repository implements IRepository {
-    url?: string | undefined;
-    htmlUrl?: string | undefined;
-    cloneUrl?: string | undefined;
-    gitUrl?: string | undefined;
-    sshUrl?: string | undefined;
-    svnUrl?: string | undefined;
-    mirrorUrl?: string | undefined;
-    id?: number;
-    nodeId?: string | undefined;
-    owner?: User | undefined;
-    name?: string | undefined;
-    fullName?: string | undefined;
-    isTemplate?: boolean;
-    description?: string | undefined;
-    homepage?: string | undefined;
-    language?: string | undefined;
-    private?: boolean;
-    fork?: boolean;
-    forksCount?: number;
-    stargazersCount?: number;
-    watchersCount?: number;
-    defaultBranch?: string | undefined;
-    openIssuesCount?: number;
-    pushedAt?: Date | undefined;
-    createdAt?: Date;
-    updatedAt?: Date;
-    permissions?: RepositoryPermissions | undefined;
-    parent?: Repository | undefined;
-    source?: Repository | undefined;
-    license?: LicenseMetadata | undefined;
-    hasIssues?: boolean;
-    hasWiki?: boolean;
-    hasDownloads?: boolean;
-    allowRebaseMerge?: boolean | undefined;
-    allowSquashMerge?: boolean | undefined;
-    allowMergeCommit?: boolean | undefined;
-    hasPages?: boolean;
-    subscribersCount?: number;
-    size?: number;
-    archived?: boolean;
-    deleteBranchOnMerge?: boolean | undefined;
-    visibility?: RepositoryVisibility | undefined;
+  url?: string | undefined;
+  htmlUrl?: string | undefined;
+  cloneUrl?: string | undefined;
+  gitUrl?: string | undefined;
+  sshUrl?: string | undefined;
+  svnUrl?: string | undefined;
+  mirrorUrl?: string | undefined;
+  id?: number;
+  nodeId?: string | undefined;
+  owner?: User | undefined;
+  name?: string | undefined;
+  fullName?: string | undefined;
+  isTemplate?: boolean;
+  description?: string | undefined;
+  homepage?: string | undefined;
+  language?: string | undefined;
+  private?: boolean;
+  fork?: boolean;
+  forksCount?: number;
+  stargazersCount?: number;
+  watchersCount?: number;
+  defaultBranch?: string | undefined;
+  openIssuesCount?: number;
+  pushedAt?: Date | undefined;
+  createdAt?: Date;
+  updatedAt?: Date;
+  permissions?: RepositoryPermissions | undefined;
+  parent?: Repository | undefined;
+  source?: Repository | undefined;
+  license?: LicenseMetadata | undefined;
+  hasIssues?: boolean;
+  hasWiki?: boolean;
+  hasDownloads?: boolean;
+  allowRebaseMerge?: boolean | undefined;
+  allowSquashMerge?: boolean | undefined;
+  allowMergeCommit?: boolean | undefined;
+  hasPages?: boolean;
+  subscribersCount?: number;
+  size?: number;
+  archived?: boolean;
+  deleteBranchOnMerge?: boolean | undefined;
+  visibility?: RepositoryVisibility | undefined;
 
-    constructor(data?: IRepository) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IRepository) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.url = _data["url"];
-            this.htmlUrl = _data["htmlUrl"];
-            this.cloneUrl = _data["cloneUrl"];
-            this.gitUrl = _data["gitUrl"];
-            this.sshUrl = _data["sshUrl"];
-            this.svnUrl = _data["svnUrl"];
-            this.mirrorUrl = _data["mirrorUrl"];
-            this.id = _data["id"];
-            this.nodeId = _data["nodeId"];
-            this.owner = _data["owner"] ? User.fromJS(_data["owner"]) : <any>undefined;
-            this.name = _data["name"];
-            this.fullName = _data["fullName"];
-            this.isTemplate = _data["isTemplate"];
-            this.description = _data["description"];
-            this.homepage = _data["homepage"];
-            this.language = _data["language"];
-            this.private = _data["private"];
-            this.fork = _data["fork"];
-            this.forksCount = _data["forksCount"];
-            this.stargazersCount = _data["stargazersCount"];
-            this.watchersCount = _data["watchersCount"];
-            this.defaultBranch = _data["defaultBranch"];
-            this.openIssuesCount = _data["openIssuesCount"];
-            this.pushedAt = _data["pushedAt"] ? new Date(_data["pushedAt"].toString()) : <any>undefined;
-            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
-            this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
-            this.permissions = _data["permissions"] ? RepositoryPermissions.fromJS(_data["permissions"]) : <any>undefined;
-            this.parent = _data["parent"] ? Repository.fromJS(_data["parent"]) : <any>undefined;
-            this.source = _data["source"] ? Repository.fromJS(_data["source"]) : <any>undefined;
-            this.license = _data["license"] ? LicenseMetadata.fromJS(_data["license"]) : <any>undefined;
-            this.hasIssues = _data["hasIssues"];
-            this.hasWiki = _data["hasWiki"];
-            this.hasDownloads = _data["hasDownloads"];
-            this.allowRebaseMerge = _data["allowRebaseMerge"];
-            this.allowSquashMerge = _data["allowSquashMerge"];
-            this.allowMergeCommit = _data["allowMergeCommit"];
-            this.hasPages = _data["hasPages"];
-            this.subscribersCount = _data["subscribersCount"];
-            this.size = _data["size"];
-            this.archived = _data["archived"];
-            this.deleteBranchOnMerge = _data["deleteBranchOnMerge"];
-            this.visibility = _data["visibility"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.url = _data["url"];
+      this.htmlUrl = _data["htmlUrl"];
+      this.cloneUrl = _data["cloneUrl"];
+      this.gitUrl = _data["gitUrl"];
+      this.sshUrl = _data["sshUrl"];
+      this.svnUrl = _data["svnUrl"];
+      this.mirrorUrl = _data["mirrorUrl"];
+      this.id = _data["id"];
+      this.nodeId = _data["nodeId"];
+      this.owner = _data["owner"]
+        ? User.fromJS(_data["owner"])
+        : <any>undefined;
+      this.name = _data["name"];
+      this.fullName = _data["fullName"];
+      this.isTemplate = _data["isTemplate"];
+      this.description = _data["description"];
+      this.homepage = _data["homepage"];
+      this.language = _data["language"];
+      this.private = _data["private"];
+      this.fork = _data["fork"];
+      this.forksCount = _data["forksCount"];
+      this.stargazersCount = _data["stargazersCount"];
+      this.watchersCount = _data["watchersCount"];
+      this.defaultBranch = _data["defaultBranch"];
+      this.openIssuesCount = _data["openIssuesCount"];
+      this.pushedAt = _data["pushedAt"]
+        ? new Date(_data["pushedAt"].toString())
+        : <any>undefined;
+      this.createdAt = _data["createdAt"]
+        ? new Date(_data["createdAt"].toString())
+        : <any>undefined;
+      this.updatedAt = _data["updatedAt"]
+        ? new Date(_data["updatedAt"].toString())
+        : <any>undefined;
+      this.permissions = _data["permissions"]
+        ? RepositoryPermissions.fromJS(_data["permissions"])
+        : <any>undefined;
+      this.parent = _data["parent"]
+        ? Repository.fromJS(_data["parent"])
+        : <any>undefined;
+      this.source = _data["source"]
+        ? Repository.fromJS(_data["source"])
+        : <any>undefined;
+      this.license = _data["license"]
+        ? LicenseMetadata.fromJS(_data["license"])
+        : <any>undefined;
+      this.hasIssues = _data["hasIssues"];
+      this.hasWiki = _data["hasWiki"];
+      this.hasDownloads = _data["hasDownloads"];
+      this.allowRebaseMerge = _data["allowRebaseMerge"];
+      this.allowSquashMerge = _data["allowSquashMerge"];
+      this.allowMergeCommit = _data["allowMergeCommit"];
+      this.hasPages = _data["hasPages"];
+      this.subscribersCount = _data["subscribersCount"];
+      this.size = _data["size"];
+      this.archived = _data["archived"];
+      this.deleteBranchOnMerge = _data["deleteBranchOnMerge"];
+      this.visibility = _data["visibility"];
     }
+  }
 
-    static fromJS(data: any): Repository {
-        data = typeof data === 'object' ? data : {};
-        let result = new Repository();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Repository {
+    data = typeof data === "object" ? data : {};
+    let result = new Repository();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["url"] = this.url;
-        data["htmlUrl"] = this.htmlUrl;
-        data["cloneUrl"] = this.cloneUrl;
-        data["gitUrl"] = this.gitUrl;
-        data["sshUrl"] = this.sshUrl;
-        data["svnUrl"] = this.svnUrl;
-        data["mirrorUrl"] = this.mirrorUrl;
-        data["id"] = this.id;
-        data["nodeId"] = this.nodeId;
-        data["owner"] = this.owner ? this.owner.toJSON() : <any>undefined;
-        data["name"] = this.name;
-        data["fullName"] = this.fullName;
-        data["isTemplate"] = this.isTemplate;
-        data["description"] = this.description;
-        data["homepage"] = this.homepage;
-        data["language"] = this.language;
-        data["private"] = this.private;
-        data["fork"] = this.fork;
-        data["forksCount"] = this.forksCount;
-        data["stargazersCount"] = this.stargazersCount;
-        data["watchersCount"] = this.watchersCount;
-        data["defaultBranch"] = this.defaultBranch;
-        data["openIssuesCount"] = this.openIssuesCount;
-        data["pushedAt"] = this.pushedAt ? this.pushedAt.toISOString() : <any>undefined;
-        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
-        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
-        data["permissions"] = this.permissions ? this.permissions.toJSON() : <any>undefined;
-        data["parent"] = this.parent ? this.parent.toJSON() : <any>undefined;
-        data["source"] = this.source ? this.source.toJSON() : <any>undefined;
-        data["license"] = this.license ? this.license.toJSON() : <any>undefined;
-        data["hasIssues"] = this.hasIssues;
-        data["hasWiki"] = this.hasWiki;
-        data["hasDownloads"] = this.hasDownloads;
-        data["allowRebaseMerge"] = this.allowRebaseMerge;
-        data["allowSquashMerge"] = this.allowSquashMerge;
-        data["allowMergeCommit"] = this.allowMergeCommit;
-        data["hasPages"] = this.hasPages;
-        data["subscribersCount"] = this.subscribersCount;
-        data["size"] = this.size;
-        data["archived"] = this.archived;
-        data["deleteBranchOnMerge"] = this.deleteBranchOnMerge;
-        data["visibility"] = this.visibility;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["url"] = this.url;
+    data["htmlUrl"] = this.htmlUrl;
+    data["cloneUrl"] = this.cloneUrl;
+    data["gitUrl"] = this.gitUrl;
+    data["sshUrl"] = this.sshUrl;
+    data["svnUrl"] = this.svnUrl;
+    data["mirrorUrl"] = this.mirrorUrl;
+    data["id"] = this.id;
+    data["nodeId"] = this.nodeId;
+    data["owner"] = this.owner ? this.owner.toJSON() : <any>undefined;
+    data["name"] = this.name;
+    data["fullName"] = this.fullName;
+    data["isTemplate"] = this.isTemplate;
+    data["description"] = this.description;
+    data["homepage"] = this.homepage;
+    data["language"] = this.language;
+    data["private"] = this.private;
+    data["fork"] = this.fork;
+    data["forksCount"] = this.forksCount;
+    data["stargazersCount"] = this.stargazersCount;
+    data["watchersCount"] = this.watchersCount;
+    data["defaultBranch"] = this.defaultBranch;
+    data["openIssuesCount"] = this.openIssuesCount;
+    data["pushedAt"] = this.pushedAt
+      ? this.pushedAt.toISOString()
+      : <any>undefined;
+    data["createdAt"] = this.createdAt
+      ? this.createdAt.toISOString()
+      : <any>undefined;
+    data["updatedAt"] = this.updatedAt
+      ? this.updatedAt.toISOString()
+      : <any>undefined;
+    data["permissions"] = this.permissions
+      ? this.permissions.toJSON()
+      : <any>undefined;
+    data["parent"] = this.parent ? this.parent.toJSON() : <any>undefined;
+    data["source"] = this.source ? this.source.toJSON() : <any>undefined;
+    data["license"] = this.license ? this.license.toJSON() : <any>undefined;
+    data["hasIssues"] = this.hasIssues;
+    data["hasWiki"] = this.hasWiki;
+    data["hasDownloads"] = this.hasDownloads;
+    data["allowRebaseMerge"] = this.allowRebaseMerge;
+    data["allowSquashMerge"] = this.allowSquashMerge;
+    data["allowMergeCommit"] = this.allowMergeCommit;
+    data["hasPages"] = this.hasPages;
+    data["subscribersCount"] = this.subscribersCount;
+    data["size"] = this.size;
+    data["archived"] = this.archived;
+    data["deleteBranchOnMerge"] = this.deleteBranchOnMerge;
+    data["visibility"] = this.visibility;
+    return data;
+  }
 }
 
 export interface IRepository {
-    url?: string | undefined;
-    htmlUrl?: string | undefined;
-    cloneUrl?: string | undefined;
-    gitUrl?: string | undefined;
-    sshUrl?: string | undefined;
-    svnUrl?: string | undefined;
-    mirrorUrl?: string | undefined;
-    id?: number;
-    nodeId?: string | undefined;
-    owner?: User | undefined;
-    name?: string | undefined;
-    fullName?: string | undefined;
-    isTemplate?: boolean;
-    description?: string | undefined;
-    homepage?: string | undefined;
-    language?: string | undefined;
-    private?: boolean;
-    fork?: boolean;
-    forksCount?: number;
-    stargazersCount?: number;
-    watchersCount?: number;
-    defaultBranch?: string | undefined;
-    openIssuesCount?: number;
-    pushedAt?: Date | undefined;
-    createdAt?: Date;
-    updatedAt?: Date;
-    permissions?: RepositoryPermissions | undefined;
-    parent?: Repository | undefined;
-    source?: Repository | undefined;
-    license?: LicenseMetadata | undefined;
-    hasIssues?: boolean;
-    hasWiki?: boolean;
-    hasDownloads?: boolean;
-    allowRebaseMerge?: boolean | undefined;
-    allowSquashMerge?: boolean | undefined;
-    allowMergeCommit?: boolean | undefined;
-    hasPages?: boolean;
-    subscribersCount?: number;
-    size?: number;
-    archived?: boolean;
-    deleteBranchOnMerge?: boolean | undefined;
-    visibility?: RepositoryVisibility | undefined;
+  url?: string | undefined;
+  htmlUrl?: string | undefined;
+  cloneUrl?: string | undefined;
+  gitUrl?: string | undefined;
+  sshUrl?: string | undefined;
+  svnUrl?: string | undefined;
+  mirrorUrl?: string | undefined;
+  id?: number;
+  nodeId?: string | undefined;
+  owner?: User | undefined;
+  name?: string | undefined;
+  fullName?: string | undefined;
+  isTemplate?: boolean;
+  description?: string | undefined;
+  homepage?: string | undefined;
+  language?: string | undefined;
+  private?: boolean;
+  fork?: boolean;
+  forksCount?: number;
+  stargazersCount?: number;
+  watchersCount?: number;
+  defaultBranch?: string | undefined;
+  openIssuesCount?: number;
+  pushedAt?: Date | undefined;
+  createdAt?: Date;
+  updatedAt?: Date;
+  permissions?: RepositoryPermissions | undefined;
+  parent?: Repository | undefined;
+  source?: Repository | undefined;
+  license?: LicenseMetadata | undefined;
+  hasIssues?: boolean;
+  hasWiki?: boolean;
+  hasDownloads?: boolean;
+  allowRebaseMerge?: boolean | undefined;
+  allowSquashMerge?: boolean | undefined;
+  allowMergeCommit?: boolean | undefined;
+  hasPages?: boolean;
+  subscribersCount?: number;
+  size?: number;
+  archived?: boolean;
+  deleteBranchOnMerge?: boolean | undefined;
+  visibility?: RepositoryVisibility | undefined;
 }
 
 export class LicenseMetadata implements ILicenseMetadata {
-    key?: string | undefined;
-    nodeId?: string | undefined;
-    name?: string | undefined;
-    spdxId?: string | undefined;
-    url?: string | undefined;
-    featured?: boolean;
+  key?: string | undefined;
+  nodeId?: string | undefined;
+  name?: string | undefined;
+  spdxId?: string | undefined;
+  url?: string | undefined;
+  featured?: boolean;
 
-    constructor(data?: ILicenseMetadata) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: ILicenseMetadata) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.key = _data["key"];
-            this.nodeId = _data["nodeId"];
-            this.name = _data["name"];
-            this.spdxId = _data["spdxId"];
-            this.url = _data["url"];
-            this.featured = _data["featured"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.key = _data["key"];
+      this.nodeId = _data["nodeId"];
+      this.name = _data["name"];
+      this.spdxId = _data["spdxId"];
+      this.url = _data["url"];
+      this.featured = _data["featured"];
     }
+  }
 
-    static fromJS(data: any): LicenseMetadata {
-        data = typeof data === 'object' ? data : {};
-        let result = new LicenseMetadata();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): LicenseMetadata {
+    data = typeof data === "object" ? data : {};
+    let result = new LicenseMetadata();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["key"] = this.key;
-        data["nodeId"] = this.nodeId;
-        data["name"] = this.name;
-        data["spdxId"] = this.spdxId;
-        data["url"] = this.url;
-        data["featured"] = this.featured;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["key"] = this.key;
+    data["nodeId"] = this.nodeId;
+    data["name"] = this.name;
+    data["spdxId"] = this.spdxId;
+    data["url"] = this.url;
+    data["featured"] = this.featured;
+    return data;
+  }
 }
 
 export interface ILicenseMetadata {
-    key?: string | undefined;
-    nodeId?: string | undefined;
-    name?: string | undefined;
-    spdxId?: string | undefined;
-    url?: string | undefined;
-    featured?: boolean;
+  key?: string | undefined;
+  nodeId?: string | undefined;
+  name?: string | undefined;
+  spdxId?: string | undefined;
+  url?: string | undefined;
+  featured?: boolean;
 }
 
 export enum RepositoryVisibility {
-    Public = 0,
-    Private = 1,
-    Internal = 2,
+  Public = 0,
+  Private = 1,
+  Internal = 2,
 }
 
 export class Verification implements IVerification {
-    verified?: boolean;
-    reason?: StringEnumOfVerificationReason;
-    signature?: string | undefined;
-    payload?: string | undefined;
+  verified?: boolean;
+  reason?: StringEnumOfVerificationReason;
+  signature?: string | undefined;
+  payload?: string | undefined;
 
-    constructor(data?: IVerification) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IVerification) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.verified = _data["verified"];
-            this.reason = _data["reason"] ? StringEnumOfVerificationReason.fromJS(_data["reason"]) : <any>undefined;
-            this.signature = _data["signature"];
-            this.payload = _data["payload"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.verified = _data["verified"];
+      this.reason = _data["reason"]
+        ? StringEnumOfVerificationReason.fromJS(_data["reason"])
+        : <any>undefined;
+      this.signature = _data["signature"];
+      this.payload = _data["payload"];
     }
+  }
 
-    static fromJS(data: any): Verification {
-        data = typeof data === 'object' ? data : {};
-        let result = new Verification();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Verification {
+    data = typeof data === "object" ? data : {};
+    let result = new Verification();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["verified"] = this.verified;
-        data["reason"] = this.reason ? this.reason.toJSON() : <any>undefined;
-        data["signature"] = this.signature;
-        data["payload"] = this.payload;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["verified"] = this.verified;
+    data["reason"] = this.reason ? this.reason.toJSON() : <any>undefined;
+    data["signature"] = this.signature;
+    data["payload"] = this.payload;
+    return data;
+  }
 }
 
 export interface IVerification {
-    verified?: boolean;
-    reason?: StringEnumOfVerificationReason;
-    signature?: string | undefined;
-    payload?: string | undefined;
+  verified?: boolean;
+  reason?: StringEnumOfVerificationReason;
+  signature?: string | undefined;
+  payload?: string | undefined;
 }
 
-export class StringEnumOfVerificationReason implements IStringEnumOfVerificationReason {
-    stringValue?: string | undefined;
-    value?: VerificationReason;
+export class StringEnumOfVerificationReason
+  implements IStringEnumOfVerificationReason {
+  stringValue?: string | undefined;
+  value?: VerificationReason;
 
-    constructor(data?: IStringEnumOfVerificationReason) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IStringEnumOfVerificationReason) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.stringValue = _data["stringValue"];
-            this.value = _data["value"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.stringValue = _data["stringValue"];
+      this.value = _data["value"];
     }
+  }
 
-    static fromJS(data: any): StringEnumOfVerificationReason {
-        data = typeof data === 'object' ? data : {};
-        let result = new StringEnumOfVerificationReason();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): StringEnumOfVerificationReason {
+    data = typeof data === "object" ? data : {};
+    let result = new StringEnumOfVerificationReason();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["stringValue"] = this.stringValue;
-        data["value"] = this.value;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["stringValue"] = this.stringValue;
+    data["value"] = this.value;
+    return data;
+  }
 }
 
 export interface IStringEnumOfVerificationReason {
-    stringValue?: string | undefined;
-    value?: VerificationReason;
+  stringValue?: string | undefined;
+  value?: VerificationReason;
 }
 
 export enum VerificationReason {
-    ExpiredKey = 0,
-    NotSigningKey = 1,
-    GpgVerifyError = 2,
-    GpgVerifyUnavailable = 3,
-    Unsigned = 4,
-    UnknownSignatureType = 5,
-    NoUser = 6,
-    UnverifiedEmail = 7,
-    BadEmail = 8,
-    UnknownKey = 9,
-    MalformedSignature = 10,
-    Invalid = 11,
-    Valid = 12,
+  ExpiredKey = 0,
+  NotSigningKey = 1,
+  GpgVerifyError = 2,
+  GpgVerifyUnavailable = 3,
+  Unsigned = 4,
+  UnknownSignatureType = 5,
+  NoUser = 6,
+  UnverifiedEmail = 7,
+  BadEmail = 8,
+  UnknownKey = 9,
+  MalformedSignature = 10,
+  Invalid = 11,
+  Valid = 12,
 }
 
 export class UserRepositoryResult implements IUserRepositoryResult {
-    id?: number;
-    name?: string | undefined;
-    description?: string | undefined;
-    descriptionHtml?: string | undefined;
-    pullUrl?: string | undefined;
-    private?: boolean;
-    template?: boolean;
-    collaborators?: Collaborator[] | undefined;
-    lastUpdated?: Date;
+  id?: number;
+  name?: string | undefined;
+  description?: string | undefined;
+  descriptionHtml?: string | undefined;
+  pullUrl?: string | undefined;
+  private?: boolean;
+  template?: boolean;
+  collaborators?: Collaborator[] | undefined;
+  lastUpdated?: Date;
 
-    constructor(data?: IUserRepositoryResult) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IUserRepositoryResult) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.name = _data["name"];
-            this.description = _data["description"];
-            this.descriptionHtml = _data["descriptionHtml"];
-            this.pullUrl = _data["pullUrl"];
-            this.private = _data["private"];
-            this.template = _data["template"];
-            if (Array.isArray(_data["collaborators"])) {
-                this.collaborators = [] as any;
-                for (let item of _data["collaborators"])
-                    this.collaborators!.push(Collaborator.fromJS(item));
-            }
-            this.lastUpdated = _data["lastUpdated"] ? new Date(_data["lastUpdated"].toString()) : <any>undefined;
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.id = _data["id"];
+      this.name = _data["name"];
+      this.description = _data["description"];
+      this.descriptionHtml = _data["descriptionHtml"];
+      this.pullUrl = _data["pullUrl"];
+      this.private = _data["private"];
+      this.template = _data["template"];
+      if (Array.isArray(_data["collaborators"])) {
+        this.collaborators = [] as any;
+        for (let item of _data["collaborators"])
+          this.collaborators!.push(Collaborator.fromJS(item));
+      }
+      this.lastUpdated = _data["lastUpdated"]
+        ? new Date(_data["lastUpdated"].toString())
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): UserRepositoryResult {
-        data = typeof data === 'object' ? data : {};
-        let result = new UserRepositoryResult();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): UserRepositoryResult {
+    data = typeof data === "object" ? data : {};
+    let result = new UserRepositoryResult();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["name"] = this.name;
-        data["description"] = this.description;
-        data["descriptionHtml"] = this.descriptionHtml;
-        data["pullUrl"] = this.pullUrl;
-        data["private"] = this.private;
-        data["template"] = this.template;
-        if (Array.isArray(this.collaborators)) {
-            data["collaborators"] = [];
-            for (let item of this.collaborators)
-                data["collaborators"].push(item.toJSON());
-        }
-        data["lastUpdated"] = this.lastUpdated ? this.lastUpdated.toISOString() : <any>undefined;
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["id"] = this.id;
+    data["name"] = this.name;
+    data["description"] = this.description;
+    data["descriptionHtml"] = this.descriptionHtml;
+    data["pullUrl"] = this.pullUrl;
+    data["private"] = this.private;
+    data["template"] = this.template;
+    if (Array.isArray(this.collaborators)) {
+      data["collaborators"] = [];
+      for (let item of this.collaborators)
+        data["collaborators"].push(item.toJSON());
     }
+    data["lastUpdated"] = this.lastUpdated
+      ? this.lastUpdated.toISOString()
+      : <any>undefined;
+    return data;
+  }
 }
 
 export interface IUserRepositoryResult {
-    id?: number;
-    name?: string | undefined;
-    description?: string | undefined;
-    descriptionHtml?: string | undefined;
-    pullUrl?: string | undefined;
-    private?: boolean;
-    template?: boolean;
-    collaborators?: Collaborator[] | undefined;
-    lastUpdated?: Date;
+  id?: number;
+  name?: string | undefined;
+  description?: string | undefined;
+  descriptionHtml?: string | undefined;
+  pullUrl?: string | undefined;
+  private?: boolean;
+  template?: boolean;
+  collaborators?: Collaborator[] | undefined;
+  lastUpdated?: Date;
 }
 
 export class Collaborator implements ICollaborator {
-    name?: string | undefined;
-    avatarUrl?: string | undefined;
+  name?: string | undefined;
+  avatarUrl?: string | undefined;
 
-    constructor(data?: ICollaborator) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: ICollaborator) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.name = _data["name"];
-            this.avatarUrl = _data["avatarUrl"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.name = _data["name"];
+      this.avatarUrl = _data["avatarUrl"];
     }
+  }
 
-    static fromJS(data: any): Collaborator {
-        data = typeof data === 'object' ? data : {};
-        let result = new Collaborator();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Collaborator {
+    data = typeof data === "object" ? data : {};
+    let result = new Collaborator();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["name"] = this.name;
-        data["avatarUrl"] = this.avatarUrl;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["name"] = this.name;
+    data["avatarUrl"] = this.avatarUrl;
+    return data;
+  }
 }
 
 export interface ICollaborator {
-    name?: string | undefined;
-    avatarUrl?: string | undefined;
+  name?: string | undefined;
+  avatarUrl?: string | undefined;
 }
 
 export enum RepoFilterOptions {
-    All = 1,
-    Owned = 2,
-    ContributedNotOwned = 3,
+  All = 1,
+  Owned = 2,
+  ContributedNotOwned = 3,
 }
 
 export class DetailedRepository implements IDetailedRepository {
-    repository?: UserRepositoryResult | undefined;
-    commits?: GitHubCommit[] | undefined;
-    statistics?: RepoStatistics | undefined;
+  repository?: UserRepositoryResult | undefined;
+  commits?: GitHubCommit[] | undefined;
+  statistics?: RepoStatistics | undefined;
+  codeOwners?: { [key: string]: string } | undefined;
+  codeOwnersLastUpdated?: Date | undefined;
 
-    constructor(data?: IDetailedRepository) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
+  constructor(data?: IDetailedRepository) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.repository = _data["repository"]
+        ? UserRepositoryResult.fromJS(_data["repository"])
+        : <any>undefined;
+      if (Array.isArray(_data["commits"])) {
+        this.commits = [] as any;
+        for (let item of _data["commits"])
+          this.commits!.push(GitHubCommit.fromJS(item));
+      }
+      this.statistics = _data["statistics"]
+        ? RepoStatistics.fromJS(_data["statistics"])
+        : <any>undefined;
+      if (_data["codeOwners"]) {
+        this.codeOwners = {} as any;
+        for (let key in _data["codeOwners"]) {
+          if (_data["codeOwners"].hasOwnProperty(key))
+            this.codeOwners![key] = _data["codeOwners"][key];
         }
+      }
+      this.codeOwnersLastUpdated = _data["codeOwnersLastUpdated"]
+        ? new Date(_data["codeOwnersLastUpdated"].toString())
+        : <any>undefined;
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.repository = _data["repository"] ? UserRepositoryResult.fromJS(_data["repository"]) : <any>undefined;
-            if (Array.isArray(_data["commits"])) {
-                this.commits = [] as any;
-                for (let item of _data["commits"])
-                    this.commits!.push(GitHubCommit.fromJS(item));
-            }
-            this.statistics = _data["statistics"] ? RepoStatistics.fromJS(_data["statistics"]) : <any>undefined;
-        }
-    }
+  static fromJS(data: any): DetailedRepository {
+    data = typeof data === "object" ? data : {};
+    let result = new DetailedRepository();
+    result.init(data);
+    return result;
+  }
 
-    static fromJS(data: any): DetailedRepository {
-        data = typeof data === 'object' ? data : {};
-        let result = new DetailedRepository();
-        result.init(data);
-        return result;
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["repository"] = this.repository
+      ? this.repository.toJSON()
+      : <any>undefined;
+    if (Array.isArray(this.commits)) {
+      data["commits"] = [];
+      for (let item of this.commits) data["commits"].push(item.toJSON());
     }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["repository"] = this.repository ? this.repository.toJSON() : <any>undefined;
-        if (Array.isArray(this.commits)) {
-            data["commits"] = [];
-            for (let item of this.commits)
-                data["commits"].push(item.toJSON());
-        }
-        data["statistics"] = this.statistics ? this.statistics.toJSON() : <any>undefined;
-        return data; 
+    data["statistics"] = this.statistics
+      ? this.statistics.toJSON()
+      : <any>undefined;
+    if (this.codeOwners) {
+      data["codeOwners"] = {};
+      for (let key in this.codeOwners) {
+        if (this.codeOwners.hasOwnProperty(key))
+          data["codeOwners"][key] = this.codeOwners[key];
+      }
     }
+    data["codeOwnersLastUpdated"] = this.codeOwnersLastUpdated
+      ? this.codeOwnersLastUpdated.toISOString()
+      : <any>undefined;
+    return data;
+  }
 }
 
 export interface IDetailedRepository {
-    repository?: UserRepositoryResult | undefined;
-    commits?: GitHubCommit[] | undefined;
-    statistics?: RepoStatistics | undefined;
+  repository?: UserRepositoryResult | undefined;
+  commits?: GitHubCommit[] | undefined;
+  statistics?: RepoStatistics | undefined;
+  codeOwners?: { [key: string]: string } | undefined;
+  codeOwnersLastUpdated?: Date | undefined;
 }
 
 export class GitHubCommit extends GitReference implements IGitHubCommit {
-    author?: Author | undefined;
-    commentsUrl?: string | undefined;
-    commit?: Commit | undefined;
-    committer?: Author | undefined;
-    htmlUrl?: string | undefined;
-    stats?: GitHubCommitStats | undefined;
-    parents?: GitReference[] | undefined;
-    files?: GitHubCommitFile[] | undefined;
+  author?: Author | undefined;
+  commentsUrl?: string | undefined;
+  commit?: Commit | undefined;
+  committer?: Author | undefined;
+  htmlUrl?: string | undefined;
+  stats?: GitHubCommitStats | undefined;
+  parents?: GitReference[] | undefined;
+  files?: GitHubCommitFile[] | undefined;
 
-    constructor(data?: IGitHubCommit) {
-        super(data);
-    }
+  constructor(data?: IGitHubCommit) {
+    super(data);
+  }
 
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            this.author = _data["author"] ? Author.fromJS(_data["author"]) : <any>undefined;
-            this.commentsUrl = _data["commentsUrl"];
-            this.commit = _data["commit"] ? Commit.fromJS(_data["commit"]) : <any>undefined;
-            this.committer = _data["committer"] ? Author.fromJS(_data["committer"]) : <any>undefined;
-            this.htmlUrl = _data["htmlUrl"];
-            this.stats = _data["stats"] ? GitHubCommitStats.fromJS(_data["stats"]) : <any>undefined;
-            if (Array.isArray(_data["parents"])) {
-                this.parents = [] as any;
-                for (let item of _data["parents"])
-                    this.parents!.push(GitReference.fromJS(item));
-            }
-            if (Array.isArray(_data["files"])) {
-                this.files = [] as any;
-                for (let item of _data["files"])
-                    this.files!.push(GitHubCommitFile.fromJS(item));
-            }
-        }
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      this.author = _data["author"]
+        ? Author.fromJS(_data["author"])
+        : <any>undefined;
+      this.commentsUrl = _data["commentsUrl"];
+      this.commit = _data["commit"]
+        ? Commit.fromJS(_data["commit"])
+        : <any>undefined;
+      this.committer = _data["committer"]
+        ? Author.fromJS(_data["committer"])
+        : <any>undefined;
+      this.htmlUrl = _data["htmlUrl"];
+      this.stats = _data["stats"]
+        ? GitHubCommitStats.fromJS(_data["stats"])
+        : <any>undefined;
+      if (Array.isArray(_data["parents"])) {
+        this.parents = [] as any;
+        for (let item of _data["parents"])
+          this.parents!.push(GitReference.fromJS(item));
+      }
+      if (Array.isArray(_data["files"])) {
+        this.files = [] as any;
+        for (let item of _data["files"])
+          this.files!.push(GitHubCommitFile.fromJS(item));
+      }
     }
+  }
 
-    static fromJS(data: any): GitHubCommit {
-        data = typeof data === 'object' ? data : {};
-        let result = new GitHubCommit();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): GitHubCommit {
+    data = typeof data === "object" ? data : {};
+    let result = new GitHubCommit();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["author"] = this.author ? this.author.toJSON() : <any>undefined;
-        data["commentsUrl"] = this.commentsUrl;
-        data["commit"] = this.commit ? this.commit.toJSON() : <any>undefined;
-        data["committer"] = this.committer ? this.committer.toJSON() : <any>undefined;
-        data["htmlUrl"] = this.htmlUrl;
-        data["stats"] = this.stats ? this.stats.toJSON() : <any>undefined;
-        if (Array.isArray(this.parents)) {
-            data["parents"] = [];
-            for (let item of this.parents)
-                data["parents"].push(item.toJSON());
-        }
-        if (Array.isArray(this.files)) {
-            data["files"] = [];
-            for (let item of this.files)
-                data["files"].push(item.toJSON());
-        }
-        super.toJSON(data);
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["author"] = this.author ? this.author.toJSON() : <any>undefined;
+    data["commentsUrl"] = this.commentsUrl;
+    data["commit"] = this.commit ? this.commit.toJSON() : <any>undefined;
+    data["committer"] = this.committer
+      ? this.committer.toJSON()
+      : <any>undefined;
+    data["htmlUrl"] = this.htmlUrl;
+    data["stats"] = this.stats ? this.stats.toJSON() : <any>undefined;
+    if (Array.isArray(this.parents)) {
+      data["parents"] = [];
+      for (let item of this.parents) data["parents"].push(item.toJSON());
     }
+    if (Array.isArray(this.files)) {
+      data["files"] = [];
+      for (let item of this.files) data["files"].push(item.toJSON());
+    }
+    super.toJSON(data);
+    return data;
+  }
 }
 
 export interface IGitHubCommit extends IGitReference {
-    author?: Author | undefined;
-    commentsUrl?: string | undefined;
-    commit?: Commit | undefined;
-    committer?: Author | undefined;
-    htmlUrl?: string | undefined;
-    stats?: GitHubCommitStats | undefined;
-    parents?: GitReference[] | undefined;
-    files?: GitHubCommitFile[] | undefined;
+  author?: Author | undefined;
+  commentsUrl?: string | undefined;
+  commit?: Commit | undefined;
+  committer?: Author | undefined;
+  htmlUrl?: string | undefined;
+  stats?: GitHubCommitStats | undefined;
+  parents?: GitReference[] | undefined;
+  files?: GitHubCommitFile[] | undefined;
 }
 
 export class Author implements IAuthor {
-    login?: string | undefined;
-    id?: number;
-    nodeId?: string | undefined;
-    avatarUrl?: string | undefined;
-    url?: string | undefined;
-    htmlUrl?: string | undefined;
-    followersUrl?: string | undefined;
-    followingUrl?: string | undefined;
-    gistsUrl?: string | undefined;
-    starredUrl?: string | undefined;
-    subscriptionsUrl?: string | undefined;
-    organizationsUrl?: string | undefined;
-    reposUrl?: string | undefined;
-    eventsUrl?: string | undefined;
-    receivedEventsUrl?: string | undefined;
-    type?: string | undefined;
-    siteAdmin?: boolean;
+  login?: string | undefined;
+  id?: number;
+  nodeId?: string | undefined;
+  avatarUrl?: string | undefined;
+  url?: string | undefined;
+  htmlUrl?: string | undefined;
+  followersUrl?: string | undefined;
+  followingUrl?: string | undefined;
+  gistsUrl?: string | undefined;
+  starredUrl?: string | undefined;
+  subscriptionsUrl?: string | undefined;
+  organizationsUrl?: string | undefined;
+  reposUrl?: string | undefined;
+  eventsUrl?: string | undefined;
+  receivedEventsUrl?: string | undefined;
+  type?: string | undefined;
+  siteAdmin?: boolean;
 
-    constructor(data?: IAuthor) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IAuthor) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.login = _data["login"];
-            this.id = _data["id"];
-            this.nodeId = _data["nodeId"];
-            this.avatarUrl = _data["avatarUrl"];
-            this.url = _data["url"];
-            this.htmlUrl = _data["htmlUrl"];
-            this.followersUrl = _data["followersUrl"];
-            this.followingUrl = _data["followingUrl"];
-            this.gistsUrl = _data["gistsUrl"];
-            this.starredUrl = _data["starredUrl"];
-            this.subscriptionsUrl = _data["subscriptionsUrl"];
-            this.organizationsUrl = _data["organizationsUrl"];
-            this.reposUrl = _data["reposUrl"];
-            this.eventsUrl = _data["eventsUrl"];
-            this.receivedEventsUrl = _data["receivedEventsUrl"];
-            this.type = _data["type"];
-            this.siteAdmin = _data["siteAdmin"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.login = _data["login"];
+      this.id = _data["id"];
+      this.nodeId = _data["nodeId"];
+      this.avatarUrl = _data["avatarUrl"];
+      this.url = _data["url"];
+      this.htmlUrl = _data["htmlUrl"];
+      this.followersUrl = _data["followersUrl"];
+      this.followingUrl = _data["followingUrl"];
+      this.gistsUrl = _data["gistsUrl"];
+      this.starredUrl = _data["starredUrl"];
+      this.subscriptionsUrl = _data["subscriptionsUrl"];
+      this.organizationsUrl = _data["organizationsUrl"];
+      this.reposUrl = _data["reposUrl"];
+      this.eventsUrl = _data["eventsUrl"];
+      this.receivedEventsUrl = _data["receivedEventsUrl"];
+      this.type = _data["type"];
+      this.siteAdmin = _data["siteAdmin"];
     }
+  }
 
-    static fromJS(data: any): Author {
-        data = typeof data === 'object' ? data : {};
-        let result = new Author();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Author {
+    data = typeof data === "object" ? data : {};
+    let result = new Author();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["login"] = this.login;
-        data["id"] = this.id;
-        data["nodeId"] = this.nodeId;
-        data["avatarUrl"] = this.avatarUrl;
-        data["url"] = this.url;
-        data["htmlUrl"] = this.htmlUrl;
-        data["followersUrl"] = this.followersUrl;
-        data["followingUrl"] = this.followingUrl;
-        data["gistsUrl"] = this.gistsUrl;
-        data["starredUrl"] = this.starredUrl;
-        data["subscriptionsUrl"] = this.subscriptionsUrl;
-        data["organizationsUrl"] = this.organizationsUrl;
-        data["reposUrl"] = this.reposUrl;
-        data["eventsUrl"] = this.eventsUrl;
-        data["receivedEventsUrl"] = this.receivedEventsUrl;
-        data["type"] = this.type;
-        data["siteAdmin"] = this.siteAdmin;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["login"] = this.login;
+    data["id"] = this.id;
+    data["nodeId"] = this.nodeId;
+    data["avatarUrl"] = this.avatarUrl;
+    data["url"] = this.url;
+    data["htmlUrl"] = this.htmlUrl;
+    data["followersUrl"] = this.followersUrl;
+    data["followingUrl"] = this.followingUrl;
+    data["gistsUrl"] = this.gistsUrl;
+    data["starredUrl"] = this.starredUrl;
+    data["subscriptionsUrl"] = this.subscriptionsUrl;
+    data["organizationsUrl"] = this.organizationsUrl;
+    data["reposUrl"] = this.reposUrl;
+    data["eventsUrl"] = this.eventsUrl;
+    data["receivedEventsUrl"] = this.receivedEventsUrl;
+    data["type"] = this.type;
+    data["siteAdmin"] = this.siteAdmin;
+    return data;
+  }
 }
 
 export interface IAuthor {
-    login?: string | undefined;
-    id?: number;
-    nodeId?: string | undefined;
-    avatarUrl?: string | undefined;
-    url?: string | undefined;
-    htmlUrl?: string | undefined;
-    followersUrl?: string | undefined;
-    followingUrl?: string | undefined;
-    gistsUrl?: string | undefined;
-    starredUrl?: string | undefined;
-    subscriptionsUrl?: string | undefined;
-    organizationsUrl?: string | undefined;
-    reposUrl?: string | undefined;
-    eventsUrl?: string | undefined;
-    receivedEventsUrl?: string | undefined;
-    type?: string | undefined;
-    siteAdmin?: boolean;
+  login?: string | undefined;
+  id?: number;
+  nodeId?: string | undefined;
+  avatarUrl?: string | undefined;
+  url?: string | undefined;
+  htmlUrl?: string | undefined;
+  followersUrl?: string | undefined;
+  followingUrl?: string | undefined;
+  gistsUrl?: string | undefined;
+  starredUrl?: string | undefined;
+  subscriptionsUrl?: string | undefined;
+  organizationsUrl?: string | undefined;
+  reposUrl?: string | undefined;
+  eventsUrl?: string | undefined;
+  receivedEventsUrl?: string | undefined;
+  type?: string | undefined;
+  siteAdmin?: boolean;
 }
 
 export class GitHubCommitStats implements IGitHubCommitStats {
-    additions?: number;
-    deletions?: number;
-    total?: number;
+  additions?: number;
+  deletions?: number;
+  total?: number;
 
-    constructor(data?: IGitHubCommitStats) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IGitHubCommitStats) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.additions = _data["additions"];
-            this.deletions = _data["deletions"];
-            this.total = _data["total"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.additions = _data["additions"];
+      this.deletions = _data["deletions"];
+      this.total = _data["total"];
     }
+  }
 
-    static fromJS(data: any): GitHubCommitStats {
-        data = typeof data === 'object' ? data : {};
-        let result = new GitHubCommitStats();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): GitHubCommitStats {
+    data = typeof data === "object" ? data : {};
+    let result = new GitHubCommitStats();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["additions"] = this.additions;
-        data["deletions"] = this.deletions;
-        data["total"] = this.total;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["additions"] = this.additions;
+    data["deletions"] = this.deletions;
+    data["total"] = this.total;
+    return data;
+  }
 }
 
 export interface IGitHubCommitStats {
-    additions?: number;
-    deletions?: number;
-    total?: number;
+  additions?: number;
+  deletions?: number;
+  total?: number;
 }
 
 export class GitHubCommitFile implements IGitHubCommitFile {
-    filename?: string | undefined;
-    additions?: number;
-    deletions?: number;
-    changes?: number;
-    status?: string | undefined;
-    blobUrl?: string | undefined;
-    contentsUrl?: string | undefined;
-    rawUrl?: string | undefined;
-    sha?: string | undefined;
-    patch?: string | undefined;
-    previousFileName?: string | undefined;
+  filename?: string | undefined;
+  additions?: number;
+  deletions?: number;
+  changes?: number;
+  status?: string | undefined;
+  blobUrl?: string | undefined;
+  contentsUrl?: string | undefined;
+  rawUrl?: string | undefined;
+  sha?: string | undefined;
+  patch?: string | undefined;
+  previousFileName?: string | undefined;
 
-    constructor(data?: IGitHubCommitFile) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IGitHubCommitFile) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.filename = _data["filename"];
-            this.additions = _data["additions"];
-            this.deletions = _data["deletions"];
-            this.changes = _data["changes"];
-            this.status = _data["status"];
-            this.blobUrl = _data["blobUrl"];
-            this.contentsUrl = _data["contentsUrl"];
-            this.rawUrl = _data["rawUrl"];
-            this.sha = _data["sha"];
-            this.patch = _data["patch"];
-            this.previousFileName = _data["previousFileName"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.filename = _data["filename"];
+      this.additions = _data["additions"];
+      this.deletions = _data["deletions"];
+      this.changes = _data["changes"];
+      this.status = _data["status"];
+      this.blobUrl = _data["blobUrl"];
+      this.contentsUrl = _data["contentsUrl"];
+      this.rawUrl = _data["rawUrl"];
+      this.sha = _data["sha"];
+      this.patch = _data["patch"];
+      this.previousFileName = _data["previousFileName"];
     }
+  }
 
-    static fromJS(data: any): GitHubCommitFile {
-        data = typeof data === 'object' ? data : {};
-        let result = new GitHubCommitFile();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): GitHubCommitFile {
+    data = typeof data === "object" ? data : {};
+    let result = new GitHubCommitFile();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["filename"] = this.filename;
-        data["additions"] = this.additions;
-        data["deletions"] = this.deletions;
-        data["changes"] = this.changes;
-        data["status"] = this.status;
-        data["blobUrl"] = this.blobUrl;
-        data["contentsUrl"] = this.contentsUrl;
-        data["rawUrl"] = this.rawUrl;
-        data["sha"] = this.sha;
-        data["patch"] = this.patch;
-        data["previousFileName"] = this.previousFileName;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["filename"] = this.filename;
+    data["additions"] = this.additions;
+    data["deletions"] = this.deletions;
+    data["changes"] = this.changes;
+    data["status"] = this.status;
+    data["blobUrl"] = this.blobUrl;
+    data["contentsUrl"] = this.contentsUrl;
+    data["rawUrl"] = this.rawUrl;
+    data["sha"] = this.sha;
+    data["patch"] = this.patch;
+    data["previousFileName"] = this.previousFileName;
+    return data;
+  }
 }
 
 export interface IGitHubCommitFile {
-    filename?: string | undefined;
-    additions?: number;
-    deletions?: number;
-    changes?: number;
-    status?: string | undefined;
-    blobUrl?: string | undefined;
-    contentsUrl?: string | undefined;
-    rawUrl?: string | undefined;
-    sha?: string | undefined;
-    patch?: string | undefined;
-    previousFileName?: string | undefined;
+  filename?: string | undefined;
+  additions?: number;
+  deletions?: number;
+  changes?: number;
+  status?: string | undefined;
+  blobUrl?: string | undefined;
+  contentsUrl?: string | undefined;
+  rawUrl?: string | undefined;
+  sha?: string | undefined;
+  patch?: string | undefined;
+  previousFileName?: string | undefined;
 }
 
 export class RepoStatistics implements IRepoStatistics {
-    codeFrequency?: CodeFrequency | undefined;
-    commitActivity?: CommitActivity | undefined;
-    participation?: Participation | undefined;
-    commitPunchCard?: PunchCard | undefined;
+  codeFrequency?: CodeFrequency | undefined;
+  commitActivity?: CommitActivity | undefined;
+  participation?: Participation | undefined;
+  commitPunchCard?: PunchCard | undefined;
 
-    constructor(data?: IRepoStatistics) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IRepoStatistics) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.codeFrequency = _data["codeFrequency"] ? CodeFrequency.fromJS(_data["codeFrequency"]) : <any>undefined;
-            this.commitActivity = _data["commitActivity"] ? CommitActivity.fromJS(_data["commitActivity"]) : <any>undefined;
-            this.participation = _data["participation"] ? Participation.fromJS(_data["participation"]) : <any>undefined;
-            this.commitPunchCard = _data["commitPunchCard"] ? PunchCard.fromJS(_data["commitPunchCard"]) : <any>undefined;
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.codeFrequency = _data["codeFrequency"]
+        ? CodeFrequency.fromJS(_data["codeFrequency"])
+        : <any>undefined;
+      this.commitActivity = _data["commitActivity"]
+        ? CommitActivity.fromJS(_data["commitActivity"])
+        : <any>undefined;
+      this.participation = _data["participation"]
+        ? Participation.fromJS(_data["participation"])
+        : <any>undefined;
+      this.commitPunchCard = _data["commitPunchCard"]
+        ? PunchCard.fromJS(_data["commitPunchCard"])
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): RepoStatistics {
-        data = typeof data === 'object' ? data : {};
-        let result = new RepoStatistics();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): RepoStatistics {
+    data = typeof data === "object" ? data : {};
+    let result = new RepoStatistics();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["codeFrequency"] = this.codeFrequency ? this.codeFrequency.toJSON() : <any>undefined;
-        data["commitActivity"] = this.commitActivity ? this.commitActivity.toJSON() : <any>undefined;
-        data["participation"] = this.participation ? this.participation.toJSON() : <any>undefined;
-        data["commitPunchCard"] = this.commitPunchCard ? this.commitPunchCard.toJSON() : <any>undefined;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["codeFrequency"] = this.codeFrequency
+      ? this.codeFrequency.toJSON()
+      : <any>undefined;
+    data["commitActivity"] = this.commitActivity
+      ? this.commitActivity.toJSON()
+      : <any>undefined;
+    data["participation"] = this.participation
+      ? this.participation.toJSON()
+      : <any>undefined;
+    data["commitPunchCard"] = this.commitPunchCard
+      ? this.commitPunchCard.toJSON()
+      : <any>undefined;
+    return data;
+  }
 }
 
 export interface IRepoStatistics {
-    codeFrequency?: CodeFrequency | undefined;
-    commitActivity?: CommitActivity | undefined;
-    participation?: Participation | undefined;
-    commitPunchCard?: PunchCard | undefined;
+  codeFrequency?: CodeFrequency | undefined;
+  commitActivity?: CommitActivity | undefined;
+  participation?: Participation | undefined;
+  commitPunchCard?: PunchCard | undefined;
 }
 
 export class CodeFrequency implements ICodeFrequency {
-    additionsAndDeletionsByWeek?: AdditionsAndDeletions[] | undefined;
+  additionsAndDeletionsByWeek?: AdditionsAndDeletions[] | undefined;
 
-    constructor(data?: ICodeFrequency) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: ICodeFrequency) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            if (Array.isArray(_data["additionsAndDeletionsByWeek"])) {
-                this.additionsAndDeletionsByWeek = [] as any;
-                for (let item of _data["additionsAndDeletionsByWeek"])
-                    this.additionsAndDeletionsByWeek!.push(AdditionsAndDeletions.fromJS(item));
-            }
-        }
+  init(_data?: any) {
+    if (_data) {
+      if (Array.isArray(_data["additionsAndDeletionsByWeek"])) {
+        this.additionsAndDeletionsByWeek = [] as any;
+        for (let item of _data["additionsAndDeletionsByWeek"])
+          this.additionsAndDeletionsByWeek!.push(
+            AdditionsAndDeletions.fromJS(item)
+          );
+      }
     }
+  }
 
-    static fromJS(data: any): CodeFrequency {
-        data = typeof data === 'object' ? data : {};
-        let result = new CodeFrequency();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): CodeFrequency {
+    data = typeof data === "object" ? data : {};
+    let result = new CodeFrequency();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (Array.isArray(this.additionsAndDeletionsByWeek)) {
-            data["additionsAndDeletionsByWeek"] = [];
-            for (let item of this.additionsAndDeletionsByWeek)
-                data["additionsAndDeletionsByWeek"].push(item.toJSON());
-        }
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (Array.isArray(this.additionsAndDeletionsByWeek)) {
+      data["additionsAndDeletionsByWeek"] = [];
+      for (let item of this.additionsAndDeletionsByWeek)
+        data["additionsAndDeletionsByWeek"].push(item.toJSON());
     }
+    return data;
+  }
 }
 
 export interface ICodeFrequency {
-    additionsAndDeletionsByWeek?: AdditionsAndDeletions[] | undefined;
+  additionsAndDeletionsByWeek?: AdditionsAndDeletions[] | undefined;
 }
 
 export class AdditionsAndDeletions implements IAdditionsAndDeletions {
-    timestamp?: Date;
-    additions?: number;
-    deletions?: number;
+  timestamp?: Date;
+  additions?: number;
+  deletions?: number;
 
-    constructor(data?: IAdditionsAndDeletions) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IAdditionsAndDeletions) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.timestamp = _data["timestamp"] ? new Date(_data["timestamp"].toString()) : <any>undefined;
-            this.additions = _data["additions"];
-            this.deletions = _data["deletions"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.timestamp = _data["timestamp"]
+        ? new Date(_data["timestamp"].toString())
+        : <any>undefined;
+      this.additions = _data["additions"];
+      this.deletions = _data["deletions"];
     }
+  }
 
-    static fromJS(data: any): AdditionsAndDeletions {
-        data = typeof data === 'object' ? data : {};
-        let result = new AdditionsAndDeletions();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): AdditionsAndDeletions {
+    data = typeof data === "object" ? data : {};
+    let result = new AdditionsAndDeletions();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["timestamp"] = this.timestamp ? this.timestamp.toISOString() : <any>undefined;
-        data["additions"] = this.additions;
-        data["deletions"] = this.deletions;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["timestamp"] = this.timestamp
+      ? this.timestamp.toISOString()
+      : <any>undefined;
+    data["additions"] = this.additions;
+    data["deletions"] = this.deletions;
+    return data;
+  }
 }
 
 export interface IAdditionsAndDeletions {
-    timestamp?: Date;
-    additions?: number;
-    deletions?: number;
+  timestamp?: Date;
+  additions?: number;
+  deletions?: number;
 }
 
 export class CommitActivity implements ICommitActivity {
-    activity?: WeeklyCommitActivity[] | undefined;
+  activity?: WeeklyCommitActivity[] | undefined;
 
-    constructor(data?: ICommitActivity) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: ICommitActivity) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            if (Array.isArray(_data["activity"])) {
-                this.activity = [] as any;
-                for (let item of _data["activity"])
-                    this.activity!.push(WeeklyCommitActivity.fromJS(item));
-            }
-        }
+  init(_data?: any) {
+    if (_data) {
+      if (Array.isArray(_data["activity"])) {
+        this.activity = [] as any;
+        for (let item of _data["activity"])
+          this.activity!.push(WeeklyCommitActivity.fromJS(item));
+      }
     }
+  }
 
-    static fromJS(data: any): CommitActivity {
-        data = typeof data === 'object' ? data : {};
-        let result = new CommitActivity();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): CommitActivity {
+    data = typeof data === "object" ? data : {};
+    let result = new CommitActivity();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (Array.isArray(this.activity)) {
-            data["activity"] = [];
-            for (let item of this.activity)
-                data["activity"].push(item.toJSON());
-        }
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (Array.isArray(this.activity)) {
+      data["activity"] = [];
+      for (let item of this.activity) data["activity"].push(item.toJSON());
     }
+    return data;
+  }
 }
 
 export interface ICommitActivity {
-    activity?: WeeklyCommitActivity[] | undefined;
+  activity?: WeeklyCommitActivity[] | undefined;
 }
 
 export class WeeklyCommitActivity implements IWeeklyCommitActivity {
-    days?: number[] | undefined;
-    total?: number;
-    week?: number;
-    weekTimestamp?: Date;
+  days?: number[] | undefined;
+  total?: number;
+  week?: number;
+  weekTimestamp?: Date;
 
-    constructor(data?: IWeeklyCommitActivity) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IWeeklyCommitActivity) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            if (Array.isArray(_data["days"])) {
-                this.days = [] as any;
-                for (let item of _data["days"])
-                    this.days!.push(item);
-            }
-            this.total = _data["total"];
-            this.week = _data["week"];
-            this.weekTimestamp = _data["weekTimestamp"] ? new Date(_data["weekTimestamp"].toString()) : <any>undefined;
-        }
+  init(_data?: any) {
+    if (_data) {
+      if (Array.isArray(_data["days"])) {
+        this.days = [] as any;
+        for (let item of _data["days"]) this.days!.push(item);
+      }
+      this.total = _data["total"];
+      this.week = _data["week"];
+      this.weekTimestamp = _data["weekTimestamp"]
+        ? new Date(_data["weekTimestamp"].toString())
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): WeeklyCommitActivity {
-        data = typeof data === 'object' ? data : {};
-        let result = new WeeklyCommitActivity();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): WeeklyCommitActivity {
+    data = typeof data === "object" ? data : {};
+    let result = new WeeklyCommitActivity();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (Array.isArray(this.days)) {
-            data["days"] = [];
-            for (let item of this.days)
-                data["days"].push(item);
-        }
-        data["total"] = this.total;
-        data["week"] = this.week;
-        data["weekTimestamp"] = this.weekTimestamp ? this.weekTimestamp.toISOString() : <any>undefined;
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (Array.isArray(this.days)) {
+      data["days"] = [];
+      for (let item of this.days) data["days"].push(item);
     }
+    data["total"] = this.total;
+    data["week"] = this.week;
+    data["weekTimestamp"] = this.weekTimestamp
+      ? this.weekTimestamp.toISOString()
+      : <any>undefined;
+    return data;
+  }
 }
 
 export interface IWeeklyCommitActivity {
-    days?: number[] | undefined;
-    total?: number;
-    week?: number;
-    weekTimestamp?: Date;
+  days?: number[] | undefined;
+  total?: number;
+  week?: number;
+  weekTimestamp?: Date;
 }
 
 export class Participation implements IParticipation {
-    all?: number[] | undefined;
-    owner?: number[] | undefined;
+  all?: number[] | undefined;
+  owner?: number[] | undefined;
 
-    constructor(data?: IParticipation) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IParticipation) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            if (Array.isArray(_data["all"])) {
-                this.all = [] as any;
-                for (let item of _data["all"])
-                    this.all!.push(item);
-            }
-            if (Array.isArray(_data["owner"])) {
-                this.owner = [] as any;
-                for (let item of _data["owner"])
-                    this.owner!.push(item);
-            }
-        }
+  init(_data?: any) {
+    if (_data) {
+      if (Array.isArray(_data["all"])) {
+        this.all = [] as any;
+        for (let item of _data["all"]) this.all!.push(item);
+      }
+      if (Array.isArray(_data["owner"])) {
+        this.owner = [] as any;
+        for (let item of _data["owner"]) this.owner!.push(item);
+      }
     }
+  }
 
-    static fromJS(data: any): Participation {
-        data = typeof data === 'object' ? data : {};
-        let result = new Participation();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Participation {
+    data = typeof data === "object" ? data : {};
+    let result = new Participation();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (Array.isArray(this.all)) {
-            data["all"] = [];
-            for (let item of this.all)
-                data["all"].push(item);
-        }
-        if (Array.isArray(this.owner)) {
-            data["owner"] = [];
-            for (let item of this.owner)
-                data["owner"].push(item);
-        }
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (Array.isArray(this.all)) {
+      data["all"] = [];
+      for (let item of this.all) data["all"].push(item);
     }
+    if (Array.isArray(this.owner)) {
+      data["owner"] = [];
+      for (let item of this.owner) data["owner"].push(item);
+    }
+    return data;
+  }
 }
 
 export interface IParticipation {
-    all?: number[] | undefined;
-    owner?: number[] | undefined;
+  all?: number[] | undefined;
+  owner?: number[] | undefined;
 }
 
 export class PunchCard implements IPunchCard {
-    punchPoints?: PunchCardPoint[] | undefined;
+  punchPoints?: PunchCardPoint[] | undefined;
 
-    constructor(data?: IPunchCard) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IPunchCard) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            if (Array.isArray(_data["punchPoints"])) {
-                this.punchPoints = [] as any;
-                for (let item of _data["punchPoints"])
-                    this.punchPoints!.push(PunchCardPoint.fromJS(item));
-            }
-        }
+  init(_data?: any) {
+    if (_data) {
+      if (Array.isArray(_data["punchPoints"])) {
+        this.punchPoints = [] as any;
+        for (let item of _data["punchPoints"])
+          this.punchPoints!.push(PunchCardPoint.fromJS(item));
+      }
     }
+  }
 
-    static fromJS(data: any): PunchCard {
-        data = typeof data === 'object' ? data : {};
-        let result = new PunchCard();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): PunchCard {
+    data = typeof data === "object" ? data : {};
+    let result = new PunchCard();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (Array.isArray(this.punchPoints)) {
-            data["punchPoints"] = [];
-            for (let item of this.punchPoints)
-                data["punchPoints"].push(item.toJSON());
-        }
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (Array.isArray(this.punchPoints)) {
+      data["punchPoints"] = [];
+      for (let item of this.punchPoints)
+        data["punchPoints"].push(item.toJSON());
     }
+    return data;
+  }
 }
 
 export interface IPunchCard {
-    punchPoints?: PunchCardPoint[] | undefined;
+  punchPoints?: PunchCardPoint[] | undefined;
 }
 
 export class PunchCardPoint implements IPunchCardPoint {
-    dayOfWeek?: StringEnumOfDayOfWeek;
-    hourOfTheDay?: number;
-    commitCount?: number;
+  dayOfWeek?: StringEnumOfDayOfWeek;
+  hourOfTheDay?: number;
+  commitCount?: number;
 
-    constructor(data?: IPunchCardPoint) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IPunchCardPoint) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.dayOfWeek = _data["dayOfWeek"] ? StringEnumOfDayOfWeek.fromJS(_data["dayOfWeek"]) : <any>undefined;
-            this.hourOfTheDay = _data["hourOfTheDay"];
-            this.commitCount = _data["commitCount"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.dayOfWeek = _data["dayOfWeek"]
+        ? StringEnumOfDayOfWeek.fromJS(_data["dayOfWeek"])
+        : <any>undefined;
+      this.hourOfTheDay = _data["hourOfTheDay"];
+      this.commitCount = _data["commitCount"];
     }
+  }
 
-    static fromJS(data: any): PunchCardPoint {
-        data = typeof data === 'object' ? data : {};
-        let result = new PunchCardPoint();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): PunchCardPoint {
+    data = typeof data === "object" ? data : {};
+    let result = new PunchCardPoint();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["dayOfWeek"] = this.dayOfWeek ? this.dayOfWeek.toJSON() : <any>undefined;
-        data["hourOfTheDay"] = this.hourOfTheDay;
-        data["commitCount"] = this.commitCount;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["dayOfWeek"] = this.dayOfWeek
+      ? this.dayOfWeek.toJSON()
+      : <any>undefined;
+    data["hourOfTheDay"] = this.hourOfTheDay;
+    data["commitCount"] = this.commitCount;
+    return data;
+  }
 }
 
 export interface IPunchCardPoint {
-    dayOfWeek?: StringEnumOfDayOfWeek;
-    hourOfTheDay?: number;
-    commitCount?: number;
+  dayOfWeek?: StringEnumOfDayOfWeek;
+  hourOfTheDay?: number;
+  commitCount?: number;
 }
 
 export class StringEnumOfDayOfWeek implements IStringEnumOfDayOfWeek {
-    stringValue?: string | undefined;
-    value?: DayOfWeek;
+  stringValue?: string | undefined;
+  value?: DayOfWeek;
 
-    constructor(data?: IStringEnumOfDayOfWeek) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IStringEnumOfDayOfWeek) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.stringValue = _data["stringValue"];
-            this.value = _data["value"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.stringValue = _data["stringValue"];
+      this.value = _data["value"];
     }
+  }
 
-    static fromJS(data: any): StringEnumOfDayOfWeek {
-        data = typeof data === 'object' ? data : {};
-        let result = new StringEnumOfDayOfWeek();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): StringEnumOfDayOfWeek {
+    data = typeof data === "object" ? data : {};
+    let result = new StringEnumOfDayOfWeek();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["stringValue"] = this.stringValue;
-        data["value"] = this.value;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["stringValue"] = this.stringValue;
+    data["value"] = this.value;
+    return data;
+  }
 }
 
 export interface IStringEnumOfDayOfWeek {
-    stringValue?: string | undefined;
-    value?: DayOfWeek;
+  stringValue?: string | undefined;
+  value?: DayOfWeek;
 }
 
 export enum DayOfWeek {
-    Sunday = 0,
-    Monday = 1,
-    Tuesday = 2,
-    Wednesday = 3,
-    Thursday = 4,
-    Friday = 5,
-    Saturday = 6,
+  Sunday = 0,
+  Monday = 1,
+  Tuesday = 2,
+  Wednesday = 3,
+  Thursday = 4,
+  Friday = 5,
+  Saturday = 6,
 }
 
 export class UserActivity implements IUserActivity {
-    notifications?: Notification[] | undefined;
-    events?: Activity[] | undefined;
+  notifications?: Notification[] | undefined;
+  events?: Activity[] | undefined;
 
-    constructor(data?: IUserActivity) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IUserActivity) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            if (Array.isArray(_data["notifications"])) {
-                this.notifications = [] as any;
-                for (let item of _data["notifications"])
-                    this.notifications!.push(Notification.fromJS(item));
-            }
-            if (Array.isArray(_data["events"])) {
-                this.events = [] as any;
-                for (let item of _data["events"])
-                    this.events!.push(Activity.fromJS(item));
-            }
-        }
+  init(_data?: any) {
+    if (_data) {
+      if (Array.isArray(_data["notifications"])) {
+        this.notifications = [] as any;
+        for (let item of _data["notifications"])
+          this.notifications!.push(Notification.fromJS(item));
+      }
+      if (Array.isArray(_data["events"])) {
+        this.events = [] as any;
+        for (let item of _data["events"])
+          this.events!.push(Activity.fromJS(item));
+      }
     }
+  }
 
-    static fromJS(data: any): UserActivity {
-        data = typeof data === 'object' ? data : {};
-        let result = new UserActivity();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): UserActivity {
+    data = typeof data === "object" ? data : {};
+    let result = new UserActivity();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        if (Array.isArray(this.notifications)) {
-            data["notifications"] = [];
-            for (let item of this.notifications)
-                data["notifications"].push(item.toJSON());
-        }
-        if (Array.isArray(this.events)) {
-            data["events"] = [];
-            for (let item of this.events)
-                data["events"].push(item.toJSON());
-        }
-        return data; 
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    if (Array.isArray(this.notifications)) {
+      data["notifications"] = [];
+      for (let item of this.notifications)
+        data["notifications"].push(item.toJSON());
     }
+    if (Array.isArray(this.events)) {
+      data["events"] = [];
+      for (let item of this.events) data["events"].push(item.toJSON());
+    }
+    return data;
+  }
 }
 
 export interface IUserActivity {
-    notifications?: Notification[] | undefined;
-    events?: Activity[] | undefined;
+  notifications?: Notification[] | undefined;
+  events?: Activity[] | undefined;
 }
 
 export class Notification implements INotification {
-    id?: string | undefined;
-    repository?: Repository | undefined;
-    subject?: NotificationInfo | undefined;
-    reason?: string | undefined;
-    unread?: boolean;
-    updatedAt?: string | undefined;
-    lastReadAt?: string | undefined;
-    url?: string | undefined;
+  id?: string | undefined;
+  repository?: Repository | undefined;
+  subject?: NotificationInfo | undefined;
+  reason?: string | undefined;
+  unread?: boolean;
+  updatedAt?: string | undefined;
+  lastReadAt?: string | undefined;
+  url?: string | undefined;
 
-    constructor(data?: INotification) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: INotification) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.repository = _data["repository"] ? Repository.fromJS(_data["repository"]) : <any>undefined;
-            this.subject = _data["subject"] ? NotificationInfo.fromJS(_data["subject"]) : <any>undefined;
-            this.reason = _data["reason"];
-            this.unread = _data["unread"];
-            this.updatedAt = _data["updatedAt"];
-            this.lastReadAt = _data["lastReadAt"];
-            this.url = _data["url"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.id = _data["id"];
+      this.repository = _data["repository"]
+        ? Repository.fromJS(_data["repository"])
+        : <any>undefined;
+      this.subject = _data["subject"]
+        ? NotificationInfo.fromJS(_data["subject"])
+        : <any>undefined;
+      this.reason = _data["reason"];
+      this.unread = _data["unread"];
+      this.updatedAt = _data["updatedAt"];
+      this.lastReadAt = _data["lastReadAt"];
+      this.url = _data["url"];
     }
+  }
 
-    static fromJS(data: any): Notification {
-        data = typeof data === 'object' ? data : {};
-        let result = new Notification();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Notification {
+    data = typeof data === "object" ? data : {};
+    let result = new Notification();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["repository"] = this.repository ? this.repository.toJSON() : <any>undefined;
-        data["subject"] = this.subject ? this.subject.toJSON() : <any>undefined;
-        data["reason"] = this.reason;
-        data["unread"] = this.unread;
-        data["updatedAt"] = this.updatedAt;
-        data["lastReadAt"] = this.lastReadAt;
-        data["url"] = this.url;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["id"] = this.id;
+    data["repository"] = this.repository
+      ? this.repository.toJSON()
+      : <any>undefined;
+    data["subject"] = this.subject ? this.subject.toJSON() : <any>undefined;
+    data["reason"] = this.reason;
+    data["unread"] = this.unread;
+    data["updatedAt"] = this.updatedAt;
+    data["lastReadAt"] = this.lastReadAt;
+    data["url"] = this.url;
+    return data;
+  }
 }
 
 export interface INotification {
-    id?: string | undefined;
-    repository?: Repository | undefined;
-    subject?: NotificationInfo | undefined;
-    reason?: string | undefined;
-    unread?: boolean;
-    updatedAt?: string | undefined;
-    lastReadAt?: string | undefined;
-    url?: string | undefined;
+  id?: string | undefined;
+  repository?: Repository | undefined;
+  subject?: NotificationInfo | undefined;
+  reason?: string | undefined;
+  unread?: boolean;
+  updatedAt?: string | undefined;
+  lastReadAt?: string | undefined;
+  url?: string | undefined;
 }
 
 export class NotificationInfo implements INotificationInfo {
-    title?: string | undefined;
-    url?: string | undefined;
-    latestCommentUrl?: string | undefined;
-    type?: string | undefined;
+  title?: string | undefined;
+  url?: string | undefined;
+  latestCommentUrl?: string | undefined;
+  type?: string | undefined;
 
-    constructor(data?: INotificationInfo) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: INotificationInfo) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.title = _data["title"];
-            this.url = _data["url"];
-            this.latestCommentUrl = _data["latestCommentUrl"];
-            this.type = _data["type"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.title = _data["title"];
+      this.url = _data["url"];
+      this.latestCommentUrl = _data["latestCommentUrl"];
+      this.type = _data["type"];
     }
+  }
 
-    static fromJS(data: any): NotificationInfo {
-        data = typeof data === 'object' ? data : {};
-        let result = new NotificationInfo();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): NotificationInfo {
+    data = typeof data === "object" ? data : {};
+    let result = new NotificationInfo();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["title"] = this.title;
-        data["url"] = this.url;
-        data["latestCommentUrl"] = this.latestCommentUrl;
-        data["type"] = this.type;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["title"] = this.title;
+    data["url"] = this.url;
+    data["latestCommentUrl"] = this.latestCommentUrl;
+    data["type"] = this.type;
+    return data;
+  }
 }
 
 export interface INotificationInfo {
-    title?: string | undefined;
-    url?: string | undefined;
-    latestCommentUrl?: string | undefined;
-    type?: string | undefined;
+  title?: string | undefined;
+  url?: string | undefined;
+  latestCommentUrl?: string | undefined;
+  type?: string | undefined;
 }
 
 export class Activity implements IActivity {
-    type?: string | undefined;
-    public?: boolean;
-    repo?: Repository | undefined;
-    actor?: User | undefined;
-    org?: Organization | undefined;
-    createdAt?: Date;
-    id?: string | undefined;
-    payload?: ActivityPayload | undefined;
+  type?: string | undefined;
+  public?: boolean;
+  repo?: Repository | undefined;
+  actor?: User | undefined;
+  org?: Organization | undefined;
+  createdAt?: Date;
+  id?: string | undefined;
+  payload?: ActivityPayload | undefined;
 
-    constructor(data?: IActivity) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IActivity) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.type = _data["type"];
-            this.public = _data["public"];
-            this.repo = _data["repo"] ? Repository.fromJS(_data["repo"]) : <any>undefined;
-            this.actor = _data["actor"] ? User.fromJS(_data["actor"]) : <any>undefined;
-            this.org = _data["org"] ? Organization.fromJS(_data["org"]) : <any>undefined;
-            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
-            this.id = _data["id"];
-            this.payload = _data["payload"] ? ActivityPayload.fromJS(_data["payload"]) : <any>undefined;
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.type = _data["type"];
+      this.public = _data["public"];
+      this.repo = _data["repo"]
+        ? Repository.fromJS(_data["repo"])
+        : <any>undefined;
+      this.actor = _data["actor"]
+        ? User.fromJS(_data["actor"])
+        : <any>undefined;
+      this.org = _data["org"]
+        ? Organization.fromJS(_data["org"])
+        : <any>undefined;
+      this.createdAt = _data["createdAt"]
+        ? new Date(_data["createdAt"].toString())
+        : <any>undefined;
+      this.id = _data["id"];
+      this.payload = _data["payload"]
+        ? ActivityPayload.fromJS(_data["payload"])
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): Activity {
-        data = typeof data === 'object' ? data : {};
-        let result = new Activity();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Activity {
+    data = typeof data === "object" ? data : {};
+    let result = new Activity();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["type"] = this.type;
-        data["public"] = this.public;
-        data["repo"] = this.repo ? this.repo.toJSON() : <any>undefined;
-        data["actor"] = this.actor ? this.actor.toJSON() : <any>undefined;
-        data["org"] = this.org ? this.org.toJSON() : <any>undefined;
-        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
-        data["id"] = this.id;
-        data["payload"] = this.payload ? this.payload.toJSON() : <any>undefined;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["type"] = this.type;
+    data["public"] = this.public;
+    data["repo"] = this.repo ? this.repo.toJSON() : <any>undefined;
+    data["actor"] = this.actor ? this.actor.toJSON() : <any>undefined;
+    data["org"] = this.org ? this.org.toJSON() : <any>undefined;
+    data["createdAt"] = this.createdAt
+      ? this.createdAt.toISOString()
+      : <any>undefined;
+    data["id"] = this.id;
+    data["payload"] = this.payload ? this.payload.toJSON() : <any>undefined;
+    return data;
+  }
 }
 
 export interface IActivity {
-    type?: string | undefined;
-    public?: boolean;
-    repo?: Repository | undefined;
-    actor?: User | undefined;
-    org?: Organization | undefined;
-    createdAt?: Date;
-    id?: string | undefined;
-    payload?: ActivityPayload | undefined;
+  type?: string | undefined;
+  public?: boolean;
+  repo?: Repository | undefined;
+  actor?: User | undefined;
+  org?: Organization | undefined;
+  createdAt?: Date;
+  id?: string | undefined;
+  payload?: ActivityPayload | undefined;
 }
 
 export class Organization extends Account implements IOrganization {
-    billingAddress?: string | undefined;
-    reposUrl?: string | undefined;
-    eventsUrl?: string | undefined;
-    hooksUrl?: string | undefined;
-    issuesUrl?: string | undefined;
-    membersUrl?: string | undefined;
-    publicMembersUrl?: string | undefined;
-    description?: string | undefined;
-    isVerified?: boolean;
-    hasOrganizationProjects?: boolean;
-    hasRepositoryProjects?: boolean;
-    updatedAt?: Date;
+  billingAddress?: string | undefined;
+  reposUrl?: string | undefined;
+  eventsUrl?: string | undefined;
+  hooksUrl?: string | undefined;
+  issuesUrl?: string | undefined;
+  membersUrl?: string | undefined;
+  publicMembersUrl?: string | undefined;
+  description?: string | undefined;
+  isVerified?: boolean;
+  hasOrganizationProjects?: boolean;
+  hasRepositoryProjects?: boolean;
+  updatedAt?: Date;
 
-    constructor(data?: IOrganization) {
-        super(data);
-    }
+  constructor(data?: IOrganization) {
+    super(data);
+  }
 
-    init(_data?: any) {
-        super.init(_data);
-        if (_data) {
-            this.billingAddress = _data["billingAddress"];
-            this.reposUrl = _data["reposUrl"];
-            this.eventsUrl = _data["eventsUrl"];
-            this.hooksUrl = _data["hooksUrl"];
-            this.issuesUrl = _data["issuesUrl"];
-            this.membersUrl = _data["membersUrl"];
-            this.publicMembersUrl = _data["publicMembersUrl"];
-            this.description = _data["description"];
-            this.isVerified = _data["isVerified"];
-            this.hasOrganizationProjects = _data["hasOrganizationProjects"];
-            this.hasRepositoryProjects = _data["hasRepositoryProjects"];
-            this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
-        }
+  init(_data?: any) {
+    super.init(_data);
+    if (_data) {
+      this.billingAddress = _data["billingAddress"];
+      this.reposUrl = _data["reposUrl"];
+      this.eventsUrl = _data["eventsUrl"];
+      this.hooksUrl = _data["hooksUrl"];
+      this.issuesUrl = _data["issuesUrl"];
+      this.membersUrl = _data["membersUrl"];
+      this.publicMembersUrl = _data["publicMembersUrl"];
+      this.description = _data["description"];
+      this.isVerified = _data["isVerified"];
+      this.hasOrganizationProjects = _data["hasOrganizationProjects"];
+      this.hasRepositoryProjects = _data["hasRepositoryProjects"];
+      this.updatedAt = _data["updatedAt"]
+        ? new Date(_data["updatedAt"].toString())
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): Organization {
-        data = typeof data === 'object' ? data : {};
-        let result = new Organization();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): Organization {
+    data = typeof data === "object" ? data : {};
+    let result = new Organization();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["billingAddress"] = this.billingAddress;
-        data["reposUrl"] = this.reposUrl;
-        data["eventsUrl"] = this.eventsUrl;
-        data["hooksUrl"] = this.hooksUrl;
-        data["issuesUrl"] = this.issuesUrl;
-        data["membersUrl"] = this.membersUrl;
-        data["publicMembersUrl"] = this.publicMembersUrl;
-        data["description"] = this.description;
-        data["isVerified"] = this.isVerified;
-        data["hasOrganizationProjects"] = this.hasOrganizationProjects;
-        data["hasRepositoryProjects"] = this.hasRepositoryProjects;
-        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
-        super.toJSON(data);
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["billingAddress"] = this.billingAddress;
+    data["reposUrl"] = this.reposUrl;
+    data["eventsUrl"] = this.eventsUrl;
+    data["hooksUrl"] = this.hooksUrl;
+    data["issuesUrl"] = this.issuesUrl;
+    data["membersUrl"] = this.membersUrl;
+    data["publicMembersUrl"] = this.publicMembersUrl;
+    data["description"] = this.description;
+    data["isVerified"] = this.isVerified;
+    data["hasOrganizationProjects"] = this.hasOrganizationProjects;
+    data["hasRepositoryProjects"] = this.hasRepositoryProjects;
+    data["updatedAt"] = this.updatedAt
+      ? this.updatedAt.toISOString()
+      : <any>undefined;
+    super.toJSON(data);
+    return data;
+  }
 }
 
 export interface IOrganization extends IAccount {
-    billingAddress?: string | undefined;
-    reposUrl?: string | undefined;
-    eventsUrl?: string | undefined;
-    hooksUrl?: string | undefined;
-    issuesUrl?: string | undefined;
-    membersUrl?: string | undefined;
-    publicMembersUrl?: string | undefined;
-    description?: string | undefined;
-    isVerified?: boolean;
-    hasOrganizationProjects?: boolean;
-    hasRepositoryProjects?: boolean;
-    updatedAt?: Date;
+  billingAddress?: string | undefined;
+  reposUrl?: string | undefined;
+  eventsUrl?: string | undefined;
+  hooksUrl?: string | undefined;
+  issuesUrl?: string | undefined;
+  membersUrl?: string | undefined;
+  publicMembersUrl?: string | undefined;
+  description?: string | undefined;
+  isVerified?: boolean;
+  hasOrganizationProjects?: boolean;
+  hasRepositoryProjects?: boolean;
+  updatedAt?: Date;
 }
 
 export class ActivityPayload implements IActivityPayload {
-    repository?: Repository | undefined;
-    sender?: User | undefined;
-    installation?: InstallationId | undefined;
+  repository?: Repository | undefined;
+  sender?: User | undefined;
+  installation?: InstallationId | undefined;
 
-    constructor(data?: IActivityPayload) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IActivityPayload) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.repository = _data["repository"] ? Repository.fromJS(_data["repository"]) : <any>undefined;
-            this.sender = _data["sender"] ? User.fromJS(_data["sender"]) : <any>undefined;
-            this.installation = _data["installation"] ? InstallationId.fromJS(_data["installation"]) : <any>undefined;
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.repository = _data["repository"]
+        ? Repository.fromJS(_data["repository"])
+        : <any>undefined;
+      this.sender = _data["sender"]
+        ? User.fromJS(_data["sender"])
+        : <any>undefined;
+      this.installation = _data["installation"]
+        ? InstallationId.fromJS(_data["installation"])
+        : <any>undefined;
     }
+  }
 
-    static fromJS(data: any): ActivityPayload {
-        data = typeof data === 'object' ? data : {};
-        let result = new ActivityPayload();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): ActivityPayload {
+    data = typeof data === "object" ? data : {};
+    let result = new ActivityPayload();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["repository"] = this.repository ? this.repository.toJSON() : <any>undefined;
-        data["sender"] = this.sender ? this.sender.toJSON() : <any>undefined;
-        data["installation"] = this.installation ? this.installation.toJSON() : <any>undefined;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["repository"] = this.repository
+      ? this.repository.toJSON()
+      : <any>undefined;
+    data["sender"] = this.sender ? this.sender.toJSON() : <any>undefined;
+    data["installation"] = this.installation
+      ? this.installation.toJSON()
+      : <any>undefined;
+    return data;
+  }
 }
 
 export interface IActivityPayload {
-    repository?: Repository | undefined;
-    sender?: User | undefined;
-    installation?: InstallationId | undefined;
+  repository?: Repository | undefined;
+  sender?: User | undefined;
+  installation?: InstallationId | undefined;
 }
 
 export class InstallationId implements IInstallationId {
-    id?: number;
+  id?: number;
 
-    constructor(data?: IInstallationId) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IInstallationId) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.id = _data["id"];
     }
+  }
 
-    static fromJS(data: any): InstallationId {
-        data = typeof data === 'object' ? data : {};
-        let result = new InstallationId();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): InstallationId {
+    data = typeof data === "object" ? data : {};
+    let result = new InstallationId();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["id"] = this.id;
+    return data;
+  }
 }
 
 export interface IInstallationId {
-    id?: number;
+  id?: number;
 }
 
 export class ClientMetadata implements IClientMetadata {
-    page?: string | undefined;
-    referrer?: string | undefined;
-    browserName?: string | undefined;
-    browserEngine?: string | undefined;
-    browserLanguage?: string | undefined;
-    cookiesEnabled?: boolean;
+  page?: string | undefined;
+  referrer?: string | undefined;
+  browserName?: string | undefined;
+  browserEngine?: string | undefined;
+  browserLanguage?: string | undefined;
+  cookiesEnabled?: boolean;
 
-    constructor(data?: IClientMetadata) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
+  constructor(data?: IClientMetadata) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
     }
+  }
 
-    init(_data?: any) {
-        if (_data) {
-            this.page = _data["page"];
-            this.referrer = _data["referrer"];
-            this.browserName = _data["browserName"];
-            this.browserEngine = _data["browserEngine"];
-            this.browserLanguage = _data["browserLanguage"];
-            this.cookiesEnabled = _data["cookiesEnabled"];
-        }
+  init(_data?: any) {
+    if (_data) {
+      this.page = _data["page"];
+      this.referrer = _data["referrer"];
+      this.browserName = _data["browserName"];
+      this.browserEngine = _data["browserEngine"];
+      this.browserLanguage = _data["browserLanguage"];
+      this.cookiesEnabled = _data["cookiesEnabled"];
     }
+  }
 
-    static fromJS(data: any): ClientMetadata {
-        data = typeof data === 'object' ? data : {};
-        let result = new ClientMetadata();
-        result.init(data);
-        return result;
-    }
+  static fromJS(data: any): ClientMetadata {
+    data = typeof data === "object" ? data : {};
+    let result = new ClientMetadata();
+    result.init(data);
+    return result;
+  }
 
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["page"] = this.page;
-        data["referrer"] = this.referrer;
-        data["browserName"] = this.browserName;
-        data["browserEngine"] = this.browserEngine;
-        data["browserLanguage"] = this.browserLanguage;
-        data["cookiesEnabled"] = this.cookiesEnabled;
-        return data; 
-    }
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["page"] = this.page;
+    data["referrer"] = this.referrer;
+    data["browserName"] = this.browserName;
+    data["browserEngine"] = this.browserEngine;
+    data["browserLanguage"] = this.browserLanguage;
+    data["cookiesEnabled"] = this.cookiesEnabled;
+    return data;
+  }
 }
 
 export interface IClientMetadata {
-    page?: string | undefined;
-    referrer?: string | undefined;
-    browserName?: string | undefined;
-    browserEngine?: string | undefined;
-    browserLanguage?: string | undefined;
-    cookiesEnabled?: boolean;
+  page?: string | undefined;
+  referrer?: string | undefined;
+  browserName?: string | undefined;
+  browserEngine?: string | undefined;
+  browserLanguage?: string | undefined;
+  cookiesEnabled?: boolean;
 }
 
 export enum SignalRNotificationType {
-    RepoAnalysisProgressUpdate = 1,
-    PullRequestAnalysisProgressUpdate = 2,
-    RepoAnalysisDone = 3,
-    PullRequestAnalysisDone = 4,
+  RepoAnalysisProgressUpdate = 1,
+  PullRequestAnalysisProgressUpdate = 2,
+  RepoAnalysisDone = 3,
+  PullRequestAnalysisDone = 4,
 }
 
 export class ApiException extends Error {
-    message: string;
-    status: number;
-    response: string;
-    headers: { [key: string]: any; };
-    result: any;
+  message: string;
+  status: number;
+  response: string;
+  headers: { [key: string]: any };
+  result: any;
 
-    constructor(message: string, status: number, response: string, headers: { [key: string]: any; }, result: any) {
-        super();
+  constructor(
+    message: string,
+    status: number,
+    response: string,
+    headers: { [key: string]: any },
+    result: any
+  ) {
+    super();
 
-        this.message = message;
-        this.status = status;
-        this.response = response;
-        this.headers = headers;
-        this.result = result;
-    }
+    this.message = message;
+    this.status = status;
+    this.response = response;
+    this.headers = headers;
+    this.result = result;
+  }
 
-    protected isApiException = true;
+  protected isApiException = true;
 
-    static isApiException(obj: any): obj is ApiException {
-        return obj.isApiException === true;
-    }
+  static isApiException(obj: any): obj is ApiException {
+    return obj.isApiException === true;
+  }
 }
 
-function throwException(message: string, status: number, response: string, headers: { [key: string]: any; }, result?: any): any {
-    if (result !== null && result !== undefined)
-        throw result;
-    else
-        throw new ApiException(message, status, response, headers, null);
+function throwException(
+  message: string,
+  status: number,
+  response: string,
+  headers: { [key: string]: any },
+  result?: any
+): any {
+  if (result !== null && result !== undefined) throw result;
+  else throw new ApiException(message, status, response, headers, null);
 }
