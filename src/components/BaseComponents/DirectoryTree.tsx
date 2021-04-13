@@ -21,7 +21,7 @@ const ToggleIcon = (props: { on: boolean }) => (
 
 export const DirectoryTree = (props: IDirTreeProps) => {
   const { setSelectedItem } = props;
-  function arrangeIntoTree(paths: string[][]) {
+  const arrangeIntoTree = (paths: string[][]) => {
     let tree: ITreeData[] = new Array<ITreeData>();
     for (let i = 0; i < paths.length; i++) {
       const path = paths[i];
@@ -51,7 +51,7 @@ export const DirectoryTree = (props: IDirTreeProps) => {
       (a, b) => b.nodes.length - a.nodes.length
     );
     return tree;
-  }
+  };
 
   const ListItem = ({
     level = 0,

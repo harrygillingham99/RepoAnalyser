@@ -54,7 +54,7 @@ export const DetailedRepositoryRoute = () => {
     })();
   });
 
-  const reCalculateCodeOwners = async () => {
+  const recalculateCodeOwners = async () => {
     if (!state.repo || !state.repo.repository || !state.repo.repository.id)
       return;
     setLoading(true);
@@ -97,7 +97,7 @@ export const DetailedRepositoryRoute = () => {
                 <Button
                   className="mb-2"
                   variant="info"
-                  onClick={() => reCalculateCodeOwners()}
+                  onClick={() => recalculateCodeOwners()}
                 >
                   Re-Calculate Code Owners
                 </Button>
