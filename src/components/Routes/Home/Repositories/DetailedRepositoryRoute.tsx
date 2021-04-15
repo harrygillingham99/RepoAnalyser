@@ -89,6 +89,7 @@ export const DetailedRepositoryRoute = () => {
         console.log(state.fileCommits);
       }
     })();
+    /* eslint-disable-next-line react-hooks/exhaustive-deps*/
   }, [state.selectedFile]);
 
   const recalculateCodeOwners = async () => {
