@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { Dropdown, Pagination, Row } from "react-bootstrap";
-import useSetState from "react-use/lib/useSetState";
 
 interface IPaginationHandlerProps {
   page: number;
@@ -9,20 +7,7 @@ interface IPaginationHandlerProps {
   setPageSize: (pageSize: number) => void;
 }
 
-interface IPaginationState {
-  page: number;
-  pageSize: number;
-}
-
 export const PaginationHandler = (props: IPaginationHandlerProps) => {
-  const [state, setState] = useSetState<IPaginationState>();
-
-  useEffect(
-    () => setState({ page: props.page, pageSize: props.pageSize }),
-    /* eslint-disable-next-line react-hooks/exhaustive-deps*/
-    [props.page, props.pageSize]
-  );
-
   const handlePaginationButtonPress = (type: "first" | "next" | "previous") => {
     switch (type) {
       case "first":
@@ -42,7 +27,7 @@ export const PaginationHandler = (props: IPaginationHandlerProps) => {
     <Row className="justify-content-center">
       <Dropdown className="pr-3">
         <Dropdown.Toggle variant="info">
-          Page Size: {state.pageSize}
+          Page Size: {props.pageSize}
         </Dropdown.Toggle>
         <Dropdown.Menu>
           <Dropdown.Item onClick={() => props.setPageSize(10)}>
@@ -69,7 +54,7 @@ export const PaginationHandler = (props: IPaginationHandlerProps) => {
         <Pagination.Prev
           onClick={() => handlePaginationButtonPress("previous")}
         />
-        <Pagination.Item>{state.page}</Pagination.Item>
+        <Pagination.Item>{props.page}</Pagination.Item>
         <Pagination.Next onClick={() => handlePaginationButtonPress("next")} />
       </Pagination>
     </Row>

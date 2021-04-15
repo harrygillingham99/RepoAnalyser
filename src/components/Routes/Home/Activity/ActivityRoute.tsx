@@ -27,8 +27,8 @@ import {
 import { PaginationHandler } from "@components/BaseComponents/PaginationHandler";
 import useListTransform from "use-list-transform";
 import { Container, Dropdown } from "react-bootstrap";
-import { EventTypes } from "@constants/GitHub";
 import { addSpacesToString } from "@utils/Strings";
+import { distinctProperty } from "@utils/Array";
 
 interface IActivityRouteState {
   userActivity: UserActivity;
@@ -52,7 +52,7 @@ export const ActivityRoute = () => {
     return true;
   };
 
-  const { transformed, setData } = useListTransform({
+  const { transformed, setData, transformData } = useListTransform({
     list: state?.userActivity?.events ?? new Array<Activity>(),
     transform: [filterByProperty],
     onLoading: (loading) => setLoading(loading),
@@ -85,7 +85,7 @@ export const ActivityRoute = () => {
   ): [string, string, React.ReactNode] => {
     switch (eventType) {
       case "PullRequestEvent":
-        return ["Pull Request Event", "#28a745", <Arrow90degRight />];
+        return ["Pull Request", "#28a745", <Arrow90degRight />];
       case "PushEvent":
         return ["Push", "#17a2b8", <ArrowUp />];
       case "ForkEvent":
@@ -95,9 +95,9 @@ export const ActivityRoute = () => {
       case "ReleaseEvent":
         return ["Release", "blue", <Asterisk />];
       case "PublicEvent":
-        return ["Public Event", "#ffc107", <People />];
+        return ["Public", "#ffc107", <People />];
       case "MemberEvent":
-        return ["Collaborator Event", "#5a6268", <PersonPlus />];
+        return ["Collaborator", "#5a6268", <PersonPlus />];
       case "CreateEvent":
         return ["Create", "#5a6268", <CloudPlus />];
       case "DeleteEvent":
@@ -111,23 +111,41 @@ export const ActivityRoute = () => {
     }
   };
 
+  const getFreindlyNameForEvent = (event?: string) =>
+    getIconColourFriendlyNameForEvent(event)[0];
+
+  const shortRepoName = (repoName: string) => {
+    const split = repoName.split("/");
+    if (split.length < 1) {
+      throw new Error("Sequence contains no elements");
+    }
+    return split[split.length - 1];
+  };
+
   return (
     <>
       <DashboardHeader text="Activity" />
       {!loading && state.userActivity && state.userActivity.events && (
         <Container fluid>
           <Dropdown className="">
-            <Dropdown.Toggle variant="info">Type Filter</Dropdown.Toggle>
+            <Dropdown.Toggle variant="info">{`${
+              transformData?.type
+                ? getFreindlyNameForEvent(transformData.type)
+                : "All"
+            } Events`}</Dropdown.Toggle>
             <Dropdown.Menu>
               <Dropdown.Item onClick={() => setData({ type: undefined })}>
                 All
               </Dropdown.Item>
-              {EventTypes.map((type) => (
+              {distinctProperty(
+                state.userActivity.events,
+                (event) => event.type
+              ).map((type) => (
                 <Dropdown.Item
                   onClick={() => setData({ type: type })}
-                  key={`${type}-Filter`}
+                  key={`${type!}-Filter`}
                 >
-                  {addSpacesToString(type)}
+                  {addSpacesToString(type!)}
                 </Dropdown.Item>
               ))}
             </Dropdown.Menu>
@@ -139,6 +157,7 @@ export const ActivityRoute = () => {
                 colour,
                 icon,
               ] = getIconColourFriendlyNameForEvent(event.type);
+              const name = shortRepoName(event.repo?.name ?? "Unknown");
               return (
                 <VerticalTimelineElement
                   key={`timeLineItem-${event.id?.toString()}`}
@@ -159,10 +178,10 @@ export const ActivityRoute = () => {
                   </h3>
                   <h4 className="vertical-timeline-element-subtitle">
                     <a
-                      href={`https://github.com/${event.repo?.name}`}
+                      href={`https://github.com/${event.actor?.login}/${name}`}
                       className="text-reset"
                     >
-                      {event.repo?.name}
+                      {name}
                     </a>
                   </h4>
                   <p>

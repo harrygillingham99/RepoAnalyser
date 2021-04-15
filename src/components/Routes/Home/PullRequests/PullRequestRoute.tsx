@@ -17,7 +17,7 @@ import { addUrlParameters, Routes } from "@typeDefinitions/Routes";
 import { Link } from "react-router-dom";
 import { getCardTitle } from "@utils/Strings";
 import useListTransform from "use-list-transform";
-import { distinct } from "@utils/Array";
+import { distinctProperty } from "@utils/Array";
 
 interface PullRequestRouteState {
   pulls: UserPullRequestResult[];
@@ -112,14 +112,13 @@ export const PullRequestRoute = () => {
             <Dropdown.Item onClick={() => setData(undefined)}>
               All
             </Dropdown.Item>
-            {state.pulls
-              .map((pull) => pull.repositoryName)
-              .filter(distinct)
-              .map((repoName) => (
+            {distinctProperty(state.pulls, (pull) => pull.repositoryName).map(
+              (repoName) => (
                 <Dropdown.Item onClick={() => setData({ repo: repoName })}>
                   {repoName}
                 </Dropdown.Item>
-              ))}
+              )
+            )}
           </Dropdown.Menu>
         </Dropdown>
         <Button

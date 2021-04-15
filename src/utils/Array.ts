@@ -15,6 +15,12 @@ export function orderByDescending<T extends Object>(
   return array.sort((a, b) => +a[propName] - +b[propName]);
 }
 
-export function distinct<T>(value: T, index: number, self: T[]) {
-  return self.indexOf(value) === index;
+export function distinctProperty<T, Tprop>(
+  arr: T[],
+  predicate: (item: T) => Tprop
+) {
+  function distinct<T>(value: T, index: number, self: T[]) {
+    return self.indexOf(value) === index;
+  }
+  return arr.map(predicate).filter(distinct);
 }
