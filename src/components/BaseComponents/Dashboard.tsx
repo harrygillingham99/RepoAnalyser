@@ -21,7 +21,7 @@ export const Dashboard = () => {
     appState.connection.on(
       "DirectNotification",
       (user: string, message: string, type: SignalRNotificationType) => {
-        console.log(`Message Recieved ${user} ${message} ${type}`);
+        console.log(`SignalR Message Recieved ${user} ${message} ${type}`);
         switch (type) {
           case SignalRNotificationType.PullRequestAnalysisProgressUpdate:
             showInfoAlert("Pull Request Analysis", message);

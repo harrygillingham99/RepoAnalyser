@@ -69,7 +69,6 @@ export const DetailedRepositoryRoute = () => {
           state.repo?.repository?.id !== undefined &&
           state.selectedFile.indexOf(".") >= 0
         ) {
-          console.log(state.selectedFile);
           setLoadingFileInfo(true);
           const splitFileName = state.selectedFile.split(".");
           const result = await authorisedApiClient(
@@ -86,7 +85,6 @@ export const DetailedRepositoryRoute = () => {
         showErrorAlert("Error", "Error getting commits for file");
       } finally {
         setLoadingFileInfo(false);
-        console.log(state.fileCommits);
       }
     })();
     /* eslint-disable-next-line react-hooks/exhaustive-deps*/
