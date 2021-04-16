@@ -43,23 +43,25 @@ export const RepositoriesRoute = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps*/
   }, [state.repoFilterType]);
 
-  const getHeaderText = (filterOption: RepoFilterOptions) => {
+  const getButtonText = (filterOption: RepoFilterOptions) => {
     switch (filterOption) {
       case RepoFilterOptions.All:
-        return "All repositories";
+        return "All Repos";
       case RepoFilterOptions.ContributedNotOwned:
-        return "Other people's repositories you've contributed to";
+        return "Repos Contributed To";
       case RepoFilterOptions.Owned:
-        return "Your owned repositories";
+        return "Owned Repos";
     }
   };
 
+  const buttonText = getButtonText(state.repoFilterType);
+
   return (
     <>
-      <DashboardHeader text={getHeaderText(state.repoFilterType)} />
+      <DashboardHeader text="Repositories" />
       <div className="container-fluid">
         <Dropdown>
-          <Dropdown.Toggle variant="info">Repository Filter</Dropdown.Toggle>
+          <Dropdown.Toggle variant="info">{buttonText}</Dropdown.Toggle>
           <Dropdown.Menu>
             <Dropdown.Item
               onClick={() =>

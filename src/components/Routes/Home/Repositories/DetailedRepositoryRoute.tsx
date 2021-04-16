@@ -199,7 +199,9 @@ export const DetailedRepositoryRoute = () => {
                                 icon={<Github />}
                               >
                                 <h4 className="vertical-timeline-element-title">
-                                  {commit.author?.login}
+                                  {commit.author?.login ??
+                                    commit.committer?.login ??
+                                    "Unknown Contributor"}
                                 </h4>
                                 <h5 className="vertical-timeline-element-subtitle">
                                   <a
@@ -209,7 +211,9 @@ export const DetailedRepositoryRoute = () => {
                                     {commit.commit?.message}
                                   </a>
                                 </h5>
-                                <p></p>
+                                <p>Added: {commit.stats?.additions}</p>
+                                <p>Removed: {commit.stats?.deletions}</p>
+                                <p>Total: {commit.stats?.total}</p>
                               </VerticalTimelineElement>
                             );
                           })}
