@@ -21,8 +21,7 @@ export const DashboardHeader: React.FC<IDashboardHeaderProps> = (props) => {
             <div className="col-6 col-md-4">
               <img
                 alt="GitHub Profile"
-                className="rounded float-right"
-                style={{ height: 150, width: 150 }}
+                className="rounded float-right jumbotron-image"
                 src={props.imageUrl}
               />
             </div>

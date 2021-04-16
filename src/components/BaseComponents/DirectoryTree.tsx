@@ -1,5 +1,6 @@
 import { FormControl, InputGroup, ListGroup } from "react-bootstrap";
-import TreeMenu from "react-simple-tree-menu";
+import { ChevronDown, ChevronRight } from "react-bootstrap-icons";
+import TreeMenu, { TreeMenuItem } from "react-simple-tree-menu";
 
 interface ITreeData {
   nodes: ITreeData[];
@@ -15,14 +16,10 @@ const DEFAULT_PADDING = 16;
 const ICON_SIZE = 8;
 const LEVEL_SPACE = 16;
 
-const ToggleIcon = (props: { on: boolean }) => (
-  <span style={{ marginRight: 8 }}>{props.on ? "-" : "+"}</span>
-);
-
 export const DirectoryTree = (props: IDirTreeProps) => {
   const { setSelectedItem } = props;
-  const arrangeIntoTree = (paths: string[][]) => {
-    let tree: ITreeData[] = new Array<ITreeData>();
+  const treeify = (paths: string[][]) => {
+    let tree = new Array<ITreeData>();
     for (let i = 0; i < paths.length; i++) {
       const path = paths[i];
       let currentLevel = tree;
@@ -53,43 +50,40 @@ export const DirectoryTree = (props: IDirTreeProps) => {
     return tree;
   };
 
-  const ListItem = ({
-    level = 0,
-    hasNodes,
-    isOpen,
-    label,
-    searchTerm,
-    openNodes,
-    toggleNode,
-    matchSearch,
-    focused,
-    ...props
-  }: any) => (
-    <ListGroup.Item
-      {...props}
-      onClick={(e) => {
-        hasNodes && toggleNode && toggleNode();
-        setSelectedItem(label);
-        e.stopPropagation();
-      }}
-      style={{
-        paddingLeft: DEFAULT_PADDING + ICON_SIZE + level * LEVEL_SPACE,
-        cursor: "pointer",
-        boxShadow: focused ? "0px 0px 5px 0px #222" : "none",
-        zIndex: focused ? 999 : "unset",
-        position: "relative",
-      }}
-    >
-      {hasNodes && <ToggleIcon on={isOpen} />}
-      {label}
-    </ListGroup.Item>
-  );
+  /**
+   * A wrapper around react-bootstrap's ListGroup.Item to allow for additional custom props
+   */
+  const TreeListItem = (props: TreeMenuItem) => {
+    const { hasNodes, toggleNode, label, level, focused, isOpen } = props;
+    return (
+      <ListGroup.Item
+        className="tree-list-item"
+        onClick={(e) => {
+          hasNodes && toggleNode && toggleNode();
+          setSelectedItem(label);
+          e.stopPropagation();
+        }}
+        style={{
+          paddingLeft: DEFAULT_PADDING + ICON_SIZE + level * LEVEL_SPACE,
+          boxShadow: focused ? "0px 0px 5px 0px #222" : "none",
+          zIndex: focused ? 999 : "unset",
+        }}
+      >
+        {hasNodes && (
+          <span className="mr-2">
+            {isOpen ? <ChevronDown /> : <ChevronRight />}
+          </span>
+        )}
+        {label}
+      </ListGroup.Item>
+    );
+  };
 
   return (
-    <TreeMenu data={arrangeIntoTree(props.dirs)} debounceTime={500}>
+    <TreeMenu data={treeify(props.dirs)} debounceTime={500}>
       {({ search, items }) => (
         <>
-          <InputGroup size="sm" className="mb-3">
+          <InputGroup size="sm" className="mb-3 mt-2">
             <InputGroup.Prepend>
               <InputGroup.Text id="inputGroup-sizing-sm">
                 Search
@@ -103,7 +97,7 @@ export const DirectoryTree = (props: IDirTreeProps) => {
           </InputGroup>
           <ListGroup>
             {items.map((props) => (
-              <ListItem {...props} />
+              <TreeListItem {...props} />
             ))}
           </ListGroup>
         </>

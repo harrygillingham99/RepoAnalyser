@@ -139,12 +139,12 @@ export const DetailedRepositoryRoute = () => {
                 >
                   Re-Calculate Code Owners
                 </Button>
-                <div>
+                <h6>
                   Last Calculated:{" "}
                   {state?.repo?.codeOwnersLastUpdated?.toLocaleString("en-GB", {
                     timeZone: "UTC",
                   }) ?? "never"}
-                </div>
+                </h6>
                 {state.repo?.codeOwners &&
                   Object.keys(state.repo.codeOwners).length > 1 &&
                   !loading && (
@@ -164,10 +164,10 @@ export const DetailedRepositoryRoute = () => {
                 !loading && (
                   <Col sm={8}>
                     <Row></Row>
-                    <Col>
+                    <Col className="p-0">
                       <h6 className="d-flex">File: {selectedFile}</h6>
                     </Col>
-                    <Col>
+                    <Col className="p-0">
                       <h6 className="d-flex">
                         Owned By:{" "}
                         {state.repo?.codeOwners !== undefined && selectedFile
@@ -178,7 +178,7 @@ export const DetailedRepositoryRoute = () => {
                     {state.fileCommits &&
                       state.selectedFile &&
                       !loadingFileInfo && (
-                        <VerticalTimeline>
+                        <VerticalTimeline className="pl-0 pr-0 m-0 w-100">
                           {state.fileCommits.map((commit) => {
                             const colour = "#17a2b8";
                             return (
