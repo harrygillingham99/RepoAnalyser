@@ -25,15 +25,27 @@ import {
   X,
 } from "react-bootstrap-icons";
 import { PaginationHandler } from "@components/BaseComponents/PaginationHandler";
-import useListTransform from "use-list-transform";
-import { Container, Dropdown } from "react-bootstrap";
+import useListTransform, {
+  MapTransformer,
+  TransformerParams,
+  Transformer,
+} from "use-list-transform";
+import { Container, Dropdown, Row } from "react-bootstrap";
 import { addSpacesToString } from "@utils/Strings";
 import { distinctProperty } from "@utils/Array";
+import { isConstTypeReference, transform } from "typescript";
 
 interface IActivityRouteState {
   userActivity: UserActivity;
   page: number;
   pageSize: number;
+}
+
+type OrderBy = "Newest" | "Oldest";
+
+interface IFilterData {
+  type?: string;
+  orderBy?: OrderBy;
 }
 export const ActivityRoute = () => {
   const { appState } = AppContainer.useContainer();
@@ -45,16 +57,35 @@ export const ActivityRoute = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  const filterByProperty = ({ data }: { data: any }) => (item: Activity) => {
-    if (data.type) {
-      return data.type === item.type;
+  const filterByProperty: MapTransformer<Activity, IFilterData> = (
+    params: TransformerParams<Activity, IFilterData>
+  ) => (item: Activity) => {
+    if (params.data?.type) {
+      return params.data.type === item.type;
     }
     return true;
   };
 
-  const { transformed, setData, transformData } = useListTransform({
+  const orderByDate: Transformer<Activity, IFilterData> = (
+    params: TransformerParams<Activity, IFilterData>
+  ): Activity[] => {
+    if (params.data?.orderBy) {
+      return params.list.sort((a, b) => {
+        if (params.data.orderBy === "Oldest") {
+          return +a!.createdAt! - +b!.createdAt!;
+        }
+        return +b!.createdAt! - +a!.createdAt!;
+      });
+    }
+    return params.list;
+  };
+
+  const { transformed, setData, transformData } = useListTransform<
+    IFilterData,
+    Activity
+  >({
     list: state?.userActivity?.events ?? new Array<Activity>(),
-    transform: [filterByProperty],
+    transform: [filterByProperty, orderByDate],
     onLoading: (loading) => setLoading(loading),
   });
 
@@ -122,83 +153,130 @@ export const ActivityRoute = () => {
     return split[split.length - 1];
   };
 
+  const getDateRangeString = (events: Activity[], order?: OrderBy) => {
+    if (order === undefined) order = "Newest";
+    const sorted = events.sort((a, b) => {
+      if (order === "Newest") {
+        return +b!.createdAt! - +a!.createdAt!;
+      }
+      return +a!.createdAt! - +b!.createdAt!;
+    });
+
+    const min = sorted[0].createdAt
+      ?.toLocaleString("en-GB", {
+        timeZone: "UTC",
+      })
+      .split(",")[0];
+
+    const max = sorted[sorted.length - 1].createdAt
+      ?.toLocaleString("en-GB", {
+        timeZone: "UTC",
+      })
+      .split(",")[0];
+    return `From ${min}   To: ${max}`;
+  };
+
+  const dateString =
+    state.userActivity.events &&
+    getDateRangeString(state.userActivity.events, transformData?.orderBy);
+
   return (
     <>
       <DashboardHeader text="Activity" />
       {!loading && state.userActivity && state.userActivity.events && (
         <Container fluid>
-          <Dropdown className="">
-            <Dropdown.Toggle variant="info">{`${
-              transformData?.type
-                ? getFreindlyNameForEvent(transformData.type)
-                : "All"
-            } Events`}</Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item onClick={() => setData({ type: undefined })}>
-                All
-              </Dropdown.Item>
-              {distinctProperty(
-                state.userActivity.events,
-                (event) => event.type
-              ).map((type) => (
-                <Dropdown.Item
-                  onClick={() => setData({ type: type })}
-                  key={`${type!}-Filter`}
-                >
-                  {addSpacesToString(type!)}
+          <Row className="ml-auto">
+            <Dropdown>
+              <Dropdown.Toggle variant="info">{`${
+                transformData?.type
+                  ? getFreindlyNameForEvent(transformData.type)
+                  : "All"
+              } Events`}</Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => setData({ type: undefined })}>
+                  All
                 </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-          <VerticalTimeline>
-            {transformed.map((event) => {
-              const [
-                friendlyEventName,
-                colour,
-                icon,
-              ] = getIconColourFriendlyNameForEvent(event.type);
-              const name = shortRepoName(event.repo?.name ?? "Unknown");
-              return (
-                <VerticalTimelineElement
-                  key={`timeLineItem-${event.id?.toString()}`}
-                  className="vertical-timeline-element--work"
-                  contentStyle={{
-                    background: colour,
-                    color: "#fff",
-                  }}
-                  contentArrowStyle={{
-                    borderRight: `7px solid  ${colour}`,
-                  }}
-                  date={event.createdAt?.toDateString()}
-                  iconStyle={{ background: colour, color: "#fff" }}
-                  icon={icon}
-                >
-                  <h3 className="vertical-timeline-element-title">
-                    {friendlyEventName}
-                  </h3>
-                  <h4 className="vertical-timeline-element-subtitle">
-                    <a
-                      href={`https://github.com/${event.actor?.login}/${name}`}
-                      className="text-reset"
-                    >
-                      {name}
-                    </a>
-                  </h4>
-                  <p>
-                    {`Created at: ${event.createdAt?.toLocaleString("en-GB", {
-                      timeZone: "UTC",
-                    })}`}
-                  </p>
-                </VerticalTimelineElement>
-              );
-            })}
-          </VerticalTimeline>
-          <PaginationHandler
-            setPage={(page) => setState({ page: page })}
-            setPageSize={(pageSize) => setState({ pageSize: pageSize })}
-            page={state.page}
-            pageSize={state.pageSize}
-          />
+                {distinctProperty(
+                  state.userActivity.events,
+                  (event) => event.type
+                ).map((type) => (
+                  <Dropdown.Item
+                    onClick={() => setData({ type: type })}
+                    key={`${type!}-Filter`}
+                  >
+                    {addSpacesToString(type!)}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+            <Dropdown className="ml-1">
+              <Dropdown.Toggle variant="info">
+                {transformData?.orderBy ?? "Newest"} First
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {(["Newest", "Oldest"] as OrderBy[]).map((option) => (
+                  <Dropdown.Item onClick={() => setData({ orderBy: option })}>
+                    {option}
+                  </Dropdown.Item>
+                ))}
+                <Dropdown.Item></Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </Row>
+          <Row className="justify-content-center">
+            <h4>{dateString}</h4>
+            <VerticalTimeline>
+              {transformed.map((event) => {
+                const [
+                  friendlyEventName,
+                  colour,
+                  icon,
+                ] = getIconColourFriendlyNameForEvent(event.type);
+                const name = shortRepoName(event.repo?.name ?? "Unknown");
+                return (
+                  <VerticalTimelineElement
+                    key={`timeLineItem-${event.id?.toString()}`}
+                    className="vertical-timeline-element--work"
+                    contentStyle={{
+                      background: colour,
+                      color: "#fff",
+                    }}
+                    contentArrowStyle={{
+                      borderRight: `7px solid  ${colour}`,
+                    }}
+                    date={event.createdAt?.toDateString()}
+                    iconStyle={{ background: colour, color: "#fff" }}
+                    icon={icon}
+                  >
+                    <h3 className="vertical-timeline-element-title">
+                      {friendlyEventName}
+                    </h3>
+                    <h4 className="vertical-timeline-element-subtitle">
+                      <a
+                        href={`https://github.com/${event.actor?.login}/${name}`}
+                        className="text-reset"
+                      >
+                        {name}
+                      </a>
+                    </h4>
+                    <p>
+                      {`Created at: ${event.createdAt?.toLocaleString("en-GB", {
+                        timeZone: "UTC",
+                      })}`}
+                    </p>
+                  </VerticalTimelineElement>
+                );
+              })}
+            </VerticalTimeline>
+          </Row>
+          <Row className="justify-content-center">
+            <PaginationHandler
+              setPage={(page) => setState({ page: page })}
+              setPageSize={(pageSize) => setState({ pageSize: pageSize })}
+              page={state.page}
+              pageSize={state.pageSize}
+            />
+          </Row>
         </Container>
       )}
       {loading && <Loader />}
