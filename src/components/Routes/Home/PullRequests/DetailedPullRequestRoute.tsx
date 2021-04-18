@@ -1,16 +1,12 @@
 import { DashboardHeader } from "@components/BaseComponents/DashboardHeader";
 import { DirectoryTree } from "@components/BaseComponents/DirectoryTree";
 import { Loader } from "@components/BaseComponents/Loader";
-import {
-  DetailedPullRequest,
-  GitHubCommit,
-  GitHubCommitFile,
-} from "@services/api/Client";
+import { DetailedPullRequest } from "@services/api/Client";
 import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
 import { buildUserInfo } from "@utils/ClientInfo";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Card, Col, Container, Row, Tab, Tabs } from "react-bootstrap";
 import { Github } from "react-bootstrap-icons";
 import { useParams } from "react-router-dom";
