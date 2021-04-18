@@ -114,7 +114,10 @@ export const PullRequestRoute = () => {
             </Dropdown.Item>
             {distinctProperty(state.pulls, (pull) => pull.repositoryName).map(
               (repoName) => (
-                <Dropdown.Item onClick={() => setData({ repo: repoName })}>
+                <Dropdown.Item
+                  onClick={() => setData({ repo: repoName })}
+                  key={`repoFilter-${repoName}`}
+                >
                   {repoName}
                 </Dropdown.Item>
               )

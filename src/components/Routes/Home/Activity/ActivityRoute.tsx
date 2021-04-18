@@ -33,7 +33,6 @@ import useListTransform, {
 import { Container, Dropdown, Row } from "react-bootstrap";
 import { addSpacesToString } from "@utils/Strings";
 import { distinctProperty } from "@utils/Array";
-import { isConstTypeReference, transform } from "typescript";
 
 interface IActivityRouteState {
   userActivity: UserActivity;
@@ -177,7 +176,7 @@ export const ActivityRoute = () => {
   };
 
   const dateString =
-    state.userActivity.events &&
+    state.userActivity?.events &&
     getDateRangeString(state.userActivity.events, transformData?.orderBy);
 
   return (
@@ -215,7 +214,10 @@ export const ActivityRoute = () => {
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 {(["Newest", "Oldest"] as OrderBy[]).map((option) => (
-                  <Dropdown.Item onClick={() => setData({ orderBy: option })}>
+                  <Dropdown.Item
+                    onClick={() => setData({ orderBy: option })}
+                    key={option}
+                  >
                     {option}
                   </Dropdown.Item>
                 ))}
