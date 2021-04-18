@@ -40,9 +40,12 @@ export const NavigationBar = () => {
             throw new Error();
           setUserTokenAndUrl(user, savedAuthCookie, loginRedirectUrl);
         } catch (error) {
+          console.log(error);
           showErrorAlert(
             "Authentication Error",
-            "Error logging in with existing cookie."
+            error.message.includes("Failed to fetch")
+              ? "Unable to reach API."
+              : "Error logging in with existing cookie."
           );
         } finally {
           toggleLoading(false);
@@ -59,7 +62,9 @@ export const NavigationBar = () => {
         } catch (error) {
           showErrorAlert(
             "Authentication Error",
-            "Error getting the GitHub callback URL."
+            error.message.includes("Failed to fetch")
+              ? "Unable to reach API."
+              : "Error getting the GitHub callback URL."
           );
         } finally {
           toggleLoading(false);
