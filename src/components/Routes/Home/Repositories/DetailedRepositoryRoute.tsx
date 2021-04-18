@@ -67,7 +67,8 @@ export const DetailedRepositoryRoute = () => {
         if (
           state.selectedFile &&
           state.repo?.repository?.id !== undefined &&
-          state.selectedFile.indexOf(".") >= 0
+          state.selectedFile.indexOf(".") >= 0 &&
+          state.selectedFile.charAt(0) !== "."
         ) {
           setLoadingFileInfo(true);
           const splitFileName = state.selectedFile.split(".");
@@ -80,6 +81,8 @@ export const DetailedRepositoryRoute = () => {
             buildUserInfo
           );
           setState({ fileCommits: result });
+        } else {
+          setState({ fileCommits: undefined });
         }
       } catch (error) {
         showErrorAlert("Error", "Error getting commits for file");
@@ -117,6 +120,9 @@ export const DetailedRepositoryRoute = () => {
       key.includes(state.selectedFile!)
     );
 
+  const splitFileDirectories = (codeOwners: { [key: string]: string }) =>
+    Object.keys(codeOwners).map((dir) => dir.split("/"));
+
   return appState.token === undefined ? (
     <Redirect to={Routes.Landing} />
   ) : (
@@ -147,9 +153,7 @@ export const DetailedRepositoryRoute = () => {
                   Object.keys(state.repo.codeOwners).length > 1 &&
                   !loading && (
                     <DirectoryTree
-                      dirs={Object.keys(state.repo.codeOwners).map((dir) =>
-                        dir.split("/")
-                      )}
+                      dirs={splitFileDirectories(state.repo.codeOwners)}
                       setSelectedItem={(file) =>
                         setState({ selectedFile: file })
                       }
@@ -173,50 +177,49 @@ export const DetailedRepositoryRoute = () => {
                           : "Unknown"}
                       </h6>
                     </Col>
-                    {state.fileCommits &&
-                      state.selectedFile &&
-                      !loadingFileInfo && (
-                        <VerticalTimeline className="pl-0 pr-0 m-0 w-100">
-                          {state.fileCommits.map((commit) => {
-                            const colour = "#17a2b8";
-                            return (
-                              <VerticalTimelineElement
-                                key={`timeLineItem-${commit.sha}`}
-                                className="vertical-timeline-element--work"
-                                contentStyle={{
-                                  background: colour,
-                                  color: "#fff",
-                                }}
-                                contentArrowStyle={{
-                                  borderRight: `7px solid  ${colour}`,
-                                }}
-                                iconStyle={{
-                                  background: colour,
-                                  color: "#fff",
-                                }}
-                                icon={<Github />}
-                              >
-                                <h4 className="vertical-timeline-element-title">
-                                  {commit.author?.login ??
-                                    commit.committer?.login ??
-                                    "Unknown Contributor"}
-                                </h4>
-                                <h5 className="vertical-timeline-element-subtitle">
-                                  <a
-                                    href={commit.htmlUrl}
-                                    className="text-reset"
-                                  >
-                                    {commit.commit?.message}
-                                  </a>
-                                </h5>
-                                <p>Added: {commit.stats?.additions}</p>
-                                <p>Removed: {commit.stats?.deletions}</p>
-                                <p>Total: {commit.stats?.total}</p>
-                              </VerticalTimelineElement>
-                            );
-                          })}
-                        </VerticalTimeline>
-                      )}
+                    {state.fileCommits !== undefined &&
+                    state.selectedFile &&
+                    !loadingFileInfo ? (
+                      <VerticalTimeline className="pl-0 pr-0 m-0 w-100">
+                        {state.fileCommits.map((commit) => {
+                          const colour = "#17a2b8";
+                          return (
+                            <VerticalTimelineElement
+                              key={`timeLineItem-${commit.sha}`}
+                              className="vertical-timeline-element--work"
+                              contentStyle={{
+                                background: colour,
+                                color: "#fff",
+                              }}
+                              contentArrowStyle={{
+                                borderRight: `7px solid  ${colour}`,
+                              }}
+                              iconStyle={{
+                                background: colour,
+                                color: "#fff",
+                              }}
+                              icon={<Github />}
+                            >
+                              <h4 className="vertical-timeline-element-title">
+                                {commit.author?.login ??
+                                  commit.committer?.login ??
+                                  "Unknown Contributor"}
+                              </h4>
+                              <h5 className="vertical-timeline-element-subtitle">
+                                <a href={commit.htmlUrl} className="text-reset">
+                                  {commit.commit?.message}
+                                </a>
+                              </h5>
+                              <p>Added: {commit.stats?.additions}</p>
+                              <p>Removed: {commit.stats?.deletions}</p>
+                              <p>Total: {commit.stats?.total}</p>
+                            </VerticalTimelineElement>
+                          );
+                        })}
+                      </VerticalTimeline>
+                    ) : (
+                      <p>No Commits</p>
+                    )}
                     {loadingFileInfo && <Loader />}
                   </Col>
                 )}

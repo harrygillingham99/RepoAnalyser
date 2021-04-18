@@ -60,7 +60,7 @@ export const DirectoryTree = (props: IDirTreeProps) => {
         className="tree-list-item"
         onClick={(e) => {
           hasNodes && toggleNode && toggleNode();
-          setSelectedItem(label);
+          !hasNodes && setSelectedItem(label);
           e.stopPropagation();
         }}
         style={{
