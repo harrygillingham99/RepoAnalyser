@@ -103,8 +103,8 @@ export const ActivityRoute = () => {
       } catch (error) {
         showErrorAlert("Error", "Error getting user activity information");
       } finally {
-        setLoading(false);
         window.scrollTo(0, 0);
+        setLoading(false);
       }
     })();
     /* eslint-disable-next-line react-hooks/exhaustive-deps*/
