@@ -1,7 +1,11 @@
 import { DashboardHeader } from "@components/BaseComponents/DashboardHeader";
 import { Loader } from "@components/BaseComponents/Loader";
 import { DirectoryTree } from "@components/BaseComponents/DirectoryTree";
-import { DetailedRepository, GitHubCommit } from "@services/api/Client";
+import {
+  CyclomaticComplexityRequest,
+  DetailedRepository,
+  GitHubCommit,
+} from "@services/api/Client";
 import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
@@ -96,23 +100,57 @@ export const DetailedRepositoryRoute = () => {
   const recalculateCodeOwners = async () => {
     if (!state.repo || !state.repo.repository || !state.repo.repository.id)
       return;
-    setLoading(true);
-    var result = await authorisedApiClient(
-      appState.token
-    ).repository_GetCodeOwnersForRepo(
-      state.repo.repository.id,
-      appState.connection.connectionId ?? "",
-      buildUserInfo
-    );
+    try {
+      setLoading(true);
+      var result = await authorisedApiClient(
+        appState.token
+      ).repository_GetCodeOwnersForRepo(
+        state.repo.repository.id,
+        appState.connection.connectionId ?? "",
+        buildUserInfo
+      );
 
-    setState((previous) => {
-      var newRepo = previous.repo;
-      previous.repo.codeOwners = result;
-      return { repo: newRepo };
-    });
-    setLoading(false);
+      setState((previous) => {
+        var newRepo = previous.repo;
+        newRepo.codeOwners = result;
+        return { repo: newRepo };
+      });
+    } catch (error) {
+      showErrorAlert("Error", error.detail);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const recalculateCyclomaticComplexities = async () => {
+    if (!state.repo || !state.repo?.repository || !state.repo?.repository?.id)
+      return;
+    try {
+      setLoading(true);
+      var request = new CyclomaticComplexityRequest({
+        pullRequestNumber: undefined,
+        repoId: state.repo.repository.id,
+        filesToSearch: undefined,
+      });
+      var result = await authorisedApiClient(
+        appState.token
+      ).repository_GetCyclomaticComplexities(
+        appState.connection.connectionId ?? "",
+        buildUserInfo,
+        request
+      );
+      setState((previous) => {
+        var newRepo = previous.repo;
+        newRepo.cyclomaticComplexities = result;
+        return { repo: newRepo };
+      });
+    } catch (error) {
+      console.log(error);
+      showErrorAlert("Error", error.detail);
+    } finally {
+      setLoading(false);
+    }
+  };
   const selectedFile =
     state.repo?.codeOwners &&
     state.selectedFile !== undefined &&
@@ -226,7 +264,20 @@ export const DetailedRepositoryRoute = () => {
             </Row>
           </Container>
         </Tab>
-        <Tab eventKey="Complexity Analysis" title="Complexity Analysis"></Tab>
+        {state.repo && state.repo.isDotNetProject && (
+          <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
+            <Container className="mt-1" fluid>
+              <Button
+                className="mb-2"
+                variant="info"
+                onClick={() => recalculateCyclomaticComplexities()}
+              >
+                Re-Calculate Cyclomatic Complexities
+              </Button>
+              {JSON.stringify(state.repo?.cyclomaticComplexities)}
+            </Container>
+          </Tab>
+        )}
       </Tabs>
       {loading && <Loader />}
     </>

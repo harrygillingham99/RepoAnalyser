@@ -1,6 +1,5 @@
 import { DashboardHeader } from "@components/BaseComponents/DashboardHeader";
 import {
-  Activity,
   CommitActivity,
   UserLandingPageStatistics,
 } from "@services/api/Client";
@@ -24,8 +23,7 @@ import {
   Cell,
   Pie,
 } from "recharts";
-import { distinctProperty } from "@utils/Array";
-import { addSpacesToString } from "@utils/Strings";
+import { getRandomColour } from "@utils/Styles";
 
 interface LandingRouteState {
   stats: UserLandingPageStatistics;
@@ -95,16 +93,12 @@ export const LandingRoute = () => {
     return graphPlots;
   };
 
-  const getEventsGraphData = (
-    data: Activity[]
-  ): { type: string; count: number }[] => {
-    return distinctProperty(data, (activity) => activity.type).map((type) => ({
-      type: addSpacesToString(type!),
-      count: data.filter((activity) => activity.type === type).length,
+  const languageGraphData =
+    state?.stats?.languages &&
+    Object.keys(state.stats.languages).map((key: string) => ({
+      type: key,
+      count: state.stats.languages![key],
     }));
-  };
-
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
   return appState?.user === undefined ? (
     <DashboardHeader text={`Welcome please log in`} />
@@ -121,7 +115,7 @@ export const LandingRoute = () => {
         {!loading &&
         state.stats &&
         state.stats.topRepoActivity &&
-        state.stats.events ? (
+        languageGraphData ? (
           <>
             <Row>
               <Col sm={4}>
@@ -172,10 +166,10 @@ export const LandingRoute = () => {
             </Row>
             <Row>
               <Col sm={8}>
-                <h4>Distribution of Events</h4>
+                <h4>Distribution of Languages (%)</h4>
                 <PieChart width={500} height={500}>
                   <Pie
-                    data={getEventsGraphData(state.stats.events)}
+                    data={languageGraphData}
                     width={500}
                     height={500}
                     cx={200}
@@ -186,14 +180,9 @@ export const LandingRoute = () => {
                     dataKey="count"
                     nameKey="type"
                   >
-                    {getEventsGraphData(state.stats.events).map(
-                      (entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      )
-                    )}
+                    {languageGraphData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={getRandomColour()} />
+                    ))}
                   </Pie>
                   <Tooltip />
                   <Legend />

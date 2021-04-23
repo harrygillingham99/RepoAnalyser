@@ -221,12 +221,13 @@ export const ActivityRoute = () => {
                     {option}
                   </Dropdown.Item>
                 ))}
-                <Dropdown.Item></Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </Row>
           <Row className="justify-content-center">
             <h4>{dateString}</h4>
+          </Row>
+          <Row className="justify-content-center">
             <VerticalTimeline>
               {transformed.map((event) => {
                 const [
