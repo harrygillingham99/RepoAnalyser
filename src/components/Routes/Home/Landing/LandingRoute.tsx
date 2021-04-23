@@ -59,6 +59,7 @@ export const LandingRoute = () => {
         }
       })();
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps*/
   }, [appState.token, appState.user]);
 
   const getGraphData = (
