@@ -8,9 +8,9 @@ import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
 import { buildUserInfo } from "@utils/ClientInfo";
-import React from "react";
+import React, { useEffect } from "react";
 import { Col, Container, ListGroup, Row } from "react-bootstrap";
-import { useEffectOnce, useSetState } from "react-use";
+import { useSetState } from "react-use";
 import { Loader } from "@components/BaseComponents/Loader";
 import {
   Tooltip,
@@ -43,7 +43,7 @@ export const LandingRoute = () => {
   const [loading, setLoading] = React.useState(false);
   const [state, setState] = useSetState<LandingRouteState>();
 
-  useEffectOnce(() => {
+  useEffect(() => {
     if (appState?.user && appState?.token) {
       (async () => {
         try {
@@ -59,7 +59,7 @@ export const LandingRoute = () => {
         }
       })();
     }
-  });
+  }, [appState.token, appState.user]);
 
   const getGraphData = (
     selectedRepo: string,
