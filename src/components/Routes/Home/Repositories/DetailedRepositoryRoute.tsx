@@ -161,6 +161,19 @@ export const DetailedRepositoryRoute = () => {
   const splitFileDirectories = (codeOwners: { [key: string]: string }) =>
     Object.keys(codeOwners).map((dir) => dir.split("/"));
 
+  const getPercentageFileOwnership = (
+    codeOwners: { [key: string]: string },
+    login: string
+  ) => {
+    const total = Object.values(codeOwners).filter(
+      (owner) => owner !== null && owner !== undefined
+    ).length;
+    return (
+      (Object.values(codeOwners).filter((x) => x === login).length / total) *
+      100
+    ).toFixed(0);
+  };
+
   return appState.token === undefined ? (
     <Redirect to={Routes.Landing} />
   ) : (
@@ -190,13 +203,23 @@ export const DetailedRepositoryRoute = () => {
                 {state.repo?.codeOwners &&
                   Object.keys(state.repo.codeOwners).length > 1 &&
                   !loading && (
-                    <DirectoryTree
-                      dirs={splitFileDirectories(state.repo.codeOwners)}
-                      setSelectedItem={(file) =>
-                        setState({ selectedFile: file })
-                      }
-                      repoName={repoName}
-                    />
+                    <>
+                      <h6>
+                        You own{" "}
+                        {getPercentageFileOwnership(
+                          state.repo.codeOwners,
+                          appState.user.login ?? ""
+                        )}
+                        % of this code base.
+                      </h6>
+                      <DirectoryTree
+                        dirs={splitFileDirectories(state.repo.codeOwners)}
+                        setSelectedItem={(file) =>
+                          setState({ selectedFile: file })
+                        }
+                        repoName={repoName}
+                      />
+                    </>
                   )}
               </Col>
               {state.repo?.codeOwners &&

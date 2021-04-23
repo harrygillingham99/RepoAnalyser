@@ -56,6 +56,28 @@ export const ActivityRoute = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const result = await authorisedApiClient(
+          appState.token
+        ).statistics_GetUserStatistics(
+          state.page,
+          state.pageSize,
+          buildUserInfo
+        );
+        setState({ userActivity: result });
+      } catch (error) {
+        showErrorAlert("Error", "Error getting user activity information");
+      } finally {
+        window.scrollTo(0, 0);
+        setLoading(false);
+      }
+    })();
+    /* eslint-disable-next-line react-hooks/exhaustive-deps*/
+  }, [state.page, state.pageSize]);
+
   const filterByProperty: MapTransformer<Activity, IFilterData> = (
     params: TransformerParams<Activity, IFilterData>
   ) => (item: Activity) => {
@@ -87,28 +109,6 @@ export const ActivityRoute = () => {
     transform: [filterByProperty, orderByDate],
     onLoading: (loading) => setLoading(loading),
   });
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        const result = await authorisedApiClient(
-          appState.token
-        ).statistics_GetUserStatistics(
-          state.page,
-          state.pageSize,
-          buildUserInfo
-        );
-        setState({ userActivity: result });
-      } catch (error) {
-        showErrorAlert("Error", "Error getting user activity information");
-      } finally {
-        window.scrollTo(0, 0);
-        setLoading(false);
-      }
-    })();
-    /* eslint-disable-next-line react-hooks/exhaustive-deps*/
-  }, [state.page, state.pageSize]);
 
   const getIconColourFriendlyNameForEvent = (
     eventType?: string
@@ -267,6 +267,10 @@ export const ActivityRoute = () => {
                         timeZone: "UTC",
                       })}`}
                     </p>
+                    {event.actor && <p>User: {event.actor.login}</p>}
+                    {event.public !== undefined && (
+                      <p>Public Event: {event.public ? "true" : "false"}</p>
+                    )}
                   </VerticalTimelineElement>
                 );
               })}

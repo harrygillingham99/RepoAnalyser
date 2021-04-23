@@ -93,11 +93,10 @@ export const LandingRoute = () => {
     return graphPlots;
   };
 
-  const languageGraphData =
-    state?.stats?.languages &&
-    Object.keys(state.stats.languages).map((key: string) => ({
+  const getLanguageGraphData = (data: { [key: string]: number }) =>
+    Object.keys(data).map((key: string) => ({
       type: key,
-      count: state.stats.languages![key],
+      count: data![key],
     }));
 
   return appState?.user === undefined ? (
@@ -111,11 +110,11 @@ export const LandingRoute = () => {
         subtitle={`Public Repos: ${appState.user.publicRepos}   Private Repos: ${appState.user.ownedPrivateRepos}`}
         imageUrl={appState.user.avatarUrl}
       />
-      <Container fluid>
+      <Container fluid className="justify-content-center">
         {!loading &&
         state.stats &&
         state.stats.topRepoActivity &&
-        languageGraphData ? (
+        state.stats.languages ? (
           <>
             <Row>
               <Col sm={4}>
@@ -169,7 +168,7 @@ export const LandingRoute = () => {
                 <h4>Distribution of Languages (%)</h4>
                 <PieChart width={500} height={500}>
                   <Pie
-                    data={languageGraphData}
+                    data={getLanguageGraphData(state.stats.languages)}
                     width={500}
                     height={500}
                     cx={200}
@@ -180,9 +179,11 @@ export const LandingRoute = () => {
                     dataKey="count"
                     nameKey="type"
                   >
-                    {languageGraphData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={getRandomColour()} />
-                    ))}
+                    {getLanguageGraphData(state.stats.languages).map(
+                      (entry, index) => (
+                        <Cell key={`cell-${index}`} fill={getRandomColour()} />
+                      )
+                    )}
                   </Pie>
                   <Tooltip />
                   <Legend />
