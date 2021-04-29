@@ -60,24 +60,29 @@ export const DetailedRepositoryRoute = () => {
     <Redirect to={Routes.Landing} />
   ) : (
     <>
-      <DashboardHeader text={repoName} />
+      <DashboardHeader text={repoName} className="mb-2" />
       <Tabs
         activeKey={state.activeTab}
         onSelect={(key) => setState({ activeTab: key ?? undefined })}
       >
         <Tab eventKey="Code Owners" title="Code Owners">
-          {state.repo?.codeOwners &&
-            state.repo?.repository?.name &&
-            !loading && (
-              <CodeOwners
-                repoId={state.repo.repository!.id!}
-                lastUpdated={state.repo.codeOwnersLastUpdated}
-                codeOwners={state.repo.codeOwners}
-                loading={loading}
-                setLoading={setLoading}
-                repoName={state.repo.repository.name}
-              />
-            )}
+          {state.repo?.codeOwners && state.repo?.repository?.name && !loading && (
+            <CodeOwners
+              setLastUpdated={(when) =>
+                setState((prev) => {
+                  const oldState = prev;
+                  oldState.repo.codeOwnersLastUpdated = when;
+                  return oldState;
+                })
+              }
+              repoId={state.repo.repository!.id!}
+              lastUpdated={state.repo.codeOwnersLastUpdated}
+              codeOwners={state.repo.codeOwners}
+              loading={loading}
+              setLoading={setLoading}
+              repoName={state.repo.repository.name}
+            />
+          )}
         </Tab>
         {state.repo &&
           state.repo?.repository?.id &&
@@ -89,6 +94,13 @@ export const DetailedRepositoryRoute = () => {
               />
             </Tab>
           )}
+        <Tab eventKey="Issues/Bugs" title="Issues/Bugs"></Tab>
+        <Tab eventKey="Contribution Volumes" title="Contribution Volumes"></Tab>
+        <Tab
+          tabClassName="ml-auto"
+          eventKey="Summary"
+          title={`${repoName} Summary`}
+        ></Tab>
       </Tabs>
       {loading && <Loader />}
     </>

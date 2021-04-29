@@ -40,7 +40,6 @@ export const NavigationBar = () => {
             throw new Error();
           setUserTokenAndUrl(user, savedAuthCookie, loginRedirectUrl);
         } catch (error) {
-          console.log(error);
           showErrorAlert(
             "Authentication Error",
             error.message.includes("Failed to fetch")

@@ -19,6 +19,7 @@ interface ICodeOwnerProps {
   lastUpdated?: Date;
   codeOwners: { [key: string]: string };
   setLoading: (loading: boolean) => void;
+  setLastUpdated: (when: Date) => void;
   loading: boolean;
   repoName: string;
 }
@@ -34,6 +35,7 @@ export const CodeOwners = ({
   lastUpdated,
   codeOwners,
   setLoading,
+  setLastUpdated,
   loading,
   repoName,
 }: ICodeOwnerProps) => {
@@ -89,6 +91,7 @@ export const CodeOwners = ({
       );
 
       setState({ codeOwners: result });
+      setLastUpdated(new Date(Date.now()));
     } catch (error) {
       showErrorAlert("Error", error.detail);
     } finally {
@@ -130,10 +133,7 @@ export const CodeOwners = ({
             Re-Calculate Code Owners
           </Button>
           <h6>
-            Last Calculated:{" "}
-            {lastUpdated?.toLocaleString("en-GB", {
-              timeZone: "UTC",
-            }) ?? "never"}
+            Last Calculated: {lastUpdated?.toLocaleString("en-GB") ?? "never"}
           </h6>
           {state.codeOwners &&
             Object.keys(state.codeOwners).length > 1 &&

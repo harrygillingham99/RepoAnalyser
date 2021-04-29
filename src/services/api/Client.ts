@@ -704,6 +704,146 @@ export class Client extends AuthorizedApiBase {
   /**
    * @param metadata (optional) Client Metadata JSON
    */
+  pullRequest_GetPullFileInformation(
+    repoId: number,
+    pullNumber: number,
+    fileName: string | null,
+    extension: string | null,
+    metadata: any | undefined
+  ): Promise<PullFileInfo> {
+    let url_ =
+      this.baseUrl +
+      "/pull-requests/file-info/{repoId}/{pullNumber}/{fileName}/{extension}";
+    if (repoId === undefined || repoId === null)
+      throw new Error("The parameter 'repoId' must be defined.");
+    url_ = url_.replace("{repoId}", encodeURIComponent("" + repoId));
+    if (pullNumber === undefined || pullNumber === null)
+      throw new Error("The parameter 'pullNumber' must be defined.");
+    url_ = url_.replace("{pullNumber}", encodeURIComponent("" + pullNumber));
+    if (fileName === undefined || fileName === null)
+      throw new Error("The parameter 'fileName' must be defined.");
+    url_ = url_.replace("{fileName}", encodeURIComponent("" + fileName));
+    if (extension === undefined || extension === null)
+      throw new Error("The parameter 'extension' must be defined.");
+    url_ = url_.replace("{extension}", encodeURIComponent("" + extension));
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_ = <RequestInit>{
+      method: "GET",
+      headers: {
+        Metadata:
+          metadata !== undefined && metadata !== null ? "" + metadata : "",
+        Accept: "application/json",
+      },
+    };
+
+    return this.transformOptions(options_)
+      .then((transformedOptions_) => {
+        return this.http.fetch(url_, transformedOptions_);
+      })
+      .then((_response: Response) => {
+        return this.processPullRequest_GetPullFileInformation(_response);
+      });
+  }
+
+  protected processPullRequest_GetPullFileInformation(
+    response: Response
+  ): Promise<PullFileInfo> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 404) {
+      return response.text().then((_responseText) => {
+        let result404: any = null;
+        let resultData404 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result404 = NotFoundResponse.fromJS(resultData404);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result404
+        );
+      });
+    } else if (status === 401) {
+      return response.text().then((_responseText) => {
+        let result401: any = null;
+        let resultData401 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result401 = UnauthorizedResponse.fromJS(resultData401);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result401
+        );
+      });
+    } else if (status === 400) {
+      return response.text().then((_responseText) => {
+        let result400: any = null;
+        let resultData400 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result400 = ValidationResponse.fromJS(resultData400);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result400
+        );
+      });
+    } else if (status === 500) {
+      return response.text().then((_responseText) => {
+        let result500: any = null;
+        let resultData500 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result500 = ProblemDetails.fromJS(resultData500);
+        return throwException(
+          "A server side error occurred.",
+          status,
+          _responseText,
+          _headers,
+          result500
+        );
+      });
+    } else if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        let resultData200 =
+          _responseText === ""
+            ? null
+            : JSON.parse(_responseText, this.jsonParseReviver);
+        result200 = PullFileInfo.fromJS(resultData200);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers
+        );
+      });
+    }
+    return Promise.resolve<PullFileInfo>(<any>null);
+  }
+
+  /**
+   * @param metadata (optional) Client Metadata JSON
+   */
   repository_Repositories(
     filterOption: RepoFilterOptions,
     metadata: any | undefined
@@ -2482,6 +2622,7 @@ export class DetailedPullRequest implements IDetailedPullRequest {
   pullRequest?: UserPullRequestResult | undefined;
   commits?: GitHubCommit[] | undefined;
   modifiedFilePaths?: string[] | undefined;
+  isDotNetProject?: boolean;
 
   constructor(data?: IDetailedPullRequest) {
     if (data) {
@@ -2507,6 +2648,7 @@ export class DetailedPullRequest implements IDetailedPullRequest {
         for (let item of _data["modifiedFilePaths"])
           this.modifiedFilePaths!.push(item);
       }
+      this.isDotNetProject = _data["isDotNetProject"];
     }
   }
 
@@ -2531,6 +2673,7 @@ export class DetailedPullRequest implements IDetailedPullRequest {
       for (let item of this.modifiedFilePaths)
         data["modifiedFilePaths"].push(item);
     }
+    data["isDotNetProject"] = this.isDotNetProject;
     return data;
   }
 }
@@ -2539,6 +2682,7 @@ export interface IDetailedPullRequest {
   pullRequest?: UserPullRequestResult | undefined;
   commits?: GitHubCommit[] | undefined;
   modifiedFilePaths?: string[] | undefined;
+  isDotNetProject?: boolean;
 }
 
 export class GitReference implements IGitReference {
@@ -3427,6 +3571,50 @@ export interface IGitHubCommitFile {
   sha?: string | undefined;
   patch?: string | undefined;
   previousFileName?: string | undefined;
+}
+
+export class PullFileInfo implements IPullFileInfo {
+  additions?: number;
+  deletions?: number;
+  commitsThatIncludeFile?: number;
+
+  constructor(data?: IPullFileInfo) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.additions = _data["additions"];
+      this.deletions = _data["deletions"];
+      this.commitsThatIncludeFile = _data["commitsThatIncludeFile"];
+    }
+  }
+
+  static fromJS(data: any): PullFileInfo {
+    data = typeof data === "object" ? data : {};
+    let result = new PullFileInfo();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["additions"] = this.additions;
+    data["deletions"] = this.deletions;
+    data["commitsThatIncludeFile"] = this.commitsThatIncludeFile;
+    return data;
+  }
+}
+
+export interface IPullFileInfo {
+  additions?: number;
+  deletions?: number;
+  commitsThatIncludeFile?: number;
 }
 
 export class UserRepositoryResult implements IUserRepositoryResult {
