@@ -1,26 +1,16 @@
 import { DashboardHeader } from "@components/BaseComponents/DashboardHeader";
 import { Loader } from "@components/BaseComponents/Loader";
-import { DirectoryTree } from "@components/BaseComponents/DirectoryTree";
-import {
-  CyclomaticComplexityRequest,
-  DetailedRepository,
-  GitHubCommit,
-} from "@services/api/Client";
+import { DetailedRepository, GitHubCommit } from "@services/api/Client";
 import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
 import { Routes } from "@typeDefinitions/Routes";
 import { buildUserInfo } from "@utils/ClientInfo";
-import React, { useEffect } from "react";
-import { Button, Col, Container, Row, Tab, Tabs } from "react-bootstrap";
+import React from "react";
+import { Tab, Tabs } from "react-bootstrap";
 import { Redirect, useParams } from "react-router-dom";
 import { useEffectOnce, useSetState } from "react-use";
-import { Github } from "react-bootstrap-icons";
 import { CodeOwners } from "./DetailedRepositoryTabs/CodeOwners";
-import {
-  VerticalTimeline,
-  VerticalTimelineElement,
-} from "react-vertical-timeline-component";
 import { CyclomaticComplexity } from "./DetailedRepositoryTabs/CyclomaticComplexity";
 
 interface RouteParams {
@@ -37,7 +27,6 @@ interface DetailedRepositoryRouteState {
 
 export const DetailedRepositoryRoute = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [loadingFileInfo, setLoadingFileInfo] = React.useState<boolean>(false);
   const { repoId, repoName } = useParams<RouteParams>();
   const repoNumber = Number.parseInt(repoId);
   const { appState } = AppContainer.useContainer();
