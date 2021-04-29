@@ -15,11 +15,13 @@ import React, { useEffect } from "react";
 import { Button, Col, Container, Row, Tab, Tabs } from "react-bootstrap";
 import { Redirect, useParams } from "react-router-dom";
 import { useEffectOnce, useSetState } from "react-use";
+import { Github } from "react-bootstrap-icons";
+import { CodeOwners } from "./DetailedRepositoryTabs/CodeOwners";
 import {
   VerticalTimeline,
   VerticalTimelineElement,
 } from "react-vertical-timeline-component";
-import { Github } from "react-bootstrap-icons";
+import { CyclomaticComplexity } from "./DetailedRepositoryTabs/CyclomaticComplexity";
 
 interface RouteParams {
   repoId: string;
@@ -65,115 +67,6 @@ export const DetailedRepositoryRoute = () => {
     })();
   });
 
-  useEffect(() => {
-    (async () => {
-      try {
-        if (
-          state.selectedFile &&
-          state.repo?.repository?.id !== undefined &&
-          state.selectedFile.indexOf(".") >= 0 &&
-          state.selectedFile.charAt(0) !== "."
-        ) {
-          setLoadingFileInfo(true);
-          const splitFileName = state.selectedFile.split(".");
-          const result = await authorisedApiClient(
-            appState.token
-          ).repository_GetFileInformation(
-            state.repo.repository.id,
-            splitFileName[0],
-            splitFileName[1],
-            buildUserInfo
-          );
-          setState({ fileCommits: result });
-        } else {
-          setState({ fileCommits: undefined });
-        }
-      } catch (error) {
-        showErrorAlert("Error", "Error getting commits for file");
-      } finally {
-        setLoadingFileInfo(false);
-      }
-    })();
-    /* eslint-disable-next-line react-hooks/exhaustive-deps*/
-  }, [state.selectedFile]);
-
-  const recalculateCodeOwners = async () => {
-    if (!state.repo || !state.repo.repository || !state.repo.repository.id)
-      return;
-    try {
-      setLoading(true);
-      var result = await authorisedApiClient(
-        appState.token
-      ).repository_GetCodeOwnersForRepo(
-        state.repo.repository.id,
-        appState.connection.connectionId ?? "",
-        buildUserInfo
-      );
-
-      setState((previous) => {
-        var newRepo = previous.repo;
-        newRepo.codeOwners = result;
-        return { repo: newRepo };
-      });
-    } catch (error) {
-      showErrorAlert("Error", error.detail);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const recalculateCyclomaticComplexities = async () => {
-    if (!state.repo || !state.repo?.repository || !state.repo?.repository?.id)
-      return;
-    try {
-      setLoading(true);
-      var request = new CyclomaticComplexityRequest({
-        pullRequestNumber: undefined,
-        repoId: state.repo.repository.id,
-        filesToSearch: undefined,
-      });
-      var result = await authorisedApiClient(
-        appState.token
-      ).repository_GetCyclomaticComplexities(
-        appState.connection.connectionId ?? "",
-        buildUserInfo,
-        request
-      );
-      setState((previous) => {
-        var newRepo = previous.repo;
-        newRepo.cyclomaticComplexities = result;
-        return { repo: newRepo };
-      });
-    } catch (error) {
-      console.log(error);
-      showErrorAlert("Error", error.detail);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const selectedFile =
-    state.repo?.codeOwners &&
-    state.selectedFile !== undefined &&
-    Object.keys(state.repo.codeOwners).find((key) =>
-      key.includes(state.selectedFile!)
-    );
-
-  const splitFileDirectories = (codeOwners: { [key: string]: string }) =>
-    Object.keys(codeOwners).map((dir) => dir.split("/"));
-
-  const getPercentageFileOwnership = (
-    codeOwners: { [key: string]: string },
-    login: string
-  ) => {
-    const total = Object.values(codeOwners).filter(
-      (owner) => owner !== null && owner !== undefined
-    ).length;
-    return (
-      (Object.values(codeOwners).filter((x) => x === login).length / total) *
-      100
-    ).toFixed(0);
-  };
-
   return appState.token === undefined ? (
     <Redirect to={Routes.Landing} />
   ) : (
@@ -184,123 +77,29 @@ export const DetailedRepositoryRoute = () => {
         onSelect={(key) => setState({ activeTab: key ?? undefined })}
       >
         <Tab eventKey="Code Owners" title="Code Owners">
-          <Container className="mt-1" fluid>
-            <Row>
-              <Col sm={4}>
-                <Button
-                  className="mb-2"
-                  variant="info"
-                  onClick={() => recalculateCodeOwners()}
-                >
-                  Re-Calculate Code Owners
-                </Button>
-                <h6>
-                  Last Calculated:{" "}
-                  {state?.repo?.codeOwnersLastUpdated?.toLocaleString("en-GB", {
-                    timeZone: "UTC",
-                  }) ?? "never"}
-                </h6>
-                {state.repo?.codeOwners &&
-                  Object.keys(state.repo.codeOwners).length > 1 &&
-                  !loading && (
-                    <>
-                      <h6>
-                        You own{" "}
-                        {getPercentageFileOwnership(
-                          state.repo.codeOwners,
-                          appState.user.login ?? ""
-                        )}
-                        % of this code base.
-                      </h6>
-                      <DirectoryTree
-                        dirs={splitFileDirectories(state.repo.codeOwners)}
-                        setSelectedItem={(file) =>
-                          setState({ selectedFile: file })
-                        }
-                        repoName={repoName}
-                      />
-                    </>
-                  )}
-              </Col>
-              {state.repo?.codeOwners &&
-                Object.keys(state.repo.codeOwners).length > 1 &&
-                !loading && (
-                  <Col sm={8}>
-                    <Row></Row>
-                    <Col className="p-0">
-                      <h6 className="d-flex">File: {selectedFile}</h6>
-                    </Col>
-                    <Col className="p-0">
-                      <h6 className="d-flex">
-                        Owned By:{" "}
-                        {state.repo?.codeOwners !== undefined && selectedFile
-                          ? state.repo.codeOwners[selectedFile]
-                          : "Unknown"}
-                      </h6>
-                    </Col>
-                    {state.fileCommits !== undefined &&
-                    state.selectedFile &&
-                    !loadingFileInfo ? (
-                      <VerticalTimeline className="pl-0 pr-0 m-0 w-100">
-                        {state.fileCommits.map((commit) => {
-                          const colour = "#17a2b8";
-                          return (
-                            <VerticalTimelineElement
-                              key={`timeLineItem-${commit.sha}`}
-                              className="vertical-timeline-element--work"
-                              contentStyle={{
-                                background: colour,
-                                color: "#fff",
-                              }}
-                              contentArrowStyle={{
-                                borderRight: `7px solid  ${colour}`,
-                              }}
-                              iconStyle={{
-                                background: colour,
-                                color: "#fff",
-                              }}
-                              icon={<Github />}
-                            >
-                              <h4 className="vertical-timeline-element-title">
-                                {commit.author?.login ??
-                                  commit.committer?.login ??
-                                  "Unknown Contributor"}
-                              </h4>
-                              <h5 className="vertical-timeline-element-subtitle">
-                                <a href={commit.htmlUrl} className="text-reset">
-                                  {commit.commit?.message}
-                                </a>
-                              </h5>
-                              <p>Added: {commit.stats?.additions}</p>
-                              <p>Removed: {commit.stats?.deletions}</p>
-                              <p>Total: {commit.stats?.total}</p>
-                            </VerticalTimelineElement>
-                          );
-                        })}
-                      </VerticalTimeline>
-                    ) : (
-                      <p>No Commits</p>
-                    )}
-                    {loadingFileInfo && <Loader />}
-                  </Col>
-                )}
-            </Row>
-          </Container>
+          {state.repo?.codeOwners &&
+            state.repo?.repository?.name &&
+            !loading && (
+              <CodeOwners
+                repoId={state.repo.repository!.id!}
+                lastUpdated={state.repo.codeOwnersLastUpdated}
+                codeOwners={state.repo.codeOwners}
+                loading={loading}
+                setLoading={setLoading}
+                repoName={state.repo.repository.name}
+              />
+            )}
         </Tab>
-        {state.repo && state.repo.isDotNetProject && (
-          <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
-            <Container className="mt-1" fluid>
-              <Button
-                className="mb-2"
-                variant="info"
-                onClick={() => recalculateCyclomaticComplexities()}
-              >
-                Re-Calculate Cyclomatic Complexities
-              </Button>
-              {JSON.stringify(state.repo?.cyclomaticComplexities)}
-            </Container>
-          </Tab>
-        )}
+        {state.repo &&
+          state.repo?.repository?.id &&
+          state.repo.isDotNetProject && (
+            <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
+              <CyclomaticComplexity
+                repoId={state.repo.repository.id!}
+                cyclomaticComplexities={state.repo.cyclomaticComplexities}
+              />
+            </Tab>
+          )}
       </Tabs>
       {loading && <Loader />}
     </>
