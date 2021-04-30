@@ -47,7 +47,6 @@ export const DetailedRepositoryRoute = () => {
         const result = await authorisedApiClient(
           appState.token
         ).repository_GetDetailedRepository(repoNumber, buildUserInfo);
-        console.log(result);
         setState({ repo: result });
       } catch (error) {
         showErrorAlert(

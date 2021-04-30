@@ -81,8 +81,6 @@ export const CyclomaticComplexity = ({
     return average === "NaN" ? "Not Calculated" : average;
   };
 
-  console.log(lastCalculated);
-
   return (
     <Container className="mt-1" fluid>
       <Button
