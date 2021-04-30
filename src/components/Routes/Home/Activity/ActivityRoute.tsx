@@ -107,7 +107,6 @@ export const ActivityRoute = () => {
   >({
     list: state?.userActivity?.events ?? new Array<Activity>(),
     transform: [filterByProperty, orderByDate],
-    onLoading: (loading) => setLoading(loading),
   });
 
   const getIconColourFriendlyNameForEvent = (

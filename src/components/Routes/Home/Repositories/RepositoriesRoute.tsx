@@ -29,6 +29,7 @@ import useListTransform, {
 interface RepositoriesRouteState {
   repos: UserRepositoryResult[];
   repoFilterType: RepoFilterOptions;
+  loading: boolean;
 }
 interface ITransformData {
   searchString?: string;
@@ -36,10 +37,10 @@ interface ITransformData {
 export const RepositoriesRoute = () => {
   const { appState } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
-  const [loading, setLoading] = React.useState(false);
   const [state, setState] = useSetState<RepositoriesRouteState>({
     repos: [],
     repoFilterType: RepoFilterOptions.All,
+    loading: true,
   });
 
   const searchRef = useRef<HTMLInputElement>(null);
@@ -47,7 +48,7 @@ export const RepositoriesRoute = () => {
   useEffect(() => {
     (async () => {
       try {
-        setLoading(true);
+        setState({ loading: true });
         var result = await authorisedApiClient(
           appState.token
         ).repository_Repositories(state.repoFilterType, buildUserInfo);
@@ -55,7 +56,7 @@ export const RepositoriesRoute = () => {
       } catch (error) {
         showErrorAlert("Error", "Error fetching repositories");
       } finally {
-        setLoading(false);
+        setState({ loading: false });
       }
     })();
     /* eslint-disable-next-line react-hooks/exhaustive-deps*/
@@ -83,7 +84,6 @@ export const RepositoriesRoute = () => {
   >({
     list: state?.repos ?? new Array<UserRepositoryResult>(),
     transform: [filterBySearch],
-    onLoading: (loading: boolean) => setLoading(loading),
   });
 
   const getButtonText = (filterOption: RepoFilterOptions) => {
@@ -159,7 +159,10 @@ export const RepositoriesRoute = () => {
           </Col>
         </Row>
         <Row className="ml-auto mr-auto">
-          {state.repos && state.repos.length > 0 && !loading && transformed ? (
+          {state.repos &&
+          state.repos.length > 0 &&
+          !state.loading &&
+          transformed ? (
             <ResponsiveGrid
               gridBuilder={{
                 items: transformed,
@@ -188,7 +191,7 @@ export const RepositoriesRoute = () => {
                 ),
               }}
             />
-          ) : state.repos && state.repos.length === 0 && !loading ? (
+          ) : state.repos && state.repos.length === 0 && !state.loading ? (
             <span>No Repositories</span>
           ) : (
             <Loader />

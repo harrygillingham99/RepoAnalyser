@@ -11,7 +11,10 @@ import { Tab, Tabs } from "react-bootstrap";
 import { Redirect, useParams } from "react-router-dom";
 import { useEffectOnce, useSetState } from "react-use";
 import { CodeOwners } from "./DetailedRepositoryTabs/CodeOwners";
+import { ContribuitionVolume } from "./DetailedRepositoryTabs/ContributionVolume";
 import { CyclomaticComplexity } from "./DetailedRepositoryTabs/CyclomaticComplexity";
+import { IssuesBugs } from "./DetailedRepositoryTabs/IssuesBugs";
+import { RepositorySummary } from "./DetailedRepositoryTabs/RepositorySummary";
 
 interface RouteParams {
   repoId: string;
@@ -61,43 +64,50 @@ export const DetailedRepositoryRoute = () => {
   ) : (
     <>
       <DashboardHeader text={repoName} className="mb-2" />
-      <Tabs
-        activeKey={state.activeTab}
-        onSelect={(key) => setState({ activeTab: key ?? undefined })}
-      >
-        <Tab eventKey="Code Owners" title="Code Owners">
-          {state.repo?.codeOwners && state.repo?.repository?.name && !loading && (
-            <CodeOwners
-              setLastUpdated={(when) =>
-                setState((prev) => {
-                  const oldState = prev;
-                  oldState.repo.codeOwnersLastUpdated = when;
-                  return oldState;
-                })
-              }
-              repoId={state.repo.repository!.id!}
-              lastUpdated={state.repo.codeOwnersLastUpdated}
-              codeOwners={state.repo.codeOwners}
-              loading={loading}
-              setLoading={setLoading}
-              repoName={state.repo.repository.name}
+      {state.repo && state.repo?.repository?.id && state.repo.isDotNetProject && (
+        <Tabs
+          activeKey={state.activeTab}
+          onSelect={(key) => setState({ activeTab: key ?? undefined })}
+        >
+          <Tab eventKey="Code Owners" title="Code Owners">
+            {state.repo?.codeOwners &&
+              state.repo?.repository?.name &&
+              !loading && (
+                <CodeOwners
+                  setLastUpdated={(when) =>
+                    setState((prev) => {
+                      const oldState = prev;
+                      oldState.repo.codeOwnersLastUpdated = when;
+                      return oldState;
+                    })
+                  }
+                  repoId={state.repo.repository!.id!}
+                  lastUpdated={state.repo.codeOwnersLastUpdated}
+                  codeOwners={state.repo.codeOwners}
+                  loading={loading}
+                  setLoading={setLoading}
+                  repoName={state.repo.repository.name}
+                />
+              )}
+          </Tab>
+
+          <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
+            <CyclomaticComplexity
+              repoId={state.repo.repository.id!}
+              cyclomaticComplexities={state.repo.cyclomaticComplexities}
             />
-          )}
-        </Tab>
-        {state.repo &&
-          state.repo?.repository?.id &&
-          state.repo.isDotNetProject && (
-            <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
-              <CyclomaticComplexity
-                repoId={state.repo.repository.id!}
-                cyclomaticComplexities={state.repo.cyclomaticComplexities}
-              />
-            </Tab>
-          )}
-        <Tab eventKey="Issues/Bugs" title="Issues/Bugs"></Tab>
-        <Tab eventKey="Contribution Volumes" title="Contribution Volumes"></Tab>
-        <Tab tabClassName="ml-auto" eventKey="Summary" title="Summary"></Tab>
-      </Tabs>
+          </Tab>
+          <Tab eventKey="Issues/Bugs" title="Issues/Bugs">
+            <IssuesBugs repoId={state.repo.repository.id} />
+          </Tab>
+          <Tab eventKey="Contribution Volumes" title="Contribution Volumes">
+            <ContribuitionVolume repoId={state.repo.repository.id} />
+          </Tab>
+          <Tab tabClassName="ml-auto" eventKey="Summary" title="Summary">
+            <RepositorySummary repoId={state.repo.repository.id} />
+          </Tab>
+        </Tabs>
+      )}
       {loading && <Loader />}
     </>
   );
