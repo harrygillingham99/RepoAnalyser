@@ -96,11 +96,7 @@ export const DetailedRepositoryRoute = () => {
           )}
         <Tab eventKey="Issues/Bugs" title="Issues/Bugs"></Tab>
         <Tab eventKey="Contribution Volumes" title="Contribution Volumes"></Tab>
-        <Tab
-          tabClassName="ml-auto"
-          eventKey="Summary"
-          title={`${repoName} Summary`}
-        ></Tab>
+        <Tab tabClassName="ml-auto" eventKey="Summary" title="Summary"></Tab>
       </Tabs>
       {loading && <Loader />}
     </>
