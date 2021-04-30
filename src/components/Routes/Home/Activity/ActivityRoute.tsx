@@ -161,16 +161,10 @@ export const ActivityRoute = () => {
       return +a!.createdAt! - +b!.createdAt!;
     });
 
-    const min = sorted[0].createdAt
-      ?.toLocaleString("en-GB", {
-        timeZone: "UTC",
-      })
-      .split(",")[0];
+    const min = sorted[0].createdAt?.toLocaleString("en-GB").split(",")[0];
 
     const max = sorted[sorted.length - 1].createdAt
-      ?.toLocaleString("en-GB", {
-        timeZone: "UTC",
-      })
+      ?.toLocaleString("en-GB")
       .split(",")[0];
     return `From ${min}   To: ${max}`;
   };
@@ -263,9 +257,9 @@ export const ActivityRoute = () => {
                       </a>
                     </h4>
                     <p>
-                      {`Created at: ${event.createdAt?.toLocaleString("en-GB", {
-                        timeZone: "UTC",
-                      })}`}
+                      {`Created at: ${event.createdAt?.toLocaleString(
+                        "en-GB"
+                      )}`}
                     </p>
                     {event.actor && <p>User: {event.actor.login}</p>}
                     {event.public !== undefined && (

@@ -73,9 +73,7 @@ export const FilesAndCommits = ({
             <Card.Header>
               {" "}
               Pull Last Updated:{" "}
-              {lastUpdated?.toLocaleString("en-GB", {
-                timeZone: "UTC",
-              }) ?? "never"}
+              {lastUpdated?.toLocaleString("en-GB") ?? "never"}
             </Card.Header>
             {state.selectedFile && state.fileInfo && !loading && (
               <Card.Body>
