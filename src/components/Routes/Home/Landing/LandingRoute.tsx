@@ -83,9 +83,7 @@ export const LandingRoute = () => {
       .forEach((activity) => {
         graphPlots.push({
           weekTimeStamp: activity
-            .weekTimestamp!.toLocaleString("en-GB", {
-              timeZone: "UTC",
-            })
+            .weekTimestamp!.toLocaleString("en-GB")
             .split(",")[0],
           commits: activity!.total!,
         });
