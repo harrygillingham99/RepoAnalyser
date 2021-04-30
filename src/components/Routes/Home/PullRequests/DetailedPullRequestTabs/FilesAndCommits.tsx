@@ -2,6 +2,7 @@ import { DirectoryTree } from "@components/BaseComponents/DirectoryTree";
 import { Loader } from "@components/BaseComponents/Loader";
 import { GitHubCommit, PullFileInfo } from "@services/api/Client";
 import { authorisedApiClient } from "@services/api/Index";
+import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
 import { buildUserInfo } from "@utils/ClientInfo";
 import React, { useEffect, useState } from "react";
@@ -36,6 +37,7 @@ export const FilesAndCommits = ({
   repoId,
 }: IFilesAndCommitsProps) => {
   const [state, setState] = useSetState<IFilesAndCommitsState>();
+  const { showErrorAlert } = AlertContainer.useContainer();
   const [loading, setLoading] = useState(false);
   const { appState } = AppContainer.useContainer();
   useEffect(() => {
@@ -55,12 +57,14 @@ export const FilesAndCommits = ({
         );
         setState({ fileInfo: result });
       } catch (error) {
+        showErrorAlert("Error", "Error fetching file information");
       } finally {
         setLoading(false);
       }
     })();
     /* eslint-disable-next-line react-hooks/exhaustive-deps*/
   }, [state.selectedFile]);
+
   return (
     <Container className="mt-1" fluid>
       <Row>
