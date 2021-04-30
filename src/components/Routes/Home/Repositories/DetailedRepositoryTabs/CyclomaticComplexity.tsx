@@ -11,6 +11,8 @@ import useSetState from "react-use/lib/useSetState";
 interface ICyclomaticComplexityProps {
   repoId: number;
   cyclomaticComplexities?: { [key: string]: number };
+  lastCalculated?: Date;
+  updateLastCalculated: (when: Date) => void;
 }
 
 interface ICyclomaticComplexityState {
@@ -20,6 +22,8 @@ interface ICyclomaticComplexityState {
 export const CyclomaticComplexity = ({
   repoId,
   cyclomaticComplexities,
+  lastCalculated,
+  updateLastCalculated,
 }: ICyclomaticComplexityProps) => {
   const [state, setState] = useSetState<ICyclomaticComplexityState>({
     cyclomaticComplexities: cyclomaticComplexities,
@@ -44,6 +48,7 @@ export const CyclomaticComplexity = ({
         request
       );
       setState({ cyclomaticComplexities: result });
+      updateLastCalculated(new Date(Date.now()));
     } catch (error) {
       showErrorAlert("Error", error.detail);
     } finally {
@@ -76,6 +81,8 @@ export const CyclomaticComplexity = ({
     return average === "NaN" ? "Not Calculated" : average;
   };
 
+  console.log(lastCalculated);
+
   return (
     <Container className="mt-1" fluid>
       <Button
@@ -91,6 +98,10 @@ export const CyclomaticComplexity = ({
             Average Cyclomatic Complexity:{" "}
             {getAverageComplexity(state.cyclomaticComplexities)}
           </h4>
+          <h6>
+            Last Calculated:{" "}
+            {lastCalculated?.toLocaleString("en-GB") ?? "never"}
+          </h6>
           <Table striped bordered hover size="sm">
             <thead>
               <tr>

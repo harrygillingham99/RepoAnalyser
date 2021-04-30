@@ -4135,6 +4135,7 @@ export class DetailedRepository implements IDetailedRepository {
   codeOwnersLastUpdated?: Date | undefined;
   isDotNetProject?: boolean;
   cyclomaticComplexities?: { [key: string]: number } | undefined;
+  cyclomaticComplexitiesLastUpdated?: Date | undefined;
 
   constructor(data?: IDetailedRepository) {
     if (data) {
@@ -4177,6 +4178,11 @@ export class DetailedRepository implements IDetailedRepository {
               _data["cyclomaticComplexities"][key];
         }
       }
+      this.cyclomaticComplexitiesLastUpdated = _data[
+        "cyclomaticComplexitiesLastUpdated"
+      ]
+        ? new Date(_data["cyclomaticComplexitiesLastUpdated"].toString())
+        : <any>undefined;
     }
   }
 
@@ -4219,6 +4225,10 @@ export class DetailedRepository implements IDetailedRepository {
           ];
       }
     }
+    data["cyclomaticComplexitiesLastUpdated"] = this
+      .cyclomaticComplexitiesLastUpdated
+      ? this.cyclomaticComplexitiesLastUpdated.toISOString()
+      : <any>undefined;
     return data;
   }
 }
@@ -4231,6 +4241,7 @@ export interface IDetailedRepository {
   codeOwnersLastUpdated?: Date | undefined;
   isDotNetProject?: boolean;
   cyclomaticComplexities?: { [key: string]: number } | undefined;
+  cyclomaticComplexitiesLastUpdated?: Date | undefined;
 }
 
 export class RepoStatistics implements IRepoStatistics {

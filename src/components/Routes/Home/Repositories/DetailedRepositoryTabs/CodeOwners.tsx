@@ -132,20 +132,22 @@ export const CodeOwners = ({
           >
             Re-Calculate Code Owners
           </Button>
-          <h6>
-            Last Calculated: {lastUpdated?.toLocaleString("en-GB") ?? "never"}
-          </h6>
+
           {state.codeOwners &&
             Object.keys(state.codeOwners).length > 1 &&
             !loading && (
               <>
-                <h6>
+                <h4>
                   You own{" "}
                   {getPercentageFileOwnership(
                     state.codeOwners,
                     appState.user.login ?? ""
                   )}
                   % of this code base.
+                </h4>
+                <h6>
+                  Last Calculated:{" "}
+                  {lastUpdated?.toLocaleString("en-GB") ?? "never"}
                 </h6>
                 <DirectoryTree
                   dirs={splitFileDirectories(state.codeOwners)}

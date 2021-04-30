@@ -47,6 +47,7 @@ export const DetailedRepositoryRoute = () => {
         const result = await authorisedApiClient(
           appState.token
         ).repository_GetDetailedRepository(repoNumber, buildUserInfo);
+        console.log(result);
         setState({ repo: result });
       } catch (error) {
         showErrorAlert(
@@ -93,8 +94,16 @@ export const DetailedRepositoryRoute = () => {
 
           <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
             <CyclomaticComplexity
+              updateLastCalculated={(date) =>
+                setState((prev) => {
+                  const oldState = prev;
+                  prev.repo.cyclomaticComplexitiesLastUpdated = date;
+                  return oldState;
+                })
+              }
               repoId={state.repo.repository.id!}
               cyclomaticComplexities={state.repo.cyclomaticComplexities}
+              lastCalculated={state.repo.cyclomaticComplexitiesLastUpdated}
             />
           </Tab>
           <Tab eventKey="Issues/Bugs" title="Issues/Bugs">
