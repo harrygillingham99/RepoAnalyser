@@ -5816,6 +5816,8 @@ export interface IReactionSummary {
 }
 
 export class RepoContributionResponse implements IRepoContributionResponse {
+  locForFiles?: { [key: string]: AddedRemoved } | undefined;
+
   constructor(data?: IRepoContributionResponse) {
     if (data) {
       for (var property in data) {
@@ -5825,7 +5827,19 @@ export class RepoContributionResponse implements IRepoContributionResponse {
     }
   }
 
-  init(_data?: any) {}
+  init(_data?: any) {
+    if (_data) {
+      if (_data["locForFiles"]) {
+        this.locForFiles = {} as any;
+        for (let key in _data["locForFiles"]) {
+          if (_data["locForFiles"].hasOwnProperty(key))
+            this.locForFiles![key] = _data["locForFiles"][key]
+              ? AddedRemoved.fromJS(_data["locForFiles"][key])
+              : new AddedRemoved();
+        }
+      }
+    }
+  }
 
   static fromJS(data: any): RepoContributionResponse {
     data = typeof data === "object" ? data : {};
@@ -5836,11 +5850,62 @@ export class RepoContributionResponse implements IRepoContributionResponse {
 
   toJSON(data?: any) {
     data = typeof data === "object" ? data : {};
+    if (this.locForFiles) {
+      data["locForFiles"] = {};
+      for (let key in this.locForFiles) {
+        if (this.locForFiles.hasOwnProperty(key))
+          data["locForFiles"][key] = this.locForFiles[key]
+            ? this.locForFiles[key].toJSON()
+            : <any>undefined;
+      }
+    }
     return data;
   }
 }
 
-export interface IRepoContributionResponse {}
+export interface IRepoContributionResponse {
+  locForFiles?: { [key: string]: AddedRemoved } | undefined;
+}
+
+export class AddedRemoved implements IAddedRemoved {
+  added?: number;
+  removed?: number;
+
+  constructor(data?: IAddedRemoved) {
+    if (data) {
+      for (var property in data) {
+        if (data.hasOwnProperty(property))
+          (<any>this)[property] = (<any>data)[property];
+      }
+    }
+  }
+
+  init(_data?: any) {
+    if (_data) {
+      this.added = _data["added"];
+      this.removed = _data["removed"];
+    }
+  }
+
+  static fromJS(data: any): AddedRemoved {
+    data = typeof data === "object" ? data : {};
+    let result = new AddedRemoved();
+    result.init(data);
+    return result;
+  }
+
+  toJSON(data?: any) {
+    data = typeof data === "object" ? data : {};
+    data["added"] = this.added;
+    data["removed"] = this.removed;
+    return data;
+  }
+}
+
+export interface IAddedRemoved {
+  added?: number;
+  removed?: number;
+}
 
 export class RepoSummaryResponse implements IRepoSummaryResponse {
   constructor(data?: IRepoSummaryResponse) {

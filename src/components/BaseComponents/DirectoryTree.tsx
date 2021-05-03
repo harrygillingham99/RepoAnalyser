@@ -11,13 +11,16 @@ interface IDirTreeProps {
   dirs: string[][];
   repoName: string;
   setSelectedItem: (file: string) => void;
+  useFullPath?: boolean;
 }
 const DEFAULT_PADDING = 16;
 const ICON_SIZE = 8;
 const LEVEL_SPACE = 16;
 
 export const DirectoryTree = (props: IDirTreeProps) => {
+  const { useFullPath, dirs } = props;
   const { setSelectedItem } = props;
+
   const treeify = (paths: string[][]) => {
     let tree = new Array<ITreeData>();
     for (let i = 0; i < paths.length; i++) {
@@ -50,17 +53,37 @@ export const DirectoryTree = (props: IDirTreeProps) => {
     return tree;
   };
 
+  interface TreeProps extends TreeMenuItem {
+    useFullPath?: boolean;
+  }
   /**
    * A wrapper around react-bootstrap's ListGroup.Item to allow for additional custom props
    */
-  const TreeListItem = (props: TreeMenuItem) => {
-    const { hasNodes, toggleNode, label, level, focused, isOpen } = props;
+  const TreeListItem = (props: TreeProps) => {
+    const {
+      hasNodes,
+      toggleNode,
+      label,
+      level,
+      focused,
+      isOpen,
+      useFullPath,
+    } = props;
     return (
       <ListGroup.Item
         className="tree-list-item"
         onClick={(e) => {
           hasNodes && toggleNode && toggleNode();
-          !hasNodes && setSelectedItem(label);
+          if (!useFullPath) {
+            !hasNodes && setSelectedItem(label);
+          } else {
+            !hasNodes &&
+              setSelectedItem(
+                dirs
+                  .map((arr) => arr.join("/"))
+                  .find((dir) => dir.includes(label))!
+              );
+          }
           e.stopPropagation();
         }}
         style={{
@@ -97,7 +120,7 @@ export const DirectoryTree = (props: IDirTreeProps) => {
           </InputGroup>
           <ListGroup>
             {items.map((props) => (
-              <TreeListItem {...props} />
+              <TreeListItem {...props} useFullPath={useFullPath} />
             ))}
           </ListGroup>
         </>

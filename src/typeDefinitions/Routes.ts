@@ -41,9 +41,11 @@ const AuthorizedRoutes: Routes[] = [
   Routes.Activity,
 ];
 
+type RoutesWithParams = Routes.Repository | Routes.PullRequest;
+
 //add any more routes with params to the route type definition
 const addUrlParameters = (
-  route: Routes.Repository | Routes.PullRequest,
+  route: RoutesWithParams,
   params: { [key: string]: string }
 ): string => {
   let routeWithParams = route as string;

@@ -18,7 +18,14 @@ import {
   Button,
   Modal,
 } from "react-bootstrap";
-import { X, Bug, Book, Star, QuestionCircle } from "react-bootstrap-icons";
+import {
+  X,
+  Bug,
+  Book,
+  Star,
+  QuestionCircle,
+  Github,
+} from "react-bootstrap-icons";
 import { useEffectOnce, useSetState } from "react-use";
 import useListTransform, {
   MapTransformer,
@@ -253,10 +260,33 @@ export const IssuesBugs = (props: IssuesBugsProps) => {
               </h5>
             )}
           </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={() => setState({ selectedIssue: undefined })}>
-              Close
-            </Button>
+          <Modal.Footer className="justify-content-between">
+            {state.selectedIssue.user && state.selectedIssue.createdAt && (
+              <h6>
+                Raised by {state.selectedIssue?.user?.login ?? "Unknown User"}{" "}
+                on {state.selectedIssue.createdAt.toLocaleDateString("en-GB")}
+              </h6>
+            )}
+            <div>
+              {state.selectedIssue.htmlUrl && (
+                <a
+                  href={state.selectedIssue.htmlUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Button variant="info">
+                    <Github /> View on GitHub
+                  </Button>
+                </a>
+              )}
+              <Button
+                className="ml-1"
+                variant="info"
+                onClick={() => setState({ selectedIssue: undefined })}
+              >
+                Close
+              </Button>
+            </div>
           </Modal.Footer>
         </Modal>
       )}

@@ -72,6 +72,7 @@ export const DetailedRepositoryRoute = () => {
           <Tab eventKey="Code Owners" title="Code Owners">
             {state.repo?.codeOwners &&
               state.repo?.repository?.name &&
+              state.activeTab === "Code Owners" &&
               !loading && (
                 <CodeOwners
                   setLastUpdated={(when) =>
@@ -92,27 +93,38 @@ export const DetailedRepositoryRoute = () => {
           </Tab>
 
           <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
-            <CyclomaticComplexity
-              updateLastCalculated={(date) =>
-                setState((prev) => {
-                  const oldState = prev;
-                  prev.repo.cyclomaticComplexitiesLastUpdated = date;
-                  return oldState;
-                })
-              }
-              repoId={state.repo.repository.id!}
-              cyclomaticComplexities={state.repo.cyclomaticComplexities}
-              lastCalculated={state.repo.cyclomaticComplexitiesLastUpdated}
-            />
+            {state.activeTab === "Complexity Analysis" && (
+              <CyclomaticComplexity
+                updateLastCalculated={(date) =>
+                  setState((prev) => {
+                    const oldState = prev;
+                    prev.repo.cyclomaticComplexitiesLastUpdated = date;
+                    return oldState;
+                  })
+                }
+                repoId={state.repo.repository.id!}
+                cyclomaticComplexities={state.repo.cyclomaticComplexities}
+                lastCalculated={state.repo.cyclomaticComplexitiesLastUpdated}
+              />
+            )}
           </Tab>
           <Tab eventKey="Issues/Bugs" title="Issues/Bugs">
-            <IssuesBugs repoId={state.repo.repository.id} />
+            {state.activeTab === "Issues/Bugs" && (
+              <IssuesBugs repoId={state.repo.repository.id} />
+            )}
           </Tab>
           <Tab eventKey="Contribution Volumes" title="Contribution Volumes">
-            <ContribuitionVolume repoId={state.repo.repository.id} />
+            {state.activeTab === "Contribution Volumes" && (
+              <ContribuitionVolume
+                repoId={state.repo.repository.id}
+                repoName={repoName}
+              />
+            )}
           </Tab>
           <Tab tabClassName="ml-auto" eventKey="Summary" title="Summary">
-            <RepositorySummary repoId={state.repo.repository.id} />
+            {state.activeTab === "Summary" && (
+              <RepositorySummary repoId={state.repo.repository.id} />
+            )}
           </Tab>
         </Tabs>
       )}
