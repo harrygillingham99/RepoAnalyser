@@ -12,6 +12,7 @@ interface IDirTreeProps {
   repoName: string;
   setSelectedItem: (file: string) => void;
   useFullPath?: boolean;
+  skipAddingRoot?: boolean;
 }
 const DEFAULT_PADDING = 16;
 const ICON_SIZE = 8;
@@ -45,11 +46,23 @@ export const DirectoryTree = (props: IDirTreeProps) => {
       }
     }
 
-    tree[0].label = props.repoName;
-    tree[0].key = `${props.repoName}-listItem`;
-    tree[0].nodes = tree[0].nodes.sort(
-      (a, b) => b.nodes.length - a.nodes.length
-    );
+    if (tree.length > 1) {
+      const oldTree = tree;
+      tree = [
+        {
+          label: props.repoName,
+          key: `${props.repoName}-listItem`,
+          nodes: oldTree,
+        },
+      ];
+    } else {
+      tree[0].label = props.repoName;
+      tree[0].key = `${props.repoName}-listItem`;
+      tree[0].nodes = tree[0].nodes.sort(
+        (a, b) => b.nodes.length - a.nodes.length
+      );
+    }
+
     return tree;
   };
 

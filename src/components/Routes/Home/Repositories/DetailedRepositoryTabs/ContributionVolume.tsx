@@ -54,11 +54,10 @@ export const ContribuitionVolume = (props: ContributionVolumeProps) => {
       key.includes(state.selectedFile!)
     );
 
-  console.log(state.selectedFile);
-  console.log(state.contributions?.locForFiles);
   return !state.loading &&
     state.contributions &&
-    state.contributions.locForFiles ? (
+    state.contributions.locForFiles &&
+    Object.keys(state.contributions.locForFiles).length > 0 ? (
     <Row className="ml-auto mr-auto">
       <Col sm={4}>
         <DirectoryTree
@@ -68,6 +67,7 @@ export const ContribuitionVolume = (props: ContributionVolumeProps) => {
           setSelectedItem={(file) => setState({ selectedFile: file })}
           repoName={props.repoName}
           useFullPath={true}
+          skipAddingRoot={true}
         />
       </Col>
       <Col sm={8}>
@@ -82,7 +82,7 @@ export const ContribuitionVolume = (props: ContributionVolumeProps) => {
       </Col>
     </Row>
   ) : !state.loading && state.contributions ? (
-    <span>No Issues</span>
+    <span>You have not contributed to {props.repoName}</span>
   ) : (
     <Loader />
   );
