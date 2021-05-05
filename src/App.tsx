@@ -14,49 +14,52 @@ import { RedirectHandler } from "@components/BaseComponents/RedirectHandler";
 import { FourOhFour } from "@components/BaseComponents/FourOhFour";
 import { Unauthorised } from "@components/BaseComponents/Unauthorised";
 import { SearchContainer } from "@state/SearchContainer";
+import { ToastProvider } from "react-toast-notifications";
 
 const App = () => {
   return (
-    <AppContainer.Provider>
-      <AlertContainer.Provider>
-        <RedirectContainer.Provider>
-          <SearchContainer.Provider>
-            <NavigationBar />
-            <Switch>
-              <Route exact path={Routes.CallbackUrl}>
-                <AuthenticationHandler />
-              </Route>
-              <Route exact path="/">
-                <Redirect to={Routes.Landing} />
-              </Route>
-              <Route exact path={Routes.NotFound}>
-                <FourOhFour />
-              </Route>
-              <Route exact path={Routes.Unauthorised}>
-                <Unauthorised />
-              </Route>
-              <Route path={DashboardRoutes}>
-                <Container fluid>
-                  <Row>
-                    <Col className="col-md-2 d-none d-md-block bg-light sidebar">
-                      <SideBar />
-                    </Col>
-                    <Col className="col-md-9 ml-sm-auto col-lg-10 p-0">
-                      <AppAlert />
-                      <Dashboard />
-                    </Col>
-                  </Row>
-                </Container>
-              </Route>
-              <Route>
-                <Redirect to={Routes.NotFound} />
-              </Route>
-            </Switch>
-            <RedirectHandler />
-          </SearchContainer.Provider>
-        </RedirectContainer.Provider>
-      </AlertContainer.Provider>
-    </AppContainer.Provider>
+    <ToastProvider>
+      <AppContainer.Provider>
+        <AlertContainer.Provider>
+          <RedirectContainer.Provider>
+            <SearchContainer.Provider>
+              <NavigationBar />
+              <Switch>
+                <Route exact path={Routes.CallbackUrl}>
+                  <AuthenticationHandler />
+                </Route>
+                <Route exact path="/">
+                  <Redirect to={Routes.Landing} />
+                </Route>
+                <Route exact path={Routes.NotFound}>
+                  <FourOhFour />
+                </Route>
+                <Route exact path={Routes.Unauthorised}>
+                  <Unauthorised />
+                </Route>
+                <Route path={DashboardRoutes}>
+                  <Container fluid>
+                    <Row>
+                      <Col className="col-md-2 d-none d-md-block bg-light sidebar">
+                        <SideBar />
+                      </Col>
+                      <Col className="col-md-9 ml-sm-auto col-lg-10 p-0">
+                        <AppAlert />
+                        <Dashboard />
+                      </Col>
+                    </Row>
+                  </Container>
+                </Route>
+                <Route>
+                  <Redirect to={Routes.NotFound} />
+                </Route>
+              </Switch>
+              <RedirectHandler />
+            </SearchContainer.Provider>
+          </RedirectContainer.Provider>
+        </AlertContainer.Provider>
+      </AppContainer.Provider>
+    </ToastProvider>
   );
 };
 

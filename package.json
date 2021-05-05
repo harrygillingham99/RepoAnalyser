@@ -31,6 +31,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "react-simple-tree-menu": "^1.1.18",
+    "react-toast-notifications": "^2.4.4",
     "react-use": "^17.1.0",
     "react-vertical-timeline-component": "^3.3.3",
     "recharts": "^2.0.8",

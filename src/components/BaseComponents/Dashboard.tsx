@@ -13,7 +13,7 @@ import { AlertContainer } from "@state/AlertContainer";
 export const Dashboard = () => {
   const { pathname } = useLocation();
   const { appState } = AppContainer.useContainer();
-  const { showInfoAlert, hideAlert } = AlertContainer.useContainer();
+  const { showInfoAlert, clearInfoAlerts } = AlertContainer.useContainer();
   const { loading } = appState;
 
   //Add SignalR notification event handlers here
@@ -31,11 +31,11 @@ export const Dashboard = () => {
             break;
           case SignalRNotificationType.RepoAnalysisDone:
             showInfoAlert("Repository Analysis Complete", message);
-            setTimeout(() => hideAlert(), 4000);
+            setTimeout(() => clearInfoAlerts(), 4000);
             break;
           case SignalRNotificationType.PullRequestAnalysisDone:
             showInfoAlert("Pull Request Analysis Complete", message);
-            setTimeout(() => hideAlert(), 4000);
+            setTimeout(() => clearInfoAlerts(), 4000);
         }
       }
     );

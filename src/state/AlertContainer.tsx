@@ -1,3 +1,5 @@
+import React from "react";
+import { useToasts } from "react-toast-notifications";
 import { useSetState } from "react-use";
 import { createContainer } from "unstated-next";
 
@@ -15,7 +17,18 @@ enum AlertType {
   Success = "success",
 }
 
+const toastContent = (title: string, message: string): React.ReactNode => {
+  return (
+    <>
+      <h5>{title}</h5>
+      <p>{message}</p>
+    </>
+  );
+};
+
 const useAlertState = () => {
+  const { addToast, removeAllToasts } = useToasts();
+
   const [alert, setAlert] = useSetState<IGlobalAlertState>({
     visible: false,
     title: "",
@@ -24,13 +37,12 @@ const useAlertState = () => {
   });
 
   const showInfoAlert = (title: string, message: string) => {
-    setAlert({
-      type: AlertType.Info,
-      visible: true,
-      message: message,
-      title: title,
+    addToast(toastContent(title, message), {
+      appearance: "info",
     });
   };
+
+  const clearInfoAlerts = () => removeAllToasts();
 
   const showErrorAlert = (title: string, message: string) =>
     setAlert({
@@ -65,6 +77,7 @@ const useAlertState = () => {
     showSuccessAlert,
     showWarningAlert,
     hideAlert,
+    clearInfoAlerts,
   };
 };
 

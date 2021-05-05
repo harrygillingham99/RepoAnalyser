@@ -4,7 +4,7 @@
     display: -ms-flexbox; /* Not needed if autoprefixing */
     display: flex;
     margin-left: -10px; /* gutter size offset, (match space between columnns) */
-    width: auto;
+    width: 100%;
   }
   .masonry-grid_column {
     padding-left: 10px; /* space between columns */
