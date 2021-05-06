@@ -33,7 +33,8 @@ const useAppState = () => {
       }
     }
 
-    connection.state === SignalR.HubConnectionState.Disconnected && start();
+    connection.state === SignalR.HubConnectionState.Disconnected &&
+      (async () => await start())();
 
     return connection;
   };
