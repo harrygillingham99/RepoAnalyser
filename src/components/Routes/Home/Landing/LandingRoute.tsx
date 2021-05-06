@@ -24,6 +24,8 @@ import {
   Pie,
 } from "recharts";
 import { getRandomColour } from "@utils/Styles";
+import { Routes } from "@typeDefinitions/Routes";
+import { ErrorScreen } from "@components/BaseComponents/ErrorScreen";
 
 interface LandingRouteState {
   stats: UserLandingPageStatistics;
@@ -193,7 +195,15 @@ export const LandingRoute = () => {
         ) : (
           <Loader />
         )}
-        {!loading && !state.stats && <p>Nothing to show!</p>}
+        {!loading && !state.stats && (
+          <ErrorScreen
+            title="Nothing to show!"
+            message={`You have no data to analyse, please check your GitHub account status.`}
+            redirectSubtitle="Sign Out"
+            redirectTo={Routes.Settings}
+            type="tabError"
+          />
+        )}
       </Container>
     </>
   );

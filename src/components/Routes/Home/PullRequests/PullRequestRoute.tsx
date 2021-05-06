@@ -31,6 +31,7 @@ import useListTransform, {
 } from "use-list-transform";
 import { distinctProperty } from "@utils/Array";
 import { X } from "react-bootstrap-icons";
+import { ErrorScreen } from "@components/BaseComponents/ErrorScreen";
 
 interface PullRequestRouteState {
   pulls: UserPullRequestResult[];
@@ -243,7 +244,13 @@ export const PullRequestRoute = () => {
             />
           </>
         ) : state.pulls && transformed.length === 0 && !loading ? (
-          <span>No PR's </span>
+          <ErrorScreen
+            title="No Pull Requests"
+            message={`You have no historic or active pull requests to show.`}
+            redirectSubtitle="Back"
+            redirectTo={Routes.Landing}
+            type="tabError"
+          />
         ) : (
           <Loader />
         )}

@@ -1,9 +1,11 @@
+import { ErrorScreen } from "@components/BaseComponents/ErrorScreen";
 import { Loader } from "@components/BaseComponents/Loader";
 import { ResponsiveGrid } from "@components/BaseComponents/ResponsiveGrid";
 import { Issue, ItemState, RepoIssuesResponse } from "@services/api/Client";
 import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
+import { Routes } from "@typeDefinitions/Routes";
 import { buildUserInfo } from "@utils/ClientInfo";
 import { capitalizeFirstLetter, getCardTitle } from "@utils/Strings";
 import React from "react";
@@ -292,7 +294,13 @@ export const IssuesBugs = (props: IssuesBugsProps) => {
       )}
     </Container>
   ) : !state.loading && state.issues?.issues?.length === 0 ? (
-    <span>No Issues</span>
+    <ErrorScreen
+      title="No Issues"
+      message={`There are no issues associated with this repository`}
+      redirectSubtitle="Back"
+      redirectTo={Routes.Repositories}
+      type="tabError"
+    />
   ) : (
     <Loader />
   );

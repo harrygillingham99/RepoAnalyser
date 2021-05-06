@@ -25,6 +25,7 @@ import useListTransform, {
   MapTransformer,
   TransformerParams,
 } from "use-list-transform";
+import { ErrorScreen } from "@components/BaseComponents/ErrorScreen";
 
 interface RepositoriesRouteState {
   repos: UserRepositoryResult[];
@@ -192,7 +193,13 @@ export const RepositoriesRoute = () => {
               }}
             />
           ) : state.repos && state.repos.length === 0 && !state.loading ? (
-            <span>No Repositories</span>
+            <ErrorScreen
+              title="No Repositories"
+              message={`You have no repositories associated with your account.`}
+              redirectSubtitle="Back"
+              redirectTo={Routes.Landing}
+              type="tabError"
+            />
           ) : (
             <Loader />
           )}

@@ -1,9 +1,11 @@
 import { DirectoryTree } from "@components/BaseComponents/DirectoryTree";
+import { ErrorScreen } from "@components/BaseComponents/ErrorScreen";
 import { Loader } from "@components/BaseComponents/Loader";
 import { RepoContributionResponse } from "@services/api/Client";
 import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
+import { Routes } from "@typeDefinitions/Routes";
 import { buildUserInfo } from "@utils/ClientInfo";
 import React from "react";
 import { Row, Col } from "react-bootstrap";
@@ -82,7 +84,13 @@ export const ContribuitionVolume = (props: ContributionVolumeProps) => {
       </Col>
     </Row>
   ) : !state.loading && state.contributions ? (
-    <span>You have not contributed to {props.repoName}</span>
+    <ErrorScreen
+      title="No Contributions"
+      message={`You have not contributed to ${props.repoName}`}
+      redirectSubtitle="Back"
+      redirectTo={Routes.Repositories}
+      type="tabError"
+    />
   ) : (
     <Loader />
   );
