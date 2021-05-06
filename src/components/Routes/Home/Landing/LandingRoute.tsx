@@ -29,6 +29,7 @@ import { ErrorScreen } from "@components/BaseComponents/ErrorScreen";
 
 interface LandingRouteState {
   stats: UserLandingPageStatistics;
+  pieColours?: { [key: string]: string };
   selectedRepo: string;
 }
 
@@ -52,6 +53,13 @@ export const LandingRoute = () => {
             appState.token
           ).statistics_GetLandingPageStatistics(buildUserInfo);
           setState({ stats: result });
+          if (!state.pieColours && result.languages) {
+            const colours: { [key: string]: string } = {};
+            Object.keys(result.languages).forEach(
+              (lang) => (colours[lang] = getRandomColour())
+            );
+            setState({ pieColours: colours });
+          }
         } catch (error) {
           showErrorAlert("Error", "Unable to get landing page statistics.");
         } finally {
@@ -181,7 +189,14 @@ export const LandingRoute = () => {
                   >
                     {getLanguageGraphData(state.stats.languages).map(
                       (entry, index) => (
-                        <Cell key={`cell-${index}`} fill={getRandomColour()} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            state.pieColours
+                              ? state.pieColours[entry.type]
+                              : getRandomColour()
+                          }
+                        />
                       )
                     )}
                   </Pie>
