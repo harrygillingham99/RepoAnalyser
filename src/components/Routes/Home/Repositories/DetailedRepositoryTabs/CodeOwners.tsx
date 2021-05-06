@@ -1,13 +1,11 @@
 import { DirectoryTree } from "@components/BaseComponents/DirectoryTree";
-import { ErrorScreen } from "@components/BaseComponents/ErrorScreen";
 import { Loader } from "@components/BaseComponents/Loader";
 import { GitHubCommit } from "@services/api/Client";
 import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
-import { Routes } from "@typeDefinitions/Routes";
 import { buildUserInfo } from "@utils/ClientInfo";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { Github } from "react-bootstrap-icons";
 import { useSetState } from "react-use";
