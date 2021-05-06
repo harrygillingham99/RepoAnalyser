@@ -16,11 +16,12 @@ import {
 
 interface ICodeOwnerProps {
   repoId: number;
-  lastUpdated?: Date;
+  lastUpdatedHook: [
+    lastUpdated: Date | undefined,
+    setLastUpdated: (when: Date) => void
+  ];
+  loadingHook: [loading: boolean, setLoading: (loading: boolean) => void];
   codeOwners: { [key: string]: string };
-  setLoading: (loading: boolean) => void;
-  setLastUpdated: (when: Date) => void;
-  loading: boolean;
   repoName: string;
 }
 
@@ -32,12 +33,10 @@ interface ICodeOwnerState {
 
 export const CodeOwners = ({
   repoId,
-  lastUpdated,
   codeOwners,
-  setLoading,
-  setLastUpdated,
-  loading,
   repoName,
+  loadingHook,
+  lastUpdatedHook,
 }: ICodeOwnerProps) => {
   const [state, setState] = useSetState<ICodeOwnerState>({
     codeOwners: codeOwners,
@@ -45,6 +44,8 @@ export const CodeOwners = ({
   const [loadingFileInfo, setLoadingFileInfo] = useState(false);
   const { showErrorAlert } = AlertContainer.useContainer();
   const { appState } = AppContainer.useContainer();
+  const [loading, setLoading] = loadingHook;
+  const [lastUpdated, setLastUpdated] = lastUpdatedHook;
 
   useEffect(() => {
     (async () => {

@@ -11,8 +11,10 @@ import useSetState from "react-use/lib/useSetState";
 interface ICyclomaticComplexityProps {
   repoId: number;
   cyclomaticComplexities?: { [key: string]: number };
-  lastCalculated?: Date;
-  updateLastCalculated: (when: Date) => void;
+  lastCalculatedHook: [
+    lastCalculated: Date | undefined,
+    updateLastCalculated: (when: Date) => void
+  ];
 }
 
 interface ICyclomaticComplexityState {
@@ -22,8 +24,7 @@ interface ICyclomaticComplexityState {
 export const CyclomaticComplexity = ({
   repoId,
   cyclomaticComplexities,
-  lastCalculated,
-  updateLastCalculated,
+  lastCalculatedHook,
 }: ICyclomaticComplexityProps) => {
   const [state, setState] = useSetState<ICyclomaticComplexityState>({
     cyclomaticComplexities: cyclomaticComplexities,
@@ -31,6 +32,7 @@ export const CyclomaticComplexity = ({
   const { appState } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
   const [loading, setLoading] = useState(false);
+  const [lastCalculated, updateLastCalculated] = lastCalculatedHook;
   const recalculateCyclomaticComplexities = async () => {
     if (!repoId) return;
     try {

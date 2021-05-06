@@ -23,9 +23,17 @@ interface RouteParams {
 
 interface DetailedRepositoryRouteState {
   repo: DetailedRepository;
-  activeTab: string;
+  activeTab: RepoTabs;
   selectedFile?: string;
   fileCommits?: GitHubCommit[];
+}
+
+enum RepoTabs {
+  CodeOwners = "Code Owners",
+  Complexity = "Complexity Analysis",
+  Issues = "Issues/Bugs",
+  ContributionVolume = "Contribution Volume",
+  Summary = "Summary",
 }
 
 export const DetailedRepositoryRoute = () => {
@@ -36,7 +44,7 @@ export const DetailedRepositoryRoute = () => {
   const { showErrorAlert } = AlertContainer.useContainer();
   const [state, setState] = useSetState<DetailedRepositoryRouteState>({
     repo: undefined!,
-    activeTab: "Code Owners",
+    activeTab: RepoTabs.CodeOwners,
   });
 
   useEffectOnce(() => {
@@ -67,63 +75,73 @@ export const DetailedRepositoryRoute = () => {
       {state.repo && state.repo?.repository?.id && (
         <Tabs
           activeKey={state.activeTab}
-          onSelect={(key) => setState({ activeTab: key ?? undefined })}
+          onSelect={(key) =>
+            key !== null && setState({ activeTab: key as RepoTabs })
+          }
         >
-          <Tab eventKey="Code Owners" title="Code Owners">
+          <Tab eventKey={RepoTabs.CodeOwners} title={RepoTabs.CodeOwners}>
             {state.repo?.codeOwners &&
               state.repo?.repository?.name &&
-              state.activeTab === "Code Owners" &&
+              state.activeTab === RepoTabs.CodeOwners &&
               !loading && (
                 <CodeOwners
-                  setLastUpdated={(when) =>
-                    setState((prev) => {
-                      const oldState = prev;
-                      oldState.repo.codeOwnersLastUpdated = when;
-                      return oldState;
-                    })
-                  }
+                  lastUpdatedHook={[
+                    state.repo.codeOwnersLastUpdated,
+                    (when) =>
+                      setState((prev) => {
+                        const oldState = prev;
+                        oldState.repo.codeOwnersLastUpdated = when;
+                        return oldState;
+                      }),
+                  ]}
                   repoId={state.repo.repository!.id!}
-                  lastUpdated={state.repo.codeOwnersLastUpdated}
                   codeOwners={state.repo.codeOwners}
-                  loading={loading}
-                  setLoading={setLoading}
+                  loadingHook={[loading, setLoading]}
                   repoName={state.repo.repository.name}
                 />
               )}
           </Tab>
           {state.repo.isDotNetProject && (
-            <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
-              {state.activeTab === "Complexity Analysis" && (
+            <Tab eventKey={RepoTabs.Complexity} title={RepoTabs.Complexity}>
+              {state.activeTab === RepoTabs.Complexity && (
                 <CyclomaticComplexity
-                  updateLastCalculated={(date) =>
-                    setState((prev) => {
-                      const oldState = prev;
-                      prev.repo.cyclomaticComplexitiesLastUpdated = date;
-                      return oldState;
-                    })
-                  }
+                  lastCalculatedHook={[
+                    state.repo.cyclomaticComplexitiesLastUpdated,
+                    (date) =>
+                      setState((prev) => {
+                        const oldState = prev;
+                        prev.repo.cyclomaticComplexitiesLastUpdated = date;
+                        return oldState;
+                      }),
+                  ]}
                   repoId={state.repo.repository.id!}
                   cyclomaticComplexities={state.repo.cyclomaticComplexities}
-                  lastCalculated={state.repo.cyclomaticComplexitiesLastUpdated}
                 />
               )}
             </Tab>
           )}
-          <Tab eventKey="Issues/Bugs" title="Issues/Bugs">
-            {state.activeTab === "Issues/Bugs" && (
+          <Tab eventKey={RepoTabs.Issues} title={RepoTabs.Issues}>
+            {state.activeTab === RepoTabs.Issues && (
               <IssuesBugs repoId={state.repo.repository.id} />
             )}
           </Tab>
-          <Tab eventKey="Contribution Volumes" title="Contribution Volumes">
-            {state.activeTab === "Contribution Volumes" && (
+          <Tab
+            eventKey={RepoTabs.ContributionVolume}
+            title={RepoTabs.ContributionVolume}
+          >
+            {state.activeTab === RepoTabs.ContributionVolume && (
               <ContribuitionVolume
                 repoId={state.repo.repository.id}
                 repoName={repoName}
               />
             )}
           </Tab>
-          <Tab tabClassName="ml-auto" eventKey="Summary" title="Summary">
-            {state.activeTab === "Summary" && (
+          <Tab
+            tabClassName="ml-auto"
+            eventKey={RepoTabs.Summary}
+            title={RepoTabs.Summary}
+          >
+            {state.activeTab === RepoTabs.Summary && (
               <RepositorySummary repoId={state.repo.repository.id} />
             )}
           </Tab>
