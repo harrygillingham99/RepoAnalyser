@@ -45,15 +45,17 @@ export const Dashboard = () => {
         }
       }
     );
-
+    appState.connection.onclose(() => {
+      showErrorAlert("SignalR Disconnected", "Please refresh the page.");
+      console.log("SignalR Disconnected");
+    });
     appState.connection.onreconnecting(() => {
       showErrorAlert(
         "SignalR Reconnecting",
-        "SignalR is attempting to reconnect, if this fails please refresh."
+        "SignalR is attempting to reconnect."
       );
       console.log("SignalR Reconnecting");
     });
-
     appState.connection.onreconnected(() => {
       showInfoAlert(
         "SignalR Reconnected",
