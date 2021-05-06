@@ -8,7 +8,6 @@ import { DashboardRoutes, Routes } from "@typeDefinitions/Routes";
 import { AuthenticationHandler } from "@components/BaseComponents/AuthenticationHandler";
 import { AppContainer } from "@state/AppStateContainer";
 import { AlertContainer } from "@state/AlertContainer";
-import { AppAlert } from "@components/BaseComponents/AppAlert";
 import { RedirectContainer } from "@state/RedirectContainer";
 import { RedirectHandler } from "@components/BaseComponents/RedirectHandler";
 import { FourOhFour } from "@components/BaseComponents/FourOhFour";
@@ -44,7 +43,6 @@ const App = () => {
                         <SideBar />
                       </Col>
                       <Col className="col-md-9 ml-sm-auto col-lg-10 p-0">
-                        <AppAlert />
                         <Dashboard />
                       </Col>
                     </Row>
