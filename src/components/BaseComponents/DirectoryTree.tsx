@@ -58,10 +58,10 @@ export const DirectoryTree = (props: IDirTreeProps) => {
     } else {
       tree[0].label = props.repoName;
       tree[0].key = `${props.repoName}-listItem`;
-      tree[0].nodes = tree[0].nodes.sort(
-        (a, b) => b.nodes.length - a.nodes.length
-      );
     }
+    tree[0].nodes = tree[0].nodes.sort(
+      (a, b) => b.nodes.length - a.nodes.length
+    );
 
     return tree;
   };

@@ -64,7 +64,7 @@ export const DetailedRepositoryRoute = () => {
   ) : (
     <>
       <DashboardHeader text={repoName} className="mb-2" />
-      {state.repo && state.repo?.repository?.id && state.repo.isDotNetProject && (
+      {state.repo && state.repo?.repository?.id && (
         <Tabs
           activeKey={state.activeTab}
           onSelect={(key) => setState({ activeTab: key ?? undefined })}
@@ -91,23 +91,24 @@ export const DetailedRepositoryRoute = () => {
                 />
               )}
           </Tab>
-
-          <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
-            {state.activeTab === "Complexity Analysis" && (
-              <CyclomaticComplexity
-                updateLastCalculated={(date) =>
-                  setState((prev) => {
-                    const oldState = prev;
-                    prev.repo.cyclomaticComplexitiesLastUpdated = date;
-                    return oldState;
-                  })
-                }
-                repoId={state.repo.repository.id!}
-                cyclomaticComplexities={state.repo.cyclomaticComplexities}
-                lastCalculated={state.repo.cyclomaticComplexitiesLastUpdated}
-              />
-            )}
-          </Tab>
+          {state.repo.isDotNetProject && (
+            <Tab eventKey="Complexity Analysis" title="Complexity Analysis">
+              {state.activeTab === "Complexity Analysis" && (
+                <CyclomaticComplexity
+                  updateLastCalculated={(date) =>
+                    setState((prev) => {
+                      const oldState = prev;
+                      prev.repo.cyclomaticComplexitiesLastUpdated = date;
+                      return oldState;
+                    })
+                  }
+                  repoId={state.repo.repository.id!}
+                  cyclomaticComplexities={state.repo.cyclomaticComplexities}
+                  lastCalculated={state.repo.cyclomaticComplexitiesLastUpdated}
+                />
+              )}
+            </Tab>
+          )}
           <Tab eventKey="Issues/Bugs" title="Issues/Bugs">
             {state.activeTab === "Issues/Bugs" && (
               <IssuesBugs repoId={state.repo.repository.id} />
