@@ -42,15 +42,10 @@ const useAlertState = () => {
     });
   };
 
-  const clearInfoAlerts = () => removeAllToasts();
+  const clearAlerts = () => removeAllToasts();
 
   const showErrorAlert = (title: string, message: string) =>
-    setAlert({
-      type: AlertType.Error,
-      visible: true,
-      message: message,
-      title: title,
-    });
+    addToast(toastContent(title, message), { appearance: "error" });
 
   const showWarningAlert = (title: string, message: string) =>
     setAlert({
@@ -77,7 +72,7 @@ const useAlertState = () => {
     showSuccessAlert,
     showWarningAlert,
     hideAlert,
-    clearInfoAlerts,
+    clearAlerts,
   };
 };
 

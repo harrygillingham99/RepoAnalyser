@@ -13,8 +13,14 @@ import { AlertContainer } from "@state/AlertContainer";
 export const Dashboard = () => {
   const { pathname } = useLocation();
   const { appState } = AppContainer.useContainer();
-  const { showInfoAlert, clearInfoAlerts } = AlertContainer.useContainer();
+  const {
+    showInfoAlert,
+    clearAlerts,
+    showErrorAlert,
+  } = AlertContainer.useContainer();
   const { loading } = appState;
+
+  const waitThenClearAlerts = () => setTimeout(() => clearAlerts(), 4000);
 
   //Add SignalR notification event handlers here
   useEffectOnce(() => {
@@ -31,14 +37,31 @@ export const Dashboard = () => {
             break;
           case SignalRNotificationType.RepoAnalysisDone:
             showInfoAlert("Repository Analysis Complete", message);
-            setTimeout(() => clearInfoAlerts(), 4000);
+            waitThenClearAlerts();
             break;
           case SignalRNotificationType.PullRequestAnalysisDone:
             showInfoAlert("Pull Request Analysis Complete", message);
-            setTimeout(() => clearInfoAlerts(), 4000);
+            waitThenClearAlerts();
         }
       }
     );
+
+    appState.connection.onreconnecting(() => {
+      showErrorAlert(
+        "SignalR Reconnecting",
+        "SignalR is attempting to reconnect, if this fails please refresh."
+      );
+      console.log("SignalR Reconnecting");
+    });
+
+    appState.connection.onreconnected(() => {
+      showInfoAlert(
+        "SignalR Reconnected",
+        "SignalR has reconnected successfully."
+      );
+      waitThenClearAlerts();
+      console.log("SignalR Reconnected");
+    });
   });
 
   if (

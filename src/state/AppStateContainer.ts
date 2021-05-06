@@ -33,10 +33,6 @@ const useAppState = () => {
       }
     }
 
-    connection.onreconnecting(() => console.log("SignalR Reconnecting"));
-
-    connection.onreconnected(() => console.log("SignalR Reconnected"));
-
     connection.state === SignalR.HubConnectionState.Disconnected && start();
 
     return connection;
