@@ -15,6 +15,7 @@ import { ContribuitionVolume } from "./DetailedRepositoryTabs/ContributionVolume
 import { CyclomaticComplexity } from "./DetailedRepositoryTabs/CyclomaticComplexity";
 import { IssuesBugs } from "./DetailedRepositoryTabs/IssuesBugs";
 import { RepositorySummary } from "./DetailedRepositoryTabs/RepositorySummary";
+import { StaticAnalysis } from "./DetailedRepositoryTabs/StaticAnalysis";
 
 interface RouteParams {
   repoId: string;
@@ -31,6 +32,7 @@ interface DetailedRepositoryRouteState {
 enum RepoTabs {
   CodeOwners = "Code Owners",
   Complexity = "Complexity Analysis",
+  StaticAnalysis = "Static Analysis",
   Issues = "Issues/Bugs",
   ContributionVolume = "Contribution Volume",
   Summary = "Summary",
@@ -116,6 +118,28 @@ export const DetailedRepositoryRoute = () => {
                   ]}
                   repoId={state.repo.repository.id!}
                   cyclomaticComplexities={state.repo.cyclomaticComplexities}
+                />
+              )}
+            </Tab>
+          )}
+          {state.repo.isDotNetProject && state.repo.staticAnalysisHtml && (
+            <Tab
+              eventKey={RepoTabs.StaticAnalysis}
+              title={RepoTabs.StaticAnalysis}
+            >
+              {state.activeTab === RepoTabs.StaticAnalysis && (
+                <StaticAnalysis
+                  lastCalculatedHook={[
+                    state.repo.staticAnalysisLastUpdated,
+                    (date) =>
+                      setState((prev) => {
+                        const oldState = prev;
+                        prev.repo.staticAnalysisLastUpdated = date;
+                        return oldState;
+                      }),
+                  ]}
+                  repoId={state.repo.repository.id!}
+                  staticAnalysisHtml={state.repo.staticAnalysisHtml}
                 />
               )}
             </Tab>

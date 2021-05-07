@@ -17,7 +17,7 @@ export const DashboardHeader: React.FC<IDashboardHeaderProps> = (props) => {
       <Container fluid="xl" className="pl-1 pr-1">
         <Row>
           <div className={clsx("col-12 col-md-8", props.imageUrl && "mt-4")}>
-            <h1>{props.text}</h1>
+            <h1 className="text-reset">{props.text}</h1>
             <h4>{props.subtitle}</h4>
           </div>
 
