@@ -59,11 +59,11 @@ export const StaticAnalysis = (props: IStaticAnalysisProps) => {
                 variant="info"
                 onClick={() => recalculateReport()}
               >
-                Re-Calculate Code Owners
+                Run Static Analysis
               </Button>
               <h5>
                 Last Calculated:{" "}
-                {lastCalculated?.toLocaleDateString("en-GB") ?? "never"}
+                {lastCalculated?.toLocaleString("en-GB") ?? "never"}
               </h5>
             </Col>
           </Row>
