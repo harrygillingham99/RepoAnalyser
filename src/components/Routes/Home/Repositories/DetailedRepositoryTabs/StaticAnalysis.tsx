@@ -9,24 +9,26 @@ import useSetState from "react-use/lib/useSetState";
 
 interface IStaticAnalysisProps {
   repoId: number;
-  staticAnalysisHtml: string;
   lastCalculatedHook: [
     lastCalculated: Date | undefined,
     updateLastCalculated: (when: Date) => void
   ];
+  htmlStringHook: [
+    report: string | undefined,
+    setReport: (report: string) => void
+  ];
 }
 
 interface IStaticAnalysisState {
-  staticAnalysisHtml: string;
   loading: boolean;
 }
 
 export const StaticAnalysis = (props: IStaticAnalysisProps) => {
   const [state, setState] = useSetState<IStaticAnalysisState>({
     loading: false,
-    staticAnalysisHtml: props.staticAnalysisHtml,
   });
   const [lastCalculated, updateLastCalculated] = props.lastCalculatedHook;
+  const [report, setReport] = props.htmlStringHook;
   const { appState } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
 
@@ -40,7 +42,7 @@ export const StaticAnalysis = (props: IStaticAnalysisProps) => {
         appState.connection.connectionId ?? "",
         buildUserInfo
       );
-      setState({ staticAnalysisHtml: result });
+      setReport(result);
       updateLastCalculated(new Date(Date.now()));
     } catch (error) {
       showErrorAlert("Error", "Error generating static analysis report");
@@ -70,7 +72,7 @@ export const StaticAnalysis = (props: IStaticAnalysisProps) => {
           <Row className="ml-auto mr-auto">
             <div
               dangerouslySetInnerHTML={{
-                __html: state.staticAnalysisHtml ?? "No Report",
+                __html: report ?? "No Report",
               }}
             />
           </Row>

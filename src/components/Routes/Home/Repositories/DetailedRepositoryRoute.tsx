@@ -139,7 +139,16 @@ export const DetailedRepositoryRoute = () => {
                       }),
                   ]}
                   repoId={state.repo.repository.id!}
-                  staticAnalysisHtml={state.repo.staticAnalysisHtml}
+                  htmlStringHook={[
+                    state.repo.staticAnalysisHtml,
+                    (report) => {
+                      setState((prev) => {
+                        const oldState = prev;
+                        prev.repo.staticAnalysisHtml = report;
+                        return oldState;
+                      });
+                    },
+                  ]}
                 />
               )}
             </Tab>
