@@ -71,6 +71,7 @@ export const StaticAnalysis = (props: IStaticAnalysisProps) => {
           </Row>
           <Row className="ml-auto mr-auto">
             <div
+              className="container-fluid ml-auto p-0 mr-auto overflow-hidden"
               dangerouslySetInnerHTML={{
                 __html: report ?? "No Report",
               }}
