@@ -67,7 +67,7 @@ export const Discussion = ({ repoId, pullNumber }: DiscussionProps) => {
                 <h4>Assigned Reviewers</h4>
                 <ListGroup variant="flush" className="m-0 p-0">
                   {state.discussion.assignedReviewers.map((user) => (
-                    <ListGroup.Item>
+                    <ListGroup.Item key={`${user.id}-listItem`}>
                       <img
                         src={user.avatarUrl}
                         alt="GitHub user icon"

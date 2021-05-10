@@ -20,7 +20,8 @@ export const Dashboard = () => {
   } = AlertContainer.useContainer();
   const { loading } = appState;
 
-  const waitThenClearAlerts = () => setTimeout(() => clearAlerts(), 4000);
+  const waitThenClearAlerts = (timeout = 4000) =>
+    setTimeout(() => clearAlerts(), timeout);
 
   //Add SignalR notification event handlers here
   useEffectOnce(() => {

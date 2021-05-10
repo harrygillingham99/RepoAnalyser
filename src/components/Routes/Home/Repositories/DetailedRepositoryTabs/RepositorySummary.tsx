@@ -50,10 +50,12 @@ export const RepositorySummary = (props: ContribuitionVolumeProps) => {
         You have contributed {state.summary.locContributed} lines of code.
       </h4>
       <h4>You have removed {state.summary.locRemoved} lines of code.</h4>
-      <h4>
-        The average cyclomatic complexity for the methods in this project is:{" "}
-        {state.summary.averageCyclomaticComplexity?.toFixed(2)}
-      </h4>
+      {state.summary.averageCyclomaticComplexity !== -1 && (
+        <h4>
+          The average cyclomatic complexity for the methods in this project is:{" "}
+          {state.summary.averageCyclomaticComplexity?.toFixed(2)}
+        </h4>
+      )}
       <h4>Total issues: {state.summary.totalIssues}</h4>
       <h6>Solved by you: {state.summary.issuesSolved}</h6>
       <h6>Raised by you: {state.summary.issuesRaised}</h6>
