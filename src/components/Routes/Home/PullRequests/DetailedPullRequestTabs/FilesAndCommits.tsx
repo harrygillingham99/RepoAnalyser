@@ -71,7 +71,6 @@ export const FilesAndCommits = ({
         <Col sm={4}>
           <Card>
             <Card.Header>
-              {" "}
               Pull Last Updated:{" "}
               {lastUpdated?.toLocaleString("en-GB") ?? "never"}
             </Card.Header>
