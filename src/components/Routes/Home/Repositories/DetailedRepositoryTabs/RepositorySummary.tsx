@@ -4,7 +4,6 @@ import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
 import { buildUserInfo } from "@utils/ClientInfo";
-import React from "react";
 import { Container } from "react-bootstrap";
 import { useEffectOnce, useSetState } from "react-use";
 
@@ -59,9 +58,12 @@ export const RepositorySummary = (props: ContribuitionVolumeProps) => {
       <h4>Total issues: {state.summary.totalIssues}</h4>
       <h6>Solved by you: {state.summary.issuesSolved}</h6>
       <h6>Raised by you: {state.summary.issuesRaised}</h6>
-      {state.summary.analysisIssues !== -1 && (
-        <h4>Number of issues in static analysis: {}</h4>
-      )}
+      {state.summary.analysisIssues !== -1 &&
+        state.summary.analysisIssues !== 0 && (
+          <h4>
+            Number of issues in static analysis: {state.summary.analysisIssues}
+          </h4>
+        )}
     </Container>
   ) : (
     <Loader />

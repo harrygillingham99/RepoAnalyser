@@ -1,7 +1,9 @@
+import { ErrorScreen } from "@components/BaseComponents/ErrorScreen";
 import { Loader } from "@components/BaseComponents/Loader";
 import { authorisedApiClient } from "@services/api/Index";
 import { AlertContainer } from "@state/AlertContainer";
 import { AppContainer } from "@state/AppStateContainer";
+import { Routes } from "@typeDefinitions/Routes";
 import { buildUserInfo } from "@utils/ClientInfo";
 import React from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
@@ -63,19 +65,33 @@ export const StaticAnalysis = (props: IStaticAnalysisProps) => {
               >
                 Run Static Analysis
               </Button>
-              <h5>
-                Last Calculated:{" "}
-                {lastCalculated?.toLocaleString("en-GB") ?? "never"}
-              </h5>
+              {report && report !== "No Report" && (
+                <h5>
+                  Last Calculated:{" "}
+                  {lastCalculated?.toLocaleString("en-GB") ?? "never"}
+                </h5>
+              )}
             </Col>
           </Row>
           <Row className="ml-auto mr-auto">
-            <div
-              className="container-fluid ml-auto p-0 mr-auto overflow-hidden gendarme-report"
-              dangerouslySetInnerHTML={{
-                __html: report ?? "No Report",
-              }}
-            />
+            {report && report !== "No Report" ? (
+              <div
+                className="container-fluid ml-auto p-0 mr-auto overflow-hidden gendarme-report"
+                dangerouslySetInnerHTML={{
+                  __html: report ?? "No Report",
+                }}
+              />
+            ) : (
+              <Container className="text-center">
+                <ErrorScreen
+                  title="No Report"
+                  type="tabError"
+                  message="No report to show, try re-running."
+                  redirectSubtitle="Back"
+                  redirectTo={Routes.Repositories}
+                />
+              </Container>
+            )}
           </Row>
         </>
       ) : (
