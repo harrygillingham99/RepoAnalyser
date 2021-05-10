@@ -75,10 +75,14 @@ export const ContribuitionVolume = (props: ContributionVolumeProps) => {
       <Col sm={8}>
         {selectedFile && (
           <>
-            <p>Added: {state.contributions.locForFiles[selectedFile].added}</p>
-            <p>
-              Removed: {state.contributions.locForFiles[selectedFile].removed}
-            </p>
+            <h4 className="mt-2">
+              Lines of code added:{" "}
+              {state.contributions.locForFiles[selectedFile].added}
+            </h4>
+            <h4 className="mt-2">
+              Lines of code removed:{" "}
+              {state.contributions.locForFiles[selectedFile].removed}
+            </h4>
           </>
         )}
       </Col>
