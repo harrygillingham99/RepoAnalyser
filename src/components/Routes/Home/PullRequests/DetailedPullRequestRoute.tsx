@@ -11,6 +11,7 @@ import { useParams } from "react-router-dom";
 import { useEffectOnce, useSetState } from "react-use";
 import { Discussion } from "./DetailedPullRequestTabs/Discussion";
 import { FilesAndCommits } from "./DetailedPullRequestTabs/FilesAndCommits";
+import { PullSummary } from "./DetailedPullRequestTabs/PullSummary";
 
 interface RouteParams {
   pullRequest: string;
@@ -93,7 +94,12 @@ export const DetailedPullRequestRoute = () => {
             eventKey={PullTabs.Summary}
             title={PullTabs.Summary}
           >
-            {state.activeTab === PullTabs.Summary && <></>}
+            {state.activeTab === PullTabs.Summary && (
+              <PullSummary
+                repoId={state.pullRequest.pullRequest?.repositoryId}
+                pullNumber={state.pullRequest.pullRequest?.pullRequestNumber}
+              />
+            )}
           </Tab>
         </Tabs>
       )}

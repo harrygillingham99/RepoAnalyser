@@ -1,6 +1,5 @@
 import { Routes } from "@typeDefinitions/Routes";
 import clsx from "clsx";
-import React from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
