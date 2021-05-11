@@ -21,31 +21,32 @@ interface ICodeOwnerProps {
     setLastUpdated: (when: Date) => void
   ];
   loadingHook: [loading: boolean, setLoading: (loading: boolean) => void];
-  codeOwners: { [key: string]: string };
+  codeOwnersHook: [
+    codeOwners: { [key: string]: string } | undefined,
+    setCodeOwners: (codeOwners: { [key: string]: string }) => void
+  ];
   repoName: string;
 }
 
 interface ICodeOwnerState {
   fileCommits?: GitHubCommit[];
-  codeOwners: { [key: string]: string };
   selectedFile?: string;
 }
 
 export const CodeOwners = ({
   repoId,
-  codeOwners,
+  codeOwnersHook,
   repoName,
   loadingHook,
   lastUpdatedHook,
 }: ICodeOwnerProps) => {
-  const [state, setState] = useSetState<ICodeOwnerState>({
-    codeOwners: codeOwners,
-  });
+  const [state, setState] = useSetState<ICodeOwnerState>();
   const [loadingFileInfo, setLoadingFileInfo] = useState(false);
   const { showErrorAlert } = AlertContainer.useContainer();
   const { appState } = AppContainer.useContainer();
   const [loading, setLoading] = loadingHook;
   const [lastUpdated, setLastUpdated] = lastUpdatedHook;
+  const [codeOwners, setCodeOwners] = codeOwnersHook;
 
   useEffect(() => {
     (async () => {
@@ -91,7 +92,7 @@ export const CodeOwners = ({
         buildUserInfo
       );
 
-      setState({ codeOwners: result });
+      setCodeOwners(result);
       setLastUpdated(new Date(Date.now()));
     } catch (error) {
       showErrorAlert("Error", error.detail);
@@ -114,11 +115,9 @@ export const CodeOwners = ({
   };
 
   const selectedFile =
-    state.codeOwners &&
+    codeOwners &&
     state.selectedFile !== undefined &&
-    Object.keys(state.codeOwners).find((key) =>
-      key.includes(state.selectedFile!)
-    );
+    Object.keys(codeOwners).find((key) => key.includes(state.selectedFile!));
 
   const splitFileDirectories = (codeOwners: { [key: string]: string }) =>
     Object.keys(codeOwners).map((dir) => dir.split("/"));
@@ -134,93 +133,89 @@ export const CodeOwners = ({
             Re-Calculate Code Owners
           </Button>
 
-          {state.codeOwners &&
-            Object.keys(state.codeOwners).length > 1 &&
-            !loading && (
-              <>
-                <h4>
-                  You own{" "}
-                  {getPercentageFileOwnership(
-                    state.codeOwners,
-                    appState.user.login ?? ""
-                  )}
-                  % of this code base.
-                </h4>
-                <h6>
-                  Last Calculated:{" "}
-                  {lastUpdated?.toLocaleString("en-GB") ?? "never"}
-                </h6>
-                <DirectoryTree
-                  dirs={splitFileDirectories(state.codeOwners)}
-                  setSelectedItem={(file) => setState({ selectedFile: file })}
-                  repoName={repoName}
-                />
-              </>
-            )}
-        </Col>
-        {state?.codeOwners &&
-          Object.keys(state.codeOwners).length > 1 &&
-          !loading && (
-            <Col sm={8}>
-              <Row></Row>
-              <Col className="p-0">
-                <h6 className="d-flex">File: {state.selectedFile}</h6>
-              </Col>
-              <Col className="p-0">
-                <h6 className="d-flex">
-                  Owned By:{" "}
-                  {state?.codeOwners !== undefined && selectedFile
-                    ? state.codeOwners[selectedFile]
-                    : "Unknown"}
-                </h6>
-              </Col>
-              {state.fileCommits !== undefined &&
-              state.selectedFile &&
-              !loadingFileInfo ? (
-                <VerticalTimeline className="pl-0 pr-0 m-0 w-100">
-                  {state.fileCommits.map((commit) => {
-                    const colour = "#17a2b8";
-                    return (
-                      <VerticalTimelineElement
-                        key={`timeLineItem-${commit.sha}`}
-                        className="vertical-timeline-element--work"
-                        contentStyle={{
-                          background: colour,
-                          color: "#fff",
-                        }}
-                        contentArrowStyle={{
-                          borderRight: `7px solid  ${colour}`,
-                        }}
-                        iconStyle={{
-                          background: colour,
-                          color: "#fff",
-                        }}
-                        icon={<Github />}
-                      >
-                        <h4 className="vertical-timeline-element-title">
-                          {commit.author?.login ??
-                            commit.committer?.login ??
-                            "Unknown Contributor"}
-                        </h4>
-                        <h5 className="vertical-timeline-element-subtitle">
-                          <a href={commit.htmlUrl} className="text-reset">
-                            {commit.commit?.message}
-                          </a>
-                        </h5>
-                        <p>Added: {commit.stats?.additions}</p>
-                        <p>Removed: {commit.stats?.deletions}</p>
-                        <p>Total: {commit.stats?.total}</p>
-                      </VerticalTimelineElement>
-                    );
-                  })}
-                </VerticalTimeline>
-              ) : !loadingFileInfo ? (
-                <h4>No Commits</h4>
-              ) : (
-                <Loader />
-              )}
-            </Col>
+          {codeOwners && Object.keys(codeOwners).length > 1 && !loading && (
+            <>
+              <h4>
+                You own{" "}
+                {getPercentageFileOwnership(
+                  codeOwners,
+                  appState.user.login ?? ""
+                )}
+                % of this code base.
+              </h4>
+              <h6>
+                Last Calculated:{" "}
+                {lastUpdated?.toLocaleString("en-GB") ?? "never"}
+              </h6>
+              <DirectoryTree
+                dirs={splitFileDirectories(codeOwners)}
+                setSelectedItem={(file) => setState({ selectedFile: file })}
+                repoName={repoName}
+              />
+            </>
           )}
+        </Col>
+        {codeOwners && Object.keys(codeOwners).length > 1 && !loading && (
+          <Col sm={8}>
+            <Row></Row>
+            <Col className="p-0">
+              <h6 className="d-flex">File: {state.selectedFile}</h6>
+            </Col>
+            <Col className="p-0">
+              <h6 className="d-flex">
+                Owned By:{" "}
+                {codeOwners !== undefined && selectedFile
+                  ? codeOwners[selectedFile]
+                  : "Unknown"}
+              </h6>
+            </Col>
+            {state.fileCommits !== undefined &&
+            state.selectedFile &&
+            !loadingFileInfo ? (
+              <VerticalTimeline className="pl-0 pr-0 m-0 w-100">
+                {state.fileCommits.map((commit) => {
+                  const colour = "#17a2b8";
+                  return (
+                    <VerticalTimelineElement
+                      key={`timeLineItem-${commit.sha}`}
+                      className="vertical-timeline-element--work"
+                      contentStyle={{
+                        background: colour,
+                        color: "#fff",
+                      }}
+                      contentArrowStyle={{
+                        borderRight: `7px solid  ${colour}`,
+                      }}
+                      iconStyle={{
+                        background: colour,
+                        color: "#fff",
+                      }}
+                      icon={<Github />}
+                    >
+                      <h4 className="vertical-timeline-element-title">
+                        {commit.author?.login ??
+                          commit.committer?.login ??
+                          "Unknown Contributor"}
+                      </h4>
+                      <h5 className="vertical-timeline-element-subtitle">
+                        <a href={commit.htmlUrl} className="text-reset">
+                          {commit.commit?.message}
+                        </a>
+                      </h5>
+                      <p>Added: {commit.stats?.additions}</p>
+                      <p>Removed: {commit.stats?.deletions}</p>
+                      <p>Total: {commit.stats?.total}</p>
+                    </VerticalTimelineElement>
+                  );
+                })}
+              </VerticalTimeline>
+            ) : !loadingFileInfo ? (
+              <h4>No Commits</h4>
+            ) : (
+              <Loader />
+            )}
+          </Col>
+        )}
       </Row>
     </Container>
   );

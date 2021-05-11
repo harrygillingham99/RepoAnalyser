@@ -10,25 +10,25 @@ import useSetState from "react-use/lib/useSetState";
 
 interface ICyclomaticComplexityProps {
   repoId: number;
-  cyclomaticComplexities?: { [key: string]: number };
+  cyclomaticComplexitiesHook: [
+    cyclomaticComplexities: { [key: string]: number } | undefined,
+    setCyclomaticComplexities: (complexities: { [key: string]: number }) => void
+  ];
   lastCalculatedHook: [
     lastCalculated: Date | undefined,
     updateLastCalculated: (when: Date) => void
   ];
 }
 
-interface ICyclomaticComplexityState {
-  cyclomaticComplexities?: { [key: string]: number };
-}
-
 export const CyclomaticComplexity = ({
   repoId,
-  cyclomaticComplexities,
+  cyclomaticComplexitiesHook,
   lastCalculatedHook,
 }: ICyclomaticComplexityProps) => {
-  const [state, setState] = useSetState<ICyclomaticComplexityState>({
-    cyclomaticComplexities: cyclomaticComplexities,
-  });
+  const [
+    cyclomaticComplexities,
+    setCyclomaticComplexities,
+  ] = cyclomaticComplexitiesHook;
   const { appState } = AppContainer.useContainer();
   const { showErrorAlert } = AlertContainer.useContainer();
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,7 @@ export const CyclomaticComplexity = ({
         buildUserInfo,
         request
       );
-      setState({ cyclomaticComplexities: result });
+      setCyclomaticComplexities(result);
       updateLastCalculated(new Date(Date.now()));
     } catch (error) {
       showErrorAlert("Error", error.detail);
@@ -92,11 +92,11 @@ export const CyclomaticComplexity = ({
       >
         Re-Calculate Cyclomatic Complexities
       </Button>
-      {!loading && state.cyclomaticComplexities && (
+      {!loading && cyclomaticComplexities && (
         <>
           <h4>
             Average Cyclomatic Complexity:{" "}
-            {getAverageComplexity(state.cyclomaticComplexities)}
+            {getAverageComplexity(cyclomaticComplexities)}
           </h4>
           <h6>
             Last Calculated:{" "}
@@ -113,17 +113,15 @@ export const CyclomaticComplexity = ({
             </thead>
             <tbody>
               {!loading &&
-                state.cyclomaticComplexities &&
-                Object.keys(state.cyclomaticComplexities).map(
-                  (methodKey, i) => (
-                    <tr key={`${i}-tableRow`}>
-                      <td>{i + 1}</td>
-                      <td>{getFriendlyMethodName(methodKey)}</td>
-                      <td>{getTypeForMethodName(methodKey)}</td>
-                      <td>{state.cyclomaticComplexities![methodKey]}</td>
-                    </tr>
-                  )
-                )}
+                cyclomaticComplexities &&
+                Object.keys(cyclomaticComplexities).map((methodKey, i) => (
+                  <tr key={`${i}-tableRow`}>
+                    <td>{i + 1}</td>
+                    <td>{getFriendlyMethodName(methodKey)}</td>
+                    <td>{getTypeForMethodName(methodKey)}</td>
+                    <td>{cyclomaticComplexities![methodKey]}</td>
+                  </tr>
+                ))}
             </tbody>
           </Table>
         </>

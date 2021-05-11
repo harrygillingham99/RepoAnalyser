@@ -97,7 +97,16 @@ export const DetailedRepositoryRoute = () => {
                       }),
                   ]}
                   repoId={state.repo.repository!.id!}
-                  codeOwners={state.repo.codeOwners}
+                  codeOwnersHook={[
+                    state.repo.codeOwners,
+                    (codeOwners) => {
+                      setState((prev) => {
+                        const oldState = prev;
+                        oldState.repo.codeOwners = codeOwners;
+                        return oldState;
+                      });
+                    },
+                  ]}
                   loadingHook={[loading, setLoading]}
                   repoName={state.repo.repository.name}
                 />
@@ -117,7 +126,15 @@ export const DetailedRepositoryRoute = () => {
                       }),
                   ]}
                   repoId={state.repo.repository.id!}
-                  cyclomaticComplexities={state.repo.cyclomaticComplexities}
+                  cyclomaticComplexitiesHook={[
+                    state.repo.cyclomaticComplexities,
+                    (complexities) =>
+                      setState((prev) => {
+                        const oldState = prev;
+                        prev.repo.cyclomaticComplexities = complexities;
+                        return oldState;
+                      }),
+                  ]}
                 />
               )}
             </Tab>
