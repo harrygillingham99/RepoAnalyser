@@ -33,7 +33,7 @@ export const RepositorySummary = (props: ContribuitionVolumeProps) => {
         );
         setState({ summary: result });
       } catch (error) {
-        showErrorAlert("Error", "Error getting issues for repository.");
+        showErrorAlert("Error", "Error getting summary for repository.");
       } finally {
         setState({ loading: false });
       }
@@ -41,10 +41,12 @@ export const RepositorySummary = (props: ContribuitionVolumeProps) => {
   });
   return !state.loading && state.summary ? (
     <Container className="text-center mt-2">
-      <h4>
-        You own: {state.summary.ownershipPercentage?.toFixed(2)}% of the files
-        in this repo.
-      </h4>
+      {state.summary.ownershipPercentage !== -1 && (
+        <h4>
+          You own: {state.summary.ownershipPercentage?.toFixed(2)}% of the files
+          in this repo.
+        </h4>
+      )}
       <h4>
         You have contributed {state.summary.locContributed} lines of code.
       </h4>
