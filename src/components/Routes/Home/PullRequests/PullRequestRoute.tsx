@@ -90,7 +90,6 @@ export const PullRequestRoute = () => {
         var result = await authorisedApiClient(
           appState.token
         ).pullRequest_GetPullRequests(state.filterOption, buildUserInfo);
-        setData({ repo: undefined });
         setState({ pulls: result });
       } catch (error) {
         showErrorAlert("Error", "Error fetching pull requests");
