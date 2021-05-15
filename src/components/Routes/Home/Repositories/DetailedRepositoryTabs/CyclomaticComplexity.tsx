@@ -6,7 +6,6 @@ import { AppContainer } from "@state/AppStateContainer";
 import { buildUserInfo } from "@utils/ClientInfo";
 import { useState } from "react";
 import { Container, Button, Table } from "react-bootstrap";
-import useSetState from "react-use/lib/useSetState";
 
 interface ICyclomaticComplexityProps {
   repoId: number;
